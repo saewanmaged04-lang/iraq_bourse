@@ -1,11 +1,11 @@
 // lib/global_state.dart
 
-import 'package:flutter/material.dart';
 
 // --- barudoxi cihani taqikrdnawa (Global Mock State) ---
 bool isLoggedInGlobal = false;
 bool isGuestGlobal = false;
 String userPhoneNumberGlobal = '';
+String userDisplayNameGlobal = ''; // گۆڕاوی جیهانی بۆ پاراستنی ناوی بەکارهێنەری لۆگینبوو
 String activationDateGlobal = '١٨ / ٦ / ٢٠٢٦'; // ١٨ی حوزەیرانی ٢٠٢٦
 String expiryDateGlobal = '١٨ / ٨ / ٢٠٢٦';     // ماوەی ٢ مانگی تاقیکردنەوەی بێبەرامبەر
 bool isPremiumActiveGlobal = false; // ئایا بەکارهێنەر بە فەرمی ئەکاونتەکەی چالاک کراوە؟
@@ -35,9 +35,14 @@ bool get isCurrenciesLockedGlobal {
   return true;
 }
 
-// --- بنکەی دراوەی کاتی بۆ بەکارهێنەرانی تۆمارکراو ---
+// --- بنکەی دراوەی کاتی بۆ بەکارهێنەرانی تۆمارکراو (ژمارەکان و پاسۆردەکان) ---
 Map<String, String> registeredUsersDb = {
   '+9647701234567': '1234'
+};
+
+// --- داتابەیسی کاتی ناوی بەکارهێنەرە تۆمارکراوەکان ---
+Map<String, String> registeredNamesDb = {
+  '+9647701234567': 'سەروان'
 };
 
 // --- فەرهەنگی وەرگێڕانی گشتگیر و فەرمی زمانەکان ---
@@ -137,7 +142,7 @@ final Map<String, Map<String, String>> translations = {
     'password_hint': 'پاسۆرد',
     'forgot_password': 'پاسۆردت بیرچووە؟',
     'login_action': 'چوونەژوورەوە',
-    'register_action': 'تۆمارکردنی هەژماری نوێ',
+    'register_action': 'تۆمارکۆدنی هەژماری نوێ',
     'register_title': 'دروستکردنی ئەژمار نوێ 👤',
     'otp_title': 'کۆدی دڵنیاکەرەوە دابنێ 💬',
     'otp_desc': 'کۆدی نێردراو بۆ تاقیکردنەوە: 1234',

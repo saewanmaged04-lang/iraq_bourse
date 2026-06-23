@@ -72,8 +72,8 @@ class _CitiesScreenState extends State<CitiesScreen> {
           padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 3),
           decoration: BoxDecoration(
             color: const Color(0xFF131C2E), borderRadius: BorderRadius.circular(11),
-            border: Border.all(color: Colors.white.withOpacity(0.08)),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 6, offset: const Offset(0, 2))],
+            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 6, offset: const Offset(0, 2))],
           ),
           child: Row(children: List.generate(widget.pinnedRates.length, (pIndex) {
             final rate = widget.pinnedRates[pIndex];
@@ -100,24 +100,24 @@ class _CitiesScreenState extends State<CitiesScreen> {
                       bottomRight: Radius.circular(3),
                       bottomLeft: Radius.circular(10),
                     ),
-                    border: Border.all(color: isHovering ? Colors.white : Colors.blueAccent.withOpacity(0.4)),
+                    border: Border.all(color: isHovering ? Colors.white : Colors.blueAccent.withValues(alpha: 0.4)),
                   ),
                   child: Column(crossAxisAlignment: CrossAxisAlignment.center, mainAxisSize: MainAxisSize.min, children: [
                     Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                      Icon(Icons.push_pin, size: 8, color: Colors.white.withOpacity(0.7)), const SizedBox(width: 2),
+                      Icon(Icons.push_pin, size: 8, color: Colors.white.withValues(alpha: 0.7)), const SizedBox(width: 2),
                       Flexible(child: Text(getCityName(rate['city']!), style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w900), overflow: TextOverflow.ellipsis)),
                     ]),
                     Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                       Icon(trendIcon, size: 10, color: trendColor), const SizedBox(width: 1),
                       Flexible(child: Text(formatDisplayNumbers(rate['sell']!), style: const TextStyle(color: Colors.white, fontSize: 13.5, fontWeight: FontWeight.w900), overflow: TextOverflow.ellipsis)),
                     ]),
-                    Text(getTxt('sell'), style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 8, fontWeight: FontWeight.bold)),
-                    Container(height: 0.5, color: Colors.white.withOpacity(0.15)),
+                    Text(getTxt('sell'), style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 8, fontWeight: FontWeight.bold)),
+                    Container(height: 0.5, color: Colors.white.withValues(alpha: 0.15)),
                     Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                       Icon(trendIcon, size: 10, color: trendColor), const SizedBox(width: 1),
                       Flexible(child: Text(formatDisplayNumbers(rate['buy']!), style: const TextStyle(color: Colors.white, fontSize: 11.5, fontWeight: FontWeight.w900), overflow: TextOverflow.ellipsis)),
                     ]),
-                    Text(getTxt('buy'), style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 8, fontWeight: FontWeight.bold)),
+                    Text(getTxt('buy'), style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 8, fontWeight: FontWeight.bold)),
                   ]),
                 );
               },
@@ -127,11 +127,11 @@ class _CitiesScreenState extends State<CitiesScreen> {
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 6, 16, 2),
           child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            Text(appLanguageGlobal == 'English' ? 'Bourse' : (appLanguageGlobal == 'العربية' ? 'البورصة' : 'بۆرسە'), style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white.withOpacity(0.45))),
+            Text(appLanguageGlobal == 'English' ? 'Bourse' : (appLanguageGlobal == 'العربية' ? 'البورصة' : 'بۆرسە'), style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white.withValues(alpha: 0.45))),
             Row(children: [
-              SizedBox(width: 76, child: Center(child: Text(getTxt('buy'), style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: const Color(0xFF4ADE80).withOpacity(0.9))))),
+              SizedBox(width: 76, child: Center(child: Text(getTxt('buy'), style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: const Color(0xFF4ADE80).withValues(alpha: 0.9))))),
               const SizedBox(width: 6),
-              SizedBox(width: 76, child: Center(child: Text(getTxt('sell'), style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: const Color(0xFFFF6B6B).withOpacity(0.9))))),
+              SizedBox(width: 76, child: Center(child: Text(getTxt('sell'), style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: const Color(0xFFFF6B6B).withValues(alpha: 0.9))))),
             ]),
           ]),
         ),

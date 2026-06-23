@@ -29,14 +29,14 @@ class _CurrenciesScreenState extends State<CurrenciesScreen> {
             Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(getTxt('currencies_title'), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: Colors.white)),
               const SizedBox(height: 2),
-              Text(getTxt('vs_100_dollars'), style: TextStyle(fontSize: 10, color: Colors.white.withOpacity(0.38))),
+              Text(getTxt('vs_100_dollars'), style: TextStyle(fontSize: 10, color: Colors.white.withValues(alpha: 0.38))),
             ]),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
-                color: const Color(0xFF4ADE80).withOpacity(0.08),
+                color: const Color(0xFF4ADE80).withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: const Color(0xFF4ADE80).withOpacity(0.25)),
+                border: Border.all(color: const Color(0xFF4ADE80).withValues(alpha: 0.25)),
               ),
               child: Row(mainAxisSize: MainAxisSize.min, children: [
                 const SizedBox(width: 5, height: 5, child: DecoratedBox(decoration: BoxDecoration(color: Color(0xFF4ADE80), shape: BoxShape.circle))),
@@ -46,7 +46,7 @@ class _CurrenciesScreenState extends State<CurrenciesScreen> {
             ),
           ]),
         ),
-        Container(height: 1, color: Colors.white.withOpacity(0.05)),
+        Container(height: 1, color: Colors.white.withValues(alpha: 0.05)),
         Expanded(
           child: RefreshIndicator(
             backgroundColor: const Color(0xFF131C2E),
@@ -85,26 +85,26 @@ class _CurrenciesScreenState extends State<CurrenciesScreen> {
                         const SizedBox(height: 3),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(color: itemColor.withOpacity(0.12), borderRadius: BorderRadius.circular(4)),
+                          decoration: BoxDecoration(color: itemColor.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(4)),
                           child: Text(code, style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: itemColor)),
                         ),
                       ])),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1E293B).withOpacity(0.6),
+                          color: const Color(0xFF1E293B).withValues(alpha: 0.6),
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.white.withOpacity(0.08), width: 1),
+                          border: Border.all(color: Colors.white.withValues(alpha: 0.08), width: 1),
                         ),
                         child: Row(mainAxisSize: MainAxisSize.min, children: [
                           Text(formatDisplayNumbers(widget.formatPrice(price)), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 0.5)),
                           const SizedBox(width: 6),
-                          Text(displayUnit, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.white.withOpacity(0.5))),
+                          Text(displayUnit, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.white.withValues(alpha: 0.5))),
                         ]),
                       ),
                     ]),
                   ),
-                  if (!isLast) Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Container(height: 1, color: Colors.white.withOpacity(0.05))),
+                  if (!isLast) Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Container(height: 1, color: Colors.white.withValues(alpha: 0.05))),
                 ]);
               },
             ),

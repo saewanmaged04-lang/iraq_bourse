@@ -382,77 +382,94 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
 
   Widget _buildOfficesScreen() => OfficesScreen(offices: allOffices);
 
-  // شاشەی قوفڵبوون بە چارەسەری ئیرۆری ئۆڤەرفڵۆ
+  // شاشەی قوفڵبوون بە چاککاری زۆر تایبەت بۆ تەواو لۆدبوونی وێنە زێڕینییەکە
   Widget _buildLockedScreen(String sectionName) {
     return Center(
-      child: SingleChildScrollView( // ئەمە ڕێگە لە خەتە زەردەکە دەگرێت کاتێک شاشەکە بچووکە
+      child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
         child: Container(
-          padding: const EdgeInsets.all(24),
+          constraints: const BoxConstraints(maxWidth: 320), 
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
           decoration: BoxDecoration(
-            color: const Color(0xFF131C2E), 
+            color: const Color(0xFF131724), 
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white.withOpacity(0.05)),
+            border: Border.all(color: Colors.white.withOpacity(0.06), width: 1.0), 
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.5),
+                color: Colors.black.withOpacity(0.4),
                 blurRadius: 20,
-                spreadRadius: 2,
+                spreadRadius: 1,
               )
             ],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // بەکار هێنانی ClipOval و BoxFit.cover بۆ پڕبوونی بازنەکە بێ کێشەی لاکێشەیی
               Container(
-                padding: const EdgeInsets.all(24),
+                width: 100, // فۆرماتی دروستی قەبارەکە بۆ پیشاندانی فانۆسە گەشاوەکە
+                height: 100,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFFC59A5C).withOpacity(0.3), width: 2),
+                  border: Border.all(color: const Color(0xFFC59A5C).withOpacity(0.25), width: 2),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFC59A5C).withOpacity(0.15),
-                      blurRadius: 40,
-                      spreadRadius: 10,
+                      color: const Color(0xFFC59A5C).withOpacity(0.12),
+                      blurRadius: 35,
+                      spreadRadius: 4,
                     )
                   ],
                 ),
-                child: const Icon(Icons.hourglass_empty_rounded, size: 56, color: Color(0xFFC59A5C)),
+                child: ClipOval(
+                  child: Image.asset(
+                    'assets/fanus.png', // وێنەی فەرمی و زێڕینی فانۆسەکە
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.cover, // بەهێزترین مێتۆد بۆ ڕێگریکردن لە کەنارە ڕەشەکانی ڕاست و چەپ و پڕبوونی تەواوەتی بازنەکە
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(
+                        Icons.hourglass_empty_rounded, 
+                        size: 56, 
+                        color: Color(0xFFC59A5C)
+                      );
+                    },
+                  ),
+                ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
 
               Text(
                 getTxt('locked_title'),
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFC59A5C)),
+                style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Color(0xFFC59A5C)),
               ),
               const SizedBox(height: 12),
 
               Text(
                 getTxt('locked_desc'),
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.8), height: 1.6),
+                style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.7), height: 1.6, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 12),
               
               Text(
                 getTxt('locked_note'),
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 10, color: Colors.orangeAccent.withOpacity(0.9), height: 1.5),
+                style: const TextStyle(fontSize: 10, color: Color(0xFFC59A5C), height: 1.5, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
 
               Directionality(
                 textDirection: TextDirection.ltr,
                 child: Column(
                   children: [
                     _buildLockScreenContactRow('+964 750 585 6964'),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 10),
                     _buildLockScreenContactRow('+964 772 585 6969'),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
 
               SizedBox(
                 width: double.infinity,
@@ -460,16 +477,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
                   decoration: BoxDecoration(
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFB73A3A).withOpacity(0.4),
-                        blurRadius: 20,
-                        offset: const Offset(0, 4),
+                        color: const Color(0xFFB83939).withOpacity(0.2), 
+                        blurRadius: 15,
+                        offset: const Offset(0, 3),
                       )
                     ],
                   ),
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFB73A3A),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: const Color(0xFFB83939), 
+                      padding: const EdgeInsets.symmetric(vertical: 16), 
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                       elevation: 0,
                     ),
@@ -480,7 +497,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
                     },
                     child: Text(
                       getTxt('lock_create_account_btn'),
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13.5),
                     ),
                   ),
                 ),
@@ -492,28 +509,26 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
     );
   }
 
-  // دیزاینی تەلەفۆن بەبێ کێشەی تێکەڵبوونی ژمارەکان
   Widget _buildLockScreenContactRow(String number) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12), 
       decoration: BoxDecoration(
-        color: const Color(0xFF0B121F), 
+        color: const Color(0xFF0F111A), 
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        border: Border.all(color: Colors.white.withOpacity(0.04)),
       ),
       child: Row(
         children: [
-          // بەکارهێنانی ڕاستەوخۆی ژمارەکە بەبێ گۆڕین بۆ عەرەبی تا تێکەڵ نەبێت
           Text(
             number,
             textDirection: TextDirection.ltr,
-            style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.0),
+            style: const TextStyle(color: Colors.white, fontSize: 13.5, fontWeight: FontWeight.bold, letterSpacing: 0.8),
           ),
           const Spacer(),
           _buildSimpleIcon(Icons.chat_bubble_outline_rounded),
-          const SizedBox(width: 12),
+          const SizedBox(width: 10),
           _buildSimpleIcon(Icons.phone_outlined),
-          const SizedBox(width: 12),
+          const SizedBox(width: 10),
           _buildSimpleIcon(Icons.chat_outlined),
         ],
       ),
@@ -521,6 +536,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
   }
 
   Widget _buildSimpleIcon(IconData icon) {
-    return Icon(icon, color: Colors.white.withOpacity(0.6), size: 18);
+    return Icon(icon, color: Colors.white.withOpacity(0.6), size: 16);
   }
 }

@@ -39,7 +39,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   children: [
                     _sectionLabel(getTxt('account_section')),
                     isLoggedInGlobal 
-                        ? _buildLoggedInCard() 
+                        ? _buildConsolidatedAccountCard() // تەنها یەک ئایکۆنی ڕێکخراو لە جیاتی جەنجاڵی پێشوو
                         : _buildNotLoggedInCard(),
                     
                     const SizedBox(height: 16),
@@ -337,7 +337,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           }),
           const Spacer(),
           Text(
-            formatDisplayNumbers(number), // خۆکارانە ژمارەکە وەردەگێڕێتە سەر عەرەبی یان ئینگلیزی
+            formatDisplayNumbers(number),
             style: const TextStyle(
               color: Colors.white,
               fontSize: 13,
@@ -365,65 +365,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildLoggedInCard() {
+  // دروستکردنی کارتی نوێ و یەکگرتوو بۆ سەرەوەی لیستەکە بێ جەنجاڵی (iOS Settings Style)
+  Widget _buildConsolidatedAccountCard() {
+    String displayName = userDisplayNameGlobal;
+    if (displayName.isEmpty && userPhoneNumberGlobal.isNotEmpty) {
+      displayName = registeredNamesDb[userPhoneNumberGlobal] ?? 'بەکارهێنەر';
+    }
+
     return _buildCard([
       _buildSettingsTile(
-        icon: Icons.person_rounded,
-        title: userPhoneNumberGlobal.isNotEmpty ? formatDisplayNumbers(userPhoneNumberGlobal) : 'saewan',
-        subtitle: appLanguageGlobal == 'English' ? 'Name' : (appLanguageGlobal == 'العربية' ? 'الاسم' : 'ناو'),
-        iconColor: Colors.white70,
-        iconBg: const Color(0xFF1E293B),
-      ),
-      const Divider(color: Color(0xFF1E293B), height: 1),
-      _buildSettingsTile(
-        icon: Icons.phone_iphone_rounded,
-        title: userPhoneNumberGlobal.isNotEmpty ? formatDisplayNumbers(userPhoneNumberGlobal) : formatDisplayNumbers('+964 773 154 7371'),
-        subtitle: appLanguageGlobal == 'English' ? 'Phone Number' : (appLanguageGlobal == 'العربية' ? 'رقم الهاتف' : 'ژمارەی مۆبایل'),
-        iconColor: Colors.white70,
-        iconBg: const Color(0xFF1E293B),
-      ),
-      const Divider(color: Color(0xFF1E293B), height: 1),
-      _buildSettingsTile(
-        icon: Icons.calendar_month_rounded,
-        title: formatDisplayNumbers(activationDateGlobal),
-        subtitle: appLanguageGlobal == 'English' ? 'Subscription Start' : (appLanguageGlobal == 'العربية' ? 'تاريخ البدء' : 'سەرەتای بەشداری'),
-        iconColor: Colors.white70,
-        iconBg: const Color(0xFF1E293B),
-      ),
-      const Divider(color: Color(0xFF1E293B), height: 1),
-      _buildSettingsTile(
-        icon: Icons.calendar_today_rounded,
-        title: formatDisplayNumbers(expiryDateGlobal),
-        subtitle: appLanguageGlobal == 'English' ? 'Subscription End' : (appLanguageGlobal == 'العربية' ? 'انتهاء الاشتراك' : 'کۆتایی هاتنی بەشداری'),
-        iconColor: Colors.white70,
-        iconBg: const Color(0xFF1E293B),
-      ),
-      const Divider(color: Color(0xFF1E293B), height: 1),
-      _buildSettingsTile(
-        icon: Icons.vpn_key_rounded,
-        title: appLanguageGlobal == 'English' ? 'Change Password' : (appLanguageGlobal == 'العربية' ? 'تغيير كلمة السر' : 'گۆڕینی پاسۆرد'),
-        iconColor: Colors.white70,
-        iconBg: const Color(0xFF1E293B),
-        trailing: Icon(
-          appLanguageGlobal == 'English' ? Icons.arrow_forward_ios_rounded : Icons.arrow_back_ios_new_rounded, 
-          size: 12, 
-          color: Colors.white30
-        ),
+        icon: Icons.person_pin_rounded,
+        title: appLanguageGlobal == 'English' ? 'My Account' : (appLanguageGlobal == 'العربية' ? 'حسابي' : 'ئەژمارەکەم'),
+        subtitle: displayName.isNotEmpty ? formatDisplayNumbers(displayName) : 'بەکارهێنەر',
+        iconColor: const Color(0xFF76C917),
+        iconBg: const Color(0xFF76C917).withOpacity(0.12),
         onTap: () {
-          _simulateAction('کردنەوەی مۆداڵی گۆڕینی پاسۆرد...');
-        },
-      ),
-      const Divider(color: Color(0xFF1E293B), height: 1),
-      _buildSettingsTile(
-        icon: Icons.logout_rounded,
-        title: getTxt('logout'),
-        iconColor: Colors.redAccent,
-        iconBg: const Color(0xFF2E0F0F),
-        onTap: () {
-          setState(() {
-            isLoggedInGlobal = false;
-            isPremiumActiveGlobal = false;
-            userPhoneNumberGlobal = '';
+          // هەناردەکردنی بەکارهێنەر بۆ لاپەڕەی نوێی سەربەخۆ بێ شێواندنی مۆدێلی مێنوی ڕێکخستنەکان
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AccountDetailsScreen()),
+          ).then((_) {
+            // نوێکردنەوەی لۆکاڵی شاشەی ڕێکخستنەکان ئەگەر لەناو ئەپەکە لۆگ دەرچوو بێت
+            setState(() {});
           });
         },
       ),
@@ -471,5 +434,181 @@ class _SettingsScreenState extends State<SettingsScreen> {
         style: TextStyle(fontSize: 9, color: Colors.white.withOpacity(0.2))
       ),
     ]));
+  }
+}
+
+// ============================================================================
+// شاشەی تایبەت و سەربەخۆ بۆ نیشاندانی وردەکاری ئەکاونت (Account Details Screen)
+// ============================================================================
+class AccountDetailsScreen extends StatefulWidget {
+  const AccountDetailsScreen({super.key});
+
+  @override
+  State<AccountDetailsScreen> createState() => _AccountDetailsScreenState();
+}
+
+class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
+  @override
+  Widget build(BuildContext context) {
+    final textDirection = appLanguageGlobal == 'English' ? TextDirection.ltr : TextDirection.rtl;
+
+    String displayName = userDisplayNameGlobal;
+    if (displayName.isEmpty && userPhoneNumberGlobal.isNotEmpty) {
+      displayName = registeredNamesDb[userPhoneNumberGlobal] ?? 'بەکارهێنەر';
+    }
+
+    return Directionality(
+      textDirection: textDirection,
+      child: Scaffold(
+        backgroundColor: const Color(0xFF0B121F), // پاشبنەمای فەرمی تاریکی ئەپەکە
+        body: SafeArea(
+          child: Column(
+            children: [
+              _buildHeader(),
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF131C2E),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: const Color(0xFF1E293B)),
+                      ),
+                      child: Column(
+                        children: [
+                          _buildTile(
+                            icon: Icons.person_rounded,
+                            title: displayName.isNotEmpty ? formatDisplayNumbers(displayName) : 'بەکارهێنەر',
+                            subtitle: appLanguageGlobal == 'English' ? 'Name' : (appLanguageGlobal == 'العربية' ? 'الاسم' : 'ناو'),
+                            iconColor: Colors.white70,
+                          ),
+                          const Divider(color: Color(0xFF1E293B), height: 1),
+                          _buildTile(
+                            icon: Icons.phone_iphone_rounded,
+                            title: userPhoneNumberGlobal.isNotEmpty ? formatDisplayNumbers(userPhoneNumberGlobal) : formatDisplayNumbers('+964 773 154 7371'),
+                            subtitle: appLanguageGlobal == 'English' ? 'Phone Number' : (appLanguageGlobal == 'العربية' ? 'رقم الهاتف' : 'ژمارەی مۆبایل'),
+                            iconColor: Colors.white70,
+                          ),
+                          const Divider(color: Color(0xFF1E293B), height: 1),
+                          _buildTile(
+                            icon: Icons.calendar_month_rounded,
+                            title: formatDisplayNumbers(activationDateGlobal),
+                            subtitle: appLanguageGlobal == 'English' ? 'Subscription Start' : (appLanguageGlobal == 'العربية' ? 'تاريخ البدء' : 'سەرەتای بەشداری'),
+                            iconColor: Colors.white70,
+                          ),
+                          const Divider(color: Color(0xFF1E293B), height: 1),
+                          _buildTile(
+                            icon: Icons.calendar_today_rounded,
+                            title: formatDisplayNumbers(expiryDateGlobal),
+                            subtitle: appLanguageGlobal == 'English' ? 'Subscription End' : (appLanguageGlobal == 'العربية' ? 'انتهاء الاشتراك' : 'کۆتایی هاتنی بەشداری'),
+                            iconColor: Colors.white70,
+                          ),
+                          const Divider(color: Color(0xFF1E293B), height: 1),
+                          _buildTile(
+                            icon: Icons.vpn_key_rounded,
+                            title: appLanguageGlobal == 'English' ? 'Change Password' : (appLanguageGlobal == 'العربية' ? 'تغيير كلمة السر' : 'گۆڕینی پاسۆرد'),
+                            iconColor: Colors.white70,
+                            trailing: Icon(
+                              appLanguageGlobal == 'English' ? Icons.arrow_forward_ios_rounded : Icons.arrow_back_ios_new_rounded, 
+                              size: 12, 
+                              color: Colors.white30
+                            ),
+                            onTap: () {
+                              // پیشاندانی دیالۆگی ناوەڕاستی پشتگیری بۆ گۆڕینی پاسۆرد
+                              showSupportContactDialog(context);
+                            },
+                          ),
+                          const Divider(color: Color(0xFF1E293B), height: 1),
+                          _buildTile(
+                            icon: Icons.logout_rounded,
+                            title: getTxt('logout'),
+                            iconColor: Colors.redAccent,
+                            iconBg: const Color(0xFF2E0F0F),
+                            onTap: () {
+                              // پرۆسەی چوونە دەرەوە و گەڕانەوە بۆ لاپەڕەی پێشوو
+                              isLoggedInGlobal = false;
+                              isPremiumActiveGlobal = false;
+                              userPhoneNumberGlobal = '';
+                              userDisplayNameGlobal = '';
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: const BoxDecoration(
+        color: Color(0xFF0F172A), 
+        border: Border(bottom: BorderSide(color: Color(0xFF1E293B), width: 1))
+      ),
+      child: Row(children: [
+        GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Container(
+            padding: const EdgeInsets.all(8), 
+            decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(10)), 
+            child: Icon(
+              appLanguageGlobal == 'English' ? Icons.arrow_back_ios_new_rounded : Icons.arrow_back_ios_rounded, 
+              color: Colors.white, 
+              size: 16
+            ),
+          ),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Text(
+            appLanguageGlobal == 'English' ? 'My Account' : (appLanguageGlobal == 'العربية' ? 'حسابي' : 'ئەژمارەکەم'), 
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)
+          )
+        ),
+      ]),
+    );
+  }
+
+  Widget _buildTile({
+    required IconData icon, 
+    required String title, 
+    String? subtitle, 
+    Widget? trailing, 
+    Color iconColor = Colors.white70,
+    Color? iconBg,
+    VoidCallback? onTap
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(children: [
+          Container(
+            width: 36, height: 36, 
+            decoration: BoxDecoration(
+              color: iconBg ?? const Color(0xFF1E293B), 
+              borderRadius: BorderRadius.circular(10)
+            ), 
+            child: Icon(icon, size: 18, color: iconColor)
+          ),
+          const SizedBox(width: 14),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(title, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold, color: Colors.white)),
+            if (subtitle != null) ...[const SizedBox(height: 3), Text(subtitle, style: TextStyle(fontSize: 10, color: Colors.white.withOpacity(0.4)))],
+          ])),
+          trailing ?? const SizedBox(),
+        ]),
+      ),
+    );
   }
 }

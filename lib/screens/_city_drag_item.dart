@@ -87,7 +87,11 @@ class _CityDragItemState extends State<CityDragItem> with SingleTickerProviderSt
           dragAnchorStrategy: pointerDragAnchorStrategy,
           delay: const Duration(milliseconds: 1500),
           maxSimultaneousDrags: 1,
-          onDragUpdate: (d) { if (d.globalPosition.dy < 250) _startAutoScroll(); else _stopAutoScroll(); },
+          onDragUpdate: (d) { if (d.globalPosition.dy < 250) {
+            _startAutoScroll();
+          } else {
+            _stopAutoScroll();
+          } },
           onDragEnd: (_) { _stopAutoScroll(); widget.onDeactivate(); },
           onDraggableCanceled: (_, __) { _stopAutoScroll(); widget.onDeactivate(); },
           onDragStarted: () { widget.onActivate(widget.index); _shakeController.forward(from: 0); HapticFeedback.mediumImpact(); },
@@ -100,7 +104,7 @@ class _CityDragItemState extends State<CityDragItem> with SingleTickerProviderSt
                 color: const Color(0xFF1E3A5F),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: Colors.blueAccent, width: 2),
-                boxShadow: [BoxShadow(color: Colors.blueAccent.withOpacity(0.5), blurRadius: 20, spreadRadius: 2)],
+                boxShadow: [BoxShadow(color: Colors.blueAccent.withValues(alpha: 0.5), blurRadius: 20, spreadRadius: 2)],
               ),
               child: Row(children: [
                 Icon(widget.statusIcon, size: 13, color: widget.buyColor),
@@ -114,14 +118,14 @@ class _CityDragItemState extends State<CityDragItem> with SingleTickerProviderSt
           childWhenDragging: Container(
             margin: const EdgeInsets.symmetric(vertical: 4), height: 52,
             decoration: BoxDecoration(
-              color: Colors.blueAccent.withOpacity(0.05),
+              color: Colors.blueAccent.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.blueAccent.withOpacity(0.3), width: 1.5),
+              border: Border.all(color: Colors.blueAccent.withValues(alpha: 0.3), width: 1.5),
             ),
             child: Center(child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Icon(Icons.arrow_downward_rounded, size: 14, color: Colors.blueAccent.withOpacity(0.5)),
+              Icon(Icons.arrow_downward_rounded, size: 14, color: Colors.blueAccent.withValues(alpha: 0.5)),
               const SizedBox(width: 6),
-              Text('ئێرە دابنێ', style: TextStyle(fontSize: 11, color: Colors.blueAccent.withOpacity(0.5))),
+              Text('ئێرە دابنێ', style: TextStyle(fontSize: 11, color: Colors.blueAccent.withValues(alpha: 0.5))),
             ])),
           ),
           child: AnimatedBuilder(
@@ -137,19 +141,19 @@ class _CityDragItemState extends State<CityDragItem> with SingleTickerProviderSt
                   color: isDragOver ? const Color(0xFF1A3050) : isActive ? const Color(0xFF0D2040) : const Color(0xFF0F172A),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: isDragOver ? Colors.blueAccent : isActive ? Colors.blueAccent : const Color(0xFF1E293B), width: isDragOver ? 2 : 1),
-                  boxShadow: isActive ? [BoxShadow(color: Colors.blueAccent.withOpacity(0.4), blurRadius: 16, spreadRadius: 1)] : isDragOver ? [BoxShadow(color: Colors.blueAccent.withOpacity(0.2), blurRadius: 10)] : [],
+                  boxShadow: isActive ? [BoxShadow(color: Colors.blueAccent.withValues(alpha: 0.4), blurRadius: 16, spreadRadius: 1)] : isDragOver ? [BoxShadow(color: Colors.blueAccent.withValues(alpha: 0.2), blurRadius: 10)] : [],
                 ),
                 child: Row(children: [
-                  GestureDetector(onTap: widget.onPinTap, child: Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.15), borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.push_pin, size: 15, color: Colors.blueAccent))),
+                  GestureDetector(onTap: widget.onPinTap, child: Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: Colors.blueAccent.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.push_pin, size: 15, color: Colors.blueAccent))),
                   const SizedBox(width: 10),
                   Expanded(child: Row(children: [
                     Icon(widget.statusIcon, size: 13, color: widget.buyColor),
                     const SizedBox(width: 6),
                     Expanded(child: Text(getCityName(widget.item['name']!), style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold))),
                     if (isActive) ...[
-                      Icon(Icons.drag_indicator_rounded, size: 16, color: Colors.blueAccent.withOpacity(0.9)),
+                      Icon(Icons.drag_indicator_rounded, size: 16, color: Colors.blueAccent.withValues(alpha: 0.9)),
                       const SizedBox(width: 4),
-                      Text('ڕاکێشە', style: TextStyle(fontSize: 10, color: Colors.blueAccent.withOpacity(0.8), fontWeight: FontWeight.bold)),
+                      Text('ڕاکێشە', style: TextStyle(fontSize: 10, color: Colors.blueAccent.withValues(alpha: 0.8), fontWeight: FontWeight.bold)),
                       const SizedBox(width: 4),
                     ],
                   ])),
@@ -171,7 +175,7 @@ class _CityDragItemState extends State<CityDragItem> with SingleTickerProviderSt
     width: 76, padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
     decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(10)),
     child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-      Icon(icon, size: 11, color: Colors.white.withOpacity(0.9)),
+      Icon(icon, size: 11, color: Colors.white.withValues(alpha: 0.9)),
       const SizedBox(width: 3),
       Text(formatDisplayNumbers(price), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
     ]),
