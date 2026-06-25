@@ -36,6 +36,7 @@ class _BoursePremiumAppState extends State<BoursePremiumApp> {
       builder: (context, child) {
         // گۆڕینی قەبارەی سەرجەم تێکستەکان لە جیهاندا بەگوێرەی هەڵبژاردەی کڕیار
         return MediaQuery(
+        
           data: MediaQuery.of(context).copyWith(
             textScaler: TextScaler.linear(fontScaleMultiplierGlobal),
           ),

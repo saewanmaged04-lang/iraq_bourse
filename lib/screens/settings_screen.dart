@@ -61,6 +61,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               if (val != null) {
                                 setState(() {
                                   appLanguageGlobal = val;
+                                  // ئەگەر زمانەکە بوو بە ئینگلیزی، خۆکارانە شێوازی ژمارەکانیش دەکەین بە ئینگلیزی فەرمی (123)
+                                  if (val == 'English') {
+                                    appNumeralStyleGlobal = '123';
+                                  }
                                 });
                                 BoursePremiumApp.rebuild(context);
                               }
@@ -68,35 +72,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                         ),
                       ),
-                      const Divider(color: Color(0xFF1E293B), height: 1),
-                      // --- هەڵبژاردنی شێوازی ژمارەکان بە ئازادی ---
-                      _buildSettingsTile(
-                        icon: Icons.numbers_rounded,
-                        title: getTxt('numeral_style'),
-                        subtitle: appNumeralStyleGlobal == '123' ? getTxt('numeral_western') : getTxt('numeral_eastern'),
-                        iconColor: const Color(0xFF00C6FF),
-                        iconBg: const Color(0xFF00C6FF).withOpacity(0.15),
-                        trailing: DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value: appNumeralStyleGlobal,
-                            dropdownColor: const Color(0xFF131C2E),
-                            icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
-                            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
-                            items: [
-                              DropdownMenuItem(value: '123', child: Text(getTxt('numeral_western'))),
-                              DropdownMenuItem(value: '١٢٣', child: Text(getTxt('numeral_eastern'))),
-                            ],
-                            onChanged: (val) {
-                              if (val != null) {
-                                setState(() {
-                                  appNumeralStyleGlobal = val;
-                                });
-                                BoursePremiumApp.rebuild(context);
-                              }
-                            },
+                      
+                      // --- هەڵبژاردنی شێوازی ژمارەکان (تەنها نیشان دەدرێت ئەگەر زمانەکە ئینگلیزی نەبێت) ---
+                      if (appLanguageGlobal != 'English') ...[
+                        const Divider(color: Color(0xFF1E293B), height: 1),
+                        _buildSettingsTile(
+                          icon: Icons.numbers_rounded,
+                          title: getTxt('numeral_style'),
+                          subtitle: appNumeralStyleGlobal == '123' ? getTxt('numeral_western') : getTxt('numeral_eastern'),
+                          iconColor: const Color(0xFF00C6FF),
+                          iconBg: const Color(0xFF00C6FF).withOpacity(0.15),
+                          trailing: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              value: appNumeralStyleGlobal,
+                              dropdownColor: const Color(0xFF131C2E),
+                              icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                              style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                              items: [
+                                DropdownMenuItem(value: '123', child: Text(getTxt('numeral_western'))),
+                                DropdownMenuItem(value: '١٢٣', child: Text(getTxt('numeral_eastern'))),
+                              ],
+                              onChanged: (val) {
+                                if (val != null) {
+                                  setState(() {
+                                    appNumeralStyleGlobal = val;
+                                  });
+                                  BoursePremiumApp.rebuild(context);
+                                }
+                              },
+                            ),
                           ),
                         ),
-                      ),
+                      ],
+                      
                       const Divider(color: Color(0xFF1E293B), height: 1),
                       // --- قەبارەی فۆنت ---
                       _buildSettingsTile(

@@ -1,6 +1,3 @@
-// ignore_for_file: deprecated_member_use
-// lib/screens/calculator_screen.dart
-
 import 'package:flutter/material.dart';
 import '../global_state.dart';
 
@@ -104,7 +101,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: CircleAvatar(
-              radius: 14, backgroundColor: Colors.blueAccent.withOpacity(0.15),
+              radius: 14, backgroundColor: Colors.blueAccent.withValues(alpha: 0.15),
               child: IconButton(iconSize: 12, icon: const Icon(Icons.swap_vert, color: Colors.blueAccent), onPressed: () {
                 widget.onConverterFieldsChanged(widget.toCurrencySelected, 0.0, true);
               }),
@@ -116,7 +113,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(color: const Color(0xFF131C2E), borderRadius: BorderRadius.circular(10), border: Border.all(color: const Color(0xFF1E293B))),
             child: Column(children: [
-              Text(getTxt('current_rates'), style: TextStyle(fontSize: 10, color: Colors.white.withOpacity(0.5), fontWeight: FontWeight.bold)),
+              Text(getTxt('current_rates'), style: TextStyle(fontSize: 10, color: Colors.white.withValues(alpha: 0.5), fontWeight: FontWeight.bold)),
               const SizedBox(height: 4),
               ...widget.availableCurrencies.where((c) => c != 'دینار IQD').map((c) {
                 final rate = widget.rateToIQD[c] ?? 1.0;
@@ -139,7 +136,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       decoration: BoxDecoration(
         color: const Color(0xFF1E293B),
         borderRadius: const BorderRadius.all(Radius.circular(10)),
-        border: Border.all(color: Colors.white.withOpacity(0.15), width: 0.8),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.15), width: 0.8),
       ),
       child: Row(children: [
         DropdownButtonHideUnderline(child: DropdownButton<String>(
@@ -171,7 +168,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
             decoration: BoxDecoration(color: const Color(0xFF131C2E), borderRadius: BorderRadius.circular(10), border: Border.all(color: const Color(0xFF1E293B))),
             child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text(appLanguageGlobal == 'English' ? 'Currency Type' : 'جۆری دراو', style: TextStyle(fontSize: 11, color: Colors.white.withOpacity(0.6))),
+              Text(appLanguageGlobal == 'English' ? 'Currency Type' : 'جۆری دراو', style: TextStyle(fontSize: 11, color: Colors.white.withValues(alpha: 0.6))),
               DropdownButtonHideUnderline(child: DropdownButton<String>(
                 value: widget.selectedCurrency, dropdownColor: const Color(0xFF131C2E),
                 icon: const Icon(Icons.arrow_drop_down, color: Colors.blueAccent),
@@ -202,7 +199,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             onTap: widget.onCalculateProfit,
             child: Container(
               width: double.infinity, padding: const EdgeInsets.symmetric(vertical: 9),
-              decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF0072FF), Color(0xFF00C6FF)]), borderRadius: BorderRadius.circular(10), boxShadow: [BoxShadow(color: const Color(0xFF0072FF).withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 3))]),
+              decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF0072FF), Color(0xFF00C6FF)]), borderRadius: BorderRadius.circular(10), boxShadow: [BoxShadow(color: const Color(0xFF0072FF).withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 3))]),
               child: Center(child: Text(getTxt('calculate_btn'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: Colors.white))),
             ),
           ),
@@ -210,7 +207,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           if (widget.profitResult != null)
             Container(
               padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(color: const Color(0xFF131C2E), borderRadius: BorderRadius.circular(12), border: Border.all(color: resultColor.withOpacity(0.2), width: 1.5)),
+              decoration: BoxDecoration(color: const Color(0xFF131C2E), borderRadius: BorderRadius.circular(12), border: Border.all(color: resultColor.withValues(alpha: 0.2), width: 1.5)),
               child: Column(children: [
                 Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   Icon(isProfit ? Icons.trending_up : Icons.trending_down, color: resultColor, size: 16),
@@ -234,9 +231,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(color: const Color(0xFF131C2E), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFF1E293B))),
               child: Column(children: [
-                Icon(Icons.calculate_outlined, size: 24, color: Colors.white.withOpacity(0.12)),
+                Icon(Icons.calculate_outlined, size: 24, color: Colors.white.withValues(alpha: 0.12)),
                 const SizedBox(height: 4),
-                Text(getTxt('calculator_desc'), style: TextStyle(fontSize: 10, color: Colors.white.withOpacity(0.32)), textAlign: TextAlign.center),
+                Text(getTxt('calculator_desc'), style: TextStyle(fontSize: 10, color: Colors.white.withValues(alpha: 0.32)), textAlign: TextAlign.center),
               ]),
             ),
         ]),
@@ -255,8 +252,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
           color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(9),
-          border: Border.all(color: isActive ? color.withOpacity(0.7) : Colors.white.withOpacity(0.12), width: 1.0),
-          boxShadow: isActive ? [BoxShadow(color: color.withOpacity(0.08), blurRadius: 4)] : [],
+          border: Border.all(color: isActive ? color.withValues(alpha: 0.7) : Colors.white.withValues(alpha: 0.12), width: 1.0),
+          boxShadow: isActive ? [BoxShadow(color: color.withValues(alpha: 0.08), blurRadius: 4)] : [],
         ),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(label, style: TextStyle(fontSize: 9, color: isActive ? color : Colors.white38)),
@@ -277,7 +274,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       decoration: BoxDecoration(
         color: const Color(0xFF0D1421),
         borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16)),
-        border: Border.all(color: Colors.white.withOpacity(0.12), width: 1.0),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12), width: 1.0),
       ),
       child: Column(mainAxisSize: MainAxisSize.min, children: keys.map((row) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 2.5),

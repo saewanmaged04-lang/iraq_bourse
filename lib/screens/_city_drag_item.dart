@@ -87,11 +87,7 @@ class _CityDragItemState extends State<CityDragItem> with SingleTickerProviderSt
           dragAnchorStrategy: pointerDragAnchorStrategy,
           delay: const Duration(milliseconds: 1500),
           maxSimultaneousDrags: 1,
-          onDragUpdate: (d) { if (d.globalPosition.dy < 250) {
-            _startAutoScroll();
-          } else {
-            _stopAutoScroll();
-          } },
+          onDragUpdate: (d) { if (d.globalPosition.dy < 250) _startAutoScroll(); else _stopAutoScroll(); },
           onDragEnd: (_) { _stopAutoScroll(); widget.onDeactivate(); },
           onDraggableCanceled: (_, __) { _stopAutoScroll(); widget.onDeactivate(); },
           onDragStarted: () { widget.onActivate(widget.index); _shakeController.forward(from: 0); HapticFeedback.mediumImpact(); },
@@ -171,13 +167,20 @@ class _CityDragItemState extends State<CityDragItem> with SingleTickerProviderSt
     );
   }
 
+  // ڕێکخستنی ڕەنگی ڕاستەقینە و هێمن بە دیزاینی پڕ و دەقی سپی گەشاوە وەک وێنەکە
   Widget _priceBox(String price, Color color, IconData icon) => Container(
     width: 76, padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-    decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(10)),
+    decoration: BoxDecoration(
+      color: color, // بەکارهێنانی ڕەنگی سەرەکی فەرمی بە ڕەقی وەک داواکارییەکەت
+      borderRadius: BorderRadius.circular(12), // زیاتر خڕکردنی لێوارەکان وەک وێنەکە
+    ),
     child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-      Icon(icon, size: 11, color: Colors.white.withValues(alpha: 0.9)),
+      Icon(icon, size: 11, color: Colors.white.withValues(alpha: 0.9)), // نیشانەی سپی درەوشاوە
       const SizedBox(width: 3),
-      Text(formatDisplayNumbers(price), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
+      Text(
+        formatDisplayNumbers(price), 
+        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white), // ژمارەی سپی بە تەواوی ئۆتۆماتیکی
+      ),
     ]),
   );
 }

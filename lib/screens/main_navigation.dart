@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use
 // lib/screens/main_navigation.dart
 
+import 'dart:async'; // هاوردەکردنی تایمەر بۆ ئۆتۆ ڕێفرێش
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../global_state.dart';
@@ -19,11 +20,15 @@ class MainNavigationScreen extends StatefulWidget {
   State<MainNavigationScreen> createState() => _MainNavigationScreenState();
 }
 
+// گۆڕینی مێکسەکە بۆ TickerProviderStateMixin بۆ ڕێگەپێدانی زۆرتر لە یەک ئەنیمەیشنی جیاواز بێ کێشە
 class _MainNavigationScreenState extends State<MainNavigationScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   int _selectedIndex = 0;
   late TabController _tabController;
   final ScrollController _citiesScrollController = ScrollController();
+  
+  late AnimationController _refreshRotationController; // کۆنتڕۆڵەری خولانەوەی ڕێفرێش
+  late Timer _refreshTimer; // تایمەری ئۆتۆ ڕێفرێش لە هەر ٥ چرکەیەکدا
 
   final List<Map<String, String>> pinnedRates = [
     {'city': 'بەغداد', 'buy': '١٥٣,٨٥٠', 'sell': '١٥٤,٢٥٠', 'status': 'up'},
@@ -43,14 +48,71 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
     {'name': 'بەسرە', 'buy': '١٥٣,٩٥٠', 'sell': '١٥٤,٣٠٠', 'status': 'down'},
   ];
 
-  final List<Map<String, dynamic>> currencyData = [
-    {'name': 'دینار عێراقی', 'code': 'IQD', 'flag': '🇮🇶', 'price': 153700.0, 'change': '+0.12%', 'isUp': true, 'color': const Color(0xFF00C6FF)},
-    {'name': 'تمەنی ئێرانی', 'code': 'IRR', 'flag': '🇮🇷', 'price': 6200000.0, 'change': '-0.08%', 'isUp': false, 'color': const Color(0xFFFF4D4D)},
-    {'name': 'پاوەندی بەریتانی', 'code': 'GBP', 'flag': '🇬🇧', 'price': 79.40, 'change': '+0.05%', 'isUp': true, 'color': const Color(0xFF22C55E)},
-    {'name': 'یۆرۆی ئەورووپی', 'code': 'EUR', 'flag': '🇪🇺', 'price': 91.50, 'change': '-0.06%', 'isUp': false, 'color': const Color(0xFFEAB308)},
-    {'name': 'لیرەی تورکی', 'code': 'TRY', 'flag': '🇹🇷', 'price': 3245.0, 'change': '-0.22%', 'isUp': false, 'color': const Color(0xFFFF7849)},
-    {'name': 'درامی ئیماراتی', 'code': 'AED', 'flag': '🇦🇪', 'price': 367.3, 'change': '+0.03%', 'isUp': true, 'color': const Color(0xFF06B6D4)},
-  ];
+  // لۆجیکی حیسابکردنی داینامیکی نرخەکانی دراوەکان بە نیسبەت دۆلاری ناوەندی/بازاڕ
+  List<Map<String, dynamic>> getDynamicCurrencyData() {
+    double selectedBaseUSD = activeBaseUsdToIqdRate; // بەکار هێنانی ڕێژەی داینامیکی بەپێی هەڵبژاردەی کڕیار
+    return [
+      {
+        'name': 'دینار عێراقی', 
+        'code': 'IQD', 
+        'flag': '🇮🇶', 
+        'price': usdToIqdMarketRate * 100, // ١٠٠ دۆلاری بازاڕ بەرامبەر دینار
+        'change': '+0.12%', 
+        'isUp': true, 
+        'color': const Color(0xFF00C6FF)
+      },
+      {
+        'name': 'تمەنی ئێرانی', 
+        'code': 'IRR', 
+        'flag': '🇮🇷', 
+        // حیسابکردنی خۆکاری تمەن بەرامبەر بە دۆلاری فەرمی ناوەندی (کورتەی ١ ملیۆن تمەن)
+        'price': (1000000 / 62000.0) * selectedBaseUSD, 
+        'change': '-0.08%', 
+        'isUp': false, 
+        'color': const Color(0xFFFF4D4D)
+      },
+      {
+        'name': 'پاوەندی بەریتانی', 
+        'code': 'GBP', 
+        'flag': '🇬🇧', 
+        // حیسابکردنی ١٠٠ پاوەند بە دینار لەسەر دۆلاری ناوەندی
+        'price': (100 / 0.794) * selectedBaseUSD, 
+        'change': '+0.05%', 
+        'isUp': true, 
+        'color': const Color(0xFF22C55E)
+      },
+      {
+        'name': 'یۆرۆی ئەورووپی', 
+        'code': 'EUR', 
+        'flag': '🇪🇺', 
+        // حیسابکردنی ١٠٠ یۆرۆ بە دینار لەسەر دۆلاری فەرمی ناوەندی
+        'price': (100 / 0.915) * selectedBaseUSD, 
+        'change': '-0.06%', 
+        'isUp': false, 
+        'color': const Color(0xFFEAB308)
+      },
+      {
+        'name': 'لیرەی تورکی', 
+        'code': 'TRY', 
+        'flag': '🇹🇷', 
+        // حیسابکردنی ١٠٠ لیرە بە دینار لەسەر دۆلاری ناوەندی
+        'price': (100 / 32.45) * selectedBaseUSD, 
+        'change': '-0.22%', 
+        'isUp': false, 
+        'color': const Color(0xFFFF7849)
+      },
+      {
+        'name': 'درامی ئیماراتی', 
+        'code': 'AED', 
+        'flag': '🇦🇪', 
+        // حیسابکردنی ١٠٠ درەم بە دینار لەسەر دۆلاری فەرمی ناوەندی
+        'price': (100 / 3.673) * selectedBaseUSD, 
+        'change': '+0.03%', 
+        'isUp': true, 
+        'color': const Color(0xFF06B6D4)
+      },
+    ];
+  }
 
   String _fromAmount = '100';
   String _toAmount = '153,700';
@@ -65,22 +127,50 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
   Map<String, dynamic>? _profitResult;
 
   final List<String> _availableCurrencies = ['دۆلار USD', 'دینار IQD', 'تمەن IRR', 'یۆرۆ EUR', 'پاوەند GBP'];
-  final Map<String, double> _rateToIQD = {
-    'دۆلار USD': 1537.0, 'دینار IQD': 1.0,
-    'تمەن IRR': 0.0000248, 'یۆرۆ EUR': 1680.0, 'پاوەند GBP': 1950.0,
+  
+  // لۆجیکی هاوکێشەی ڕێژەکان بەگوێرەی بەهای هەڵبژێردراوی بەکارهێنەر لە ڕێکخستنەکاندا
+  Map<String, double> get _rateToIQD => {
+    'دۆلار USD': activeBaseUsdToIqdRate, 
+    'دینار IQD': 1.0,
+    'تمەن IRR': activeBaseUsdToIqdRate / 62000.0, 
+    'یۆرۆ EUR': activeBaseUsdToIqdRate / 0.915, 
+    'پاوەند GBP': activeBaseUsdToIqdRate / 0.794,
   };
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    
+    // خولانەوەی لەسەرخۆ بە بەردەوامی لە ماوەی تەواوی ٥ چرکەکەدا
+    _refreshRotationController = AnimationController(
+      duration: const Duration(seconds: 5), // خولانەوەیەکی زۆر هێمن و لەسەرخۆ
+      vsync: this,
+    );
+    _refreshRotationController.repeat(); // دووبارەبوونەوەی بەردەوام بە بێ پچڕان
+
+    // بەکارخستنی مێتۆدی نوێکردنەوەی خۆکارانە لە هەر ٥ چرکەیەکدا
+    _refreshTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      _triggerRefresh();
+    });
   }
 
   @override
   void dispose() {
+    _refreshTimer.cancel(); // پاککردنەوەی تایمەر لە مێمۆریدا لە کاتی داخستنی لاپەڕەکە
+    _refreshRotationController.dispose();
     _tabController.dispose();
     _citiesScrollController.dispose();
     super.dispose();
+  }
+
+  // مێتۆدی نوێبوونەوەی داینامیکی نرخەکان لە کاتی ڕێفرێشدا
+  void _triggerRefresh() {
+    setState(() {
+      // لێرەوە دەتوانیت نرخە مۆکەکانی شارەکان بە بڕی زۆر بچووک بگۆڕیت بۆ ڕاستەقینە پیشاندان لە کاتی ڕێفرێش
+      cities[0]['buy'] = (153750 + (DateTime.now().second % 3 == 0 ? 50 : -50)).toString();
+      cities[1]['buy'] = (153800 + (DateTime.now().second % 2 == 0 ? 50 : -50)).toString();
+    });
   }
 
   String _formatPrice(double price) {
@@ -141,7 +231,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
     final double sellPrice = double.tryParse(_removeCommas(_sellPriceVal)) ?? 0.0;
     final double commission = double.tryParse(_removeCommas(_commissionVal)) ?? 0.0;
     if (amount <= 0 || buyPrice <= 0 || sellPrice <= 0) return;
-    final double rate = _rateToIQD[_selectedCurrency] ?? 1537.0;
+    final double rate = _rateToIQD[_selectedCurrency] ?? activeBaseUsdToIqdRate;
     final double amountInIQD = amount * rate;
     final double units = amountInIQD / buyPrice;
     final double totalSell = units * sellPrice;
@@ -257,6 +347,37 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
               overflow: TextOverflow.ellipsis,
             ),
           ),
+          const SizedBox(width: 8),
+          // پێکهاتەی هۆشمەندی گۆڕینی لۆگۆی ڕێفرێش بە بازنەی پڕ و جووڵەی لەسەرخۆ کەمڕوون وەک داواکارییەکەت
+          GestureDetector(
+            onTap: _triggerRefresh, // ڕێفرێش بە دەست لێدان
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // هێڵە بازنەییە زێڕینییە پاشبنەماییەکە بۆ پێشکەشکردنی هەستی پڕبوون
+                SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 1.5,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      const Color(0xFF00C6FF).withOpacity(0.12)
+                    ),
+                    value: 1.0, // سندوقێکی پڕی گشتگیر پیشان دەدات
+                  ),
+                ),
+                // ئایکۆنی ناوەکی خولاوەی بەردەوام بە شێوازی لەسەرخۆ
+                RotationTransition(
+                  turns: _refreshRotationController,
+                  child: const Icon(
+                    Icons.sync_rounded, 
+                    color: Color(0xFF76C917), // ڕەنگی سەوزی مۆدێرنی دڵخواز
+                    size: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -284,100 +405,124 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
   }
 
   Widget _buildCurrentScreen() {
+    Widget child;
     switch (_selectedIndex) {
-      case 0: return isCitiesLockedGlobal ? _buildLockedScreen(getTxt('cities_tab')) : CitiesScreen(
-        pinnedRates: pinnedRates,
-        cities: cities,
-        citiesScrollController: _citiesScrollController,
-        onPinUpdated: (idx, c, b, s, st) {
-          setState(() => pinnedRates[idx] = {'city': c, 'buy': b, 'sell': s, 'status': st});
-        },
-        onSwap: (f, t) {
-          setState(() {
-            final temp = cities[f];
-            cities[f] = cities[t];
-            cities[t] = temp;
-          });
-        },
-      );
-      case 1: return isCurrenciesLockedGlobal ? _buildLockedScreen(getTxt('currencies_tab')) : CurrenciesScreen(
-        currencyData: currencyData,
-        formatPrice: (p) => p.toString(), 
-      );
-      case 2: return CalculatorScreen(
-        tabController: _tabController,
-        availableCurrencies: _availableCurrencies,
-        rateToIQD: _rateToIQD,
-        fromAmount: _fromAmount,
-        toAmount: _toAmount,
-        fromCurrencySelected: _fromCurrencySelected,
-        toCurrencySelected: _toCurrencySelected,
-        amountVal: _amountVal,
-        buyPriceVal: _buyPriceVal,
-        sellPriceVal: _sellPriceVal,
-        commissionVal: _commissionVal,
-        selectedCurrency: _selectedCurrency,
-        profitResult: _profitResult,
-        activeField: _activeField,
-        onKeyTap: (key) {
-          setState(() {
-            String current = _removeCommas(_getCurrentVal());
-            if (key == '⌫') {
-              if (current.isNotEmpty) current = current.substring(0, current.length - 1);
-            } else if (key == '.' && current.contains('.')) {
-              return;
-            } else if (current == '0' && key != '.') {
-              current = key;
-            } else {
-              if (current.length < 12) current += key;
-            }
-            _switchToValue(current);
-            if (_activeField != 'commission') _profitResult = null;
-          });
-        },
-        onConverterTap: (key) {
-          setState(() {
-            String current = _removeCommas(_fromAmount);
-            if (key == '⌫') {
-              if (current.isNotEmpty) current = current.substring(0, current.length - 1);
-              if (current.isEmpty) current = '0';
-            } else if (key == '.' && current.contains('.')) {
-              return;
-            } else if (current == '0' && key != '.') {
-              current = key;
-            } else {
-              if (current.length < 12) current += key;
-            }
-            _fromAmount = _addCommas(current);
-            _calculateConversionFromStr(fromTop: true);
-          });
-        },
-        onCalculateProfit: _calculateProfit,
-        onConverterFieldsChanged: (curr, rate, isFrom) {
-          setState(() {
-            if (isFrom) {
-              _fromCurrencySelected = curr;
-            } else {
-              _toCurrencySelected = curr;
-            }
-            _calculateConversionFromStr();
-          });
-        },
-        onProfitCurrencyChanged: (curr) {
-          setState(() {
-            _selectedCurrency = curr;
-            _profitResult = null;
-          });
-        },
-        onFieldTapped: (field, val) {
-          setState(() {
-            _activeField = field;
-          });
-        },
-      );
-      case 3: return OfficesScreen(offices: allOffices);
-      default: return _buildOfficesScreen();
+      case 0:
+        child = isCitiesLockedGlobal ? _buildLockedScreen(getTxt('cities_tab')) : CitiesScreen(
+          pinnedRates: pinnedRates,
+          cities: cities,
+          citiesScrollController: _citiesScrollController,
+          onPinUpdated: (idx, c, b, s, st) {
+            setState(() => pinnedRates[idx] = {'city': c, 'buy': b, 'sell': s, 'status': st});
+          },
+          onSwap: (f, t) {
+            setState(() {
+              final temp = cities[f];
+              cities[f] = cities[t];
+              cities[t] = temp;
+            });
+          },
+        );
+        break;
+      case 1:
+        child = isCurrenciesLockedGlobal ? _buildLockedScreen(getTxt('currencies_tab')) : CurrenciesScreen(
+          currencyData: getDynamicCurrencyData(), // بەکارهێنانی داتای نرخە داینامیکییە گەشاوەکان
+          formatPrice: (p) => p.toString(), 
+        );
+        break;
+      case 2:
+        child = CalculatorScreen(
+          tabController: _tabController,
+          availableCurrencies: _availableCurrencies,
+          rateToIQD: _rateToIQD,
+          fromAmount: _fromAmount,
+          toAmount: _toAmount,
+          fromCurrencySelected: _fromCurrencySelected,
+          toCurrencySelected: _toCurrencySelected,
+          amountVal: _amountVal,
+          buyPriceVal: _buyPriceVal,
+          sellPriceVal: _sellPriceVal,
+          commissionVal: _commissionVal,
+          selectedCurrency: _selectedCurrency,
+          profitResult: _profitResult,
+          activeField: _activeField,
+          onKeyTap: (key) {
+            setState(() {
+              String current = _removeCommas(_getCurrentVal());
+              if (key == '⌫') {
+                if (current.isNotEmpty) current = current.substring(0, current.length - 1);
+              } else if (key == '.' && current.contains('.')) {
+                return;
+              } else if (current == '0' && key != '.') {
+                current = key;
+              } else {
+                if (current.length < 12) current += key;
+              }
+              _switchToValue(current);
+              if (_activeField != 'commission') _profitResult = null;
+            });
+          },
+          onConverterTap: (key) {
+            setState(() {
+              String current = _removeCommas(_fromAmount);
+              if (key == '⌫') {
+                if (current.isNotEmpty) current = current.substring(0, current.length - 1);
+                if (current.isEmpty) current = '0';
+              } else if (key == '.' && current.contains('.')) {
+                return;
+              } else if (current == '0' && key != '.') {
+                current = key;
+              } else {
+                if (current.length < 12) current += key;
+              }
+              _fromAmount = _addCommas(current);
+              _calculateConversionFromStr(fromTop: true);
+            });
+          },
+          onCalculateProfit: _calculateProfit,
+          onConverterFieldsChanged: (curr, rate, isFrom) {
+            setState(() {
+              if (isFrom) {
+                _fromCurrencySelected = curr;
+              } else {
+                _toCurrencySelected = curr;
+              }
+              _calculateConversionFromStr();
+            });
+          },
+          onProfitCurrencyChanged: (curr) {
+            setState(() {
+              _selectedCurrency = curr;
+              _profitResult = null;
+            });
+          },
+          onFieldTapped: (field, val) {
+            setState(() {
+              _activeField = field;
+            });
+          },
+        );
+        break;
+      case 3:
+        child = OfficesScreen(offices: allOffices);
+        break;
+      default:
+        child = OfficesScreen(offices: allOffices);
     }
+
+    // لۆجیکی فەرمی زیادکردنی تایبەتمەندی ڕاکێشان بۆ خوارەوە (Pull-to-Refresh) بۆ سەرجەم بەشە گونجاوەکان وەک داواکاریت
+    if (_selectedIndex == 0 || _selectedIndex == 1 || _selectedIndex == 3) {
+      return RefreshIndicator(
+        backgroundColor: const Color(0xFF131C2E),
+        color: const Color(0xFF76C917), // ڕەنگی سەوزی نایاب لە کاتی ڕاکێشاندا
+        onRefresh: () async {
+          _triggerRefresh();
+          await Future.delayed(const Duration(milliseconds: 1000));
+        },
+        child: child,
+      );
+    }
+    return child;
   }
 
   Widget _buildOfficesScreen() => OfficesScreen(offices: allOffices);

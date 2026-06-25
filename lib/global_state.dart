@@ -1,5 +1,6 @@
 // lib/global_state.dart
 
+import 'package:flutter/material.dart';
 
 // --- barudoxi cihani taqikrdnawa (Global Mock State) ---
 bool isLoggedInGlobal = false;
@@ -21,6 +22,32 @@ String appLanguageGlobal = 'کوردی';
 
 // شێوازی جیهانی ژمارەکان ('123' یان '١٢٣')
 String appNumeralStyleGlobal = '١٢٣';
+
+// --- لۆجیکی نرخەکانی دۆلار بەرامبەر دینار (بۆ گۆڕینەوەی جیهانی بەپێی بژاردەی بەکارهێنەر) ---
+// بژاردەکان: 'Central Bank'، 'Baghdad Bourse'، 'Sulaymaniyah Bourse'، 'Erbil Bourse'
+String selectedBaseRateSourceGlobal = 'Central Bank'; 
+
+double usdToIqdMarketRate = 1537.0;       // نرخی فەرمی دۆلاری بازاڕ
+double usdToIqdCentralBankRate = 1320.0;  // نرخی بانکی ناوەندی: ١ دۆلار = ١٣٢٠ دینار
+double usdToIqdBaghdadRate = 1539.5;       // بۆرسەی بەغداد: ١ دۆلار = ١٥٣٩.٥ دینار
+double usdToIqdSulaymaniyahRate = 1538.0;   // بۆرسەی سلێمانی: ١ دۆلار = ١٥٣٨ دینار
+double usdToIqdErbilRate = 1537.5;          // بۆرسەی هەولێر: ١ دۆلار = ١٥٣٧.٥ دینار
+
+// گێتەری هۆشمەند بۆ بەکارخستنی تێکڕای گشتی گۆڕینی دۆلار بەپێی سەرچاوەی دیاریکراو
+double get activeBaseUsdToIqdRate {
+  switch (selectedBaseRateSourceGlobal) {
+    case 'Central Bank':
+      return usdToIqdCentralBankRate;
+    case 'Baghdad Bourse':
+      return usdToIqdBaghdadRate;
+    case 'Sulaymaniyah Bourse':
+      return usdToIqdSulaymaniyahRate;
+    case 'Erbil Bourse':
+      return usdToIqdErbilRate;
+    default:
+      return usdToIqdCentralBankRate;
+  }
+}
 
 // فەرمانی داینامیکی بۆ کۆنتڕۆڵکردنی قوفڵی بەشەکان
 bool get isCitiesLockedGlobal {

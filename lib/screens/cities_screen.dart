@@ -26,7 +26,7 @@ class CitiesScreen extends StatefulWidget {
 }
 
 class _CitiesScreenState extends State<CitiesScreen> {
-  int? _activeDragIndex;
+  int? _activeDragIndex; 
 
   void _showPinSelectionDialog(String city, String buy, String sell, String status) {
     showModalBottomSheet(
@@ -35,27 +35,85 @@ class _CitiesScreenState extends State<CitiesScreen> {
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (context) => Directionality(
         textDirection: appLanguageGlobal == 'English' ? TextDirection.ltr : TextDirection.rtl,
-        child: Padding(padding: const EdgeInsets.all(16), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(
-            appLanguageGlobal == 'English' 
-                ? 'Pin (${getCityName(city)}) instead of which cell?' 
-                : (appLanguageGlobal == 'العربية' ? 'تثبيت (${getCityName(city)}) بدلاً من أي خانة؟' : 'جێگیرکردنی (${getCityName(city)}) لە بری کام خانەی سەرەوە؟'), 
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white)
+        child: Padding(
+          padding: const EdgeInsets.all(16), 
+          child: Column(
+            mainAxisSize: MainAxisSize.min, 
+            crossAxisAlignment: CrossAxisAlignment.start, 
+            children: [
+              Text(
+                appLanguageGlobal == 'English' 
+                    ? 'Pin (${getCityName(city)}) instead of which cell?' 
+                    : (appLanguageGlobal == 'العربية' ? 'تثبيت (${getCityName(city)}) بدلاً من أي خانة؟' : 'جێگیرکردنی (${getCityName(city)}) لە بری کام خانەی سەرەوە؟'), 
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white)
+              ),
+              const SizedBox(height: 10),
+              ...List.generate(3, (i) => ListTile(
+                title: Text(
+                  appLanguageGlobal == 'English'
+                      ? 'Cell ${i + 1} (Now: ${getCityName(widget.pinnedRates[i]['city']!)})'
+                      : (appLanguageGlobal == 'العربية'
+                          ? 'الخانة ${i + 1} (الآن: ${getCityName(widget.pinnedRates[i]['city']!)})'
+                          : 'khaney ${i == 0 ? 'yekam' : i == 1 ? 'dwam' : 'seyam'} (esta: ${getCityName(widget.pinnedRates[i]['city']!)})'),
+                  style: const TextStyle(fontSize: 12)
+                ),
+                leading: Icon(i == 0 ? Icons.looks_one : i == 1 ? Icons.looks_two : i == 2 ? Icons.looks_3 : Icons.looks_one, color: Colors.blueAccent),
+                onTap: () { 
+                  widget.onPinUpdated(i, city, buy, sell, status); 
+                  Navigator.pop(context); 
+                },
+              )),
+              const SizedBox(height: 12),
+              _buildContactCardItemDialog('+964 750 585 6964'), 
+              const SizedBox(height: 10),
+              _buildContactCardItemDialog('+964 772 585 6969'),
+            ],
           ),
-          const SizedBox(height: 10),
-          ...List.generate(3, (i) => ListTile(
-            title: Text(
-              appLanguageGlobal == 'English'
-                  ? 'Cell ${i + 1} (Now: ${getCityName(widget.pinnedRates[i]['city']!)})'
-                  : (appLanguageGlobal == 'العربية'
-                      ? 'الخانة ${i + 1} (الآن: ${getCityName(widget.pinnedRates[i]['city']!)})'
-                      : 'خانەی ${i == 0 ? 'یەکەم' : i == 1 ? 'دووەم' : 'سێیەم'} (ئێستا: ${getCityName(widget.pinnedRates[i]['city']!)})'),
-              style: const TextStyle(fontSize: 12)
+        ),
+      ),
+    );
+  }
+
+  // پێکهاتەی سندوقی تەلەفۆنەکانی پشتگیری
+  static Widget _buildContactCardItemDialog(String number) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF16181F),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.04)),
+      ),
+      child: Row(
+        textDirection: TextDirection.ltr,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: const Color(0xFF6F3EBF).withValues(alpha: 0.12),
+              shape: BoxShape.circle,
             ),
-            leading: Icon(i == 0 ? Icons.looks_one : i == 1 ? Icons.looks_two : i == 2 ? Icons.looks_3 : Icons.looks_one, color: Colors.blueAccent),
-            onTap: () { widget.onPinUpdated(i, city, buy, sell, status); Navigator.pop(context); },
-          )),
-        ])),
+            child: const Icon(Icons.phone_iphone_rounded, color: Color(0xFF8F5EBF), size: 14),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: const Color(0xFF25D366).withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.chat_bubble_rounded, color: Color(0xFF25D366), size: 14),
+          ),
+          const Spacer(),
+          Text(
+            number,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.8,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -67,74 +125,6 @@ class _CitiesScreenState extends State<CitiesScreen> {
     return Directionality(
       textDirection: textDirection,
       child: Column(children: [
-        Container(
-          margin: const EdgeInsets.fromLTRB(12, 6, 12, 0),
-          padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 3),
-          decoration: BoxDecoration(
-            color: const Color(0xFF131C2E), borderRadius: BorderRadius.circular(11),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 6, offset: const Offset(0, 2))],
-          ),
-          child: Row(children: List.generate(widget.pinnedRates.length, (pIndex) {
-            final rate = widget.pinnedRates[pIndex];
-            final String status = rate['status'] ?? 'neutral';
-            final Color trendColor = status == 'down' ? const Color(0xFFFF6B6B) : const Color(0xFF4ADE80);
-            final IconData trendIcon = status == 'up' ? Icons.arrow_upward_rounded : status == 'down' ? Icons.arrow_downward_rounded : Icons.remove_rounded;
-            return Expanded(child: DragTarget<Map<String, String>>(
-              onWillAcceptWithDetails: (_) => true,
-              onAcceptWithDetails: (d) => widget.onPinUpdated(pIndex, d.data['city']!, d.data['buy']!, d.data['sell']!, d.data['status']!),
-              builder: (context, candidateData, _) {
-                final bool isHovering = candidateData.isNotEmpty;
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  margin: const EdgeInsets.symmetric(horizontal: 2),
-                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: isHovering ? [const Color(0xFF0072FF), const Color(0xFF00C6FF)] : [const Color(0xFF0D47A1), const Color(0xFF1565C0)],
-                      begin: Alignment.bottomCenter, end: Alignment.topCenter,
-                    ),
-                    borderRadius: const BorderRadius.only(
-                      topRight: Radius.circular(10),
-                      topLeft: Radius.circular(3),
-                      bottomRight: Radius.circular(3),
-                      bottomLeft: Radius.circular(10),
-                    ),
-                    border: Border.all(color: isHovering ? Colors.white : Colors.blueAccent.withValues(alpha: 0.4)),
-                  ),
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.center, mainAxisSize: MainAxisSize.min, children: [
-                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                      Icon(Icons.push_pin, size: 8, color: Colors.white.withValues(alpha: 0.7)), const SizedBox(width: 2),
-                      Flexible(child: Text(getCityName(rate['city']!), style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w900), overflow: TextOverflow.ellipsis)),
-                    ]),
-                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                      Icon(trendIcon, size: 10, color: trendColor), const SizedBox(width: 1),
-                      Flexible(child: Text(formatDisplayNumbers(rate['sell']!), style: const TextStyle(color: Colors.white, fontSize: 13.5, fontWeight: FontWeight.w900), overflow: TextOverflow.ellipsis)),
-                    ]),
-                    Text(getTxt('sell'), style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 8, fontWeight: FontWeight.bold)),
-                    Container(height: 0.5, color: Colors.white.withValues(alpha: 0.15)),
-                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                      Icon(trendIcon, size: 10, color: trendColor), const SizedBox(width: 1),
-                      Flexible(child: Text(formatDisplayNumbers(rate['buy']!), style: const TextStyle(color: Colors.white, fontSize: 11.5, fontWeight: FontWeight.w900), overflow: TextOverflow.ellipsis)),
-                    ]),
-                    Text(getTxt('buy'), style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 8, fontWeight: FontWeight.bold)),
-                  ]),
-                );
-              },
-            ));
-          })),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 6, 16, 2),
-          child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            Text(appLanguageGlobal == 'English' ? 'Bourse' : (appLanguageGlobal == 'العربية' ? 'البورصة' : 'بۆرسە'), style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white.withValues(alpha: 0.45))),
-            Row(children: [
-              SizedBox(width: 76, child: Center(child: Text(getTxt('buy'), style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: const Color(0xFF4ADE80).withValues(alpha: 0.9))))),
-              const SizedBox(width: 6),
-              SizedBox(width: 76, child: Center(child: Text(getTxt('sell'), style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: const Color(0xFFFF6B6B).withValues(alpha: 0.9))))),
-            ]),
-          ]),
-        ),
         Expanded(child: RefreshIndicator(
           backgroundColor: const Color(0xFF131C2E),
           color: Colors.blueAccent,
@@ -149,19 +139,116 @@ class _CitiesScreenState extends State<CitiesScreen> {
             controller: widget.citiesScrollController,
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-            itemCount: widget.cities.length,
+            itemCount: widget.cities.length + 1, // زیادکردنی یەک خانە بۆ هێنانە خوارەوەی پینەکان و تایتڵەکان بێ کێشە
             itemBuilder: (context, index) {
-              final item = widget.cities[index];
+              // هێڵی یەکەم (Index 0): خۆکارانە ٣ کارتەکەی پینکردنی سەرەوە و تایتڵەکان پیشان دەدەین بۆ جووڵانی داینامیکی
+              if (index == 0) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // دروستکردنەوەی ٣ سندوقی پینکراوی مۆدێرنی پێشوو بە شینی ڕەسەن و قەبارەی بچووکی زۆر ڕێکخراو
+                    Container(
+                      margin: const EdgeInsets.fromLTRB(0, 4, 0, 0),
+                      padding: const EdgeInsets.all(1.5),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF131C2E), borderRadius: BorderRadius.circular(11),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 6, offset: const Offset(0, 2))],
+                      ),
+                      child: Row(children: List.generate(widget.pinnedRates.length, (pIndex) {
+                        final rate = widget.pinnedRates[pIndex];
+                        final String status = rate['status'] ?? 'neutral';
+                        final Color trendColor = status == 'down' ? const Color(0xFFFF6B6B) : const Color(0xFF4CD137);
+                        final IconData trendIcon = status == 'up' ? Icons.arrow_upward_rounded : status == 'down' ? Icons.arrow_downward_rounded : Icons.remove_rounded;
+                        
+                        return Expanded(child: DragTarget<Map<String, String>>(
+                          onWillAcceptWithDetails: (_) => true,
+                          onAcceptWithDetails: (d) => widget.onPinUpdated(pIndex, d.data['city']!, d.data['buy']!, d.data['sell']!, d.data['status']!),
+                          builder: (context, candidateData, _) {
+                            final bool isHovering = candidateData.isNotEmpty;
+                            final List<Color> cardGradient = isHovering
+                                ? [const Color(0xFF0072FF), const Color(0xFF00C6FF)]
+                                : [const Color(0xFF0D47A1), const Color(0xFF1565C0)]; // گەڕانەوە بۆ شینی فەرمی هێمن
+                            
+                            return AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              margin: const EdgeInsets.symmetric(horizontal: 1.5),
+                              padding: const EdgeInsets.symmetric(vertical: 2.5, horizontal: 2.5),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: cardGradient,
+                                  begin: Alignment.bottomCenter, end: Alignment.topCenter,
+                                ),
+                                borderRadius: const BorderRadius.only(
+                                  topRight: Radius.circular(10),
+                                  topLeft: Radius.circular(3),
+                                  bottomRight: Radius.circular(3),
+                                  bottomLeft: Radius.circular(10),
+                                ),
+                                border: Border.all(color: isHovering ? Colors.white : Colors.blueAccent.withValues(alpha: 0.4)),
+                              ),
+                              child: Column(crossAxisAlignment: CrossAxisAlignment.center, mainAxisSize: MainAxisSize.min, children: [
+                                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                  Icon(Icons.push_pin, size: 7, color: Colors.white.withValues(alpha: 0.7)), const SizedBox(width: 2),
+                                  Flexible(child: Text(getCityName(rate['city']!), style: const TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.w900), overflow: TextOverflow.ellipsis)),
+                                ]),
+                                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                  Icon(trendIcon, size: 9, color: trendColor), const SizedBox(width: 1),
+                                  Flexible(child: Text(formatDisplayNumbers(rate['sell']!), style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w900), overflow: TextOverflow.ellipsis)),
+                                ]),
+                                Text(getTxt('sell'), style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 7.5, fontWeight: FontWeight.bold)),
+                                Container(height: 0.5, color: Colors.white.withValues(alpha: 0.15)),
+                                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                  Icon(trendIcon, size: 9, color: trendColor), const SizedBox(width: 1),
+                                  Flexible(child: Text(formatDisplayNumbers(rate['buy']!), style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w900), overflow: TextOverflow.ellipsis)),
+                                ]),
+                                Text(getTxt('buy'), style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 7.5, fontWeight: FontWeight.bold)),
+                              ]),
+                            );
+                          },
+                        ));
+                      })),
+                    ),
+                    
+                    // زیادکردنی ڕیزی ناونیشانەکان لێرەدا تا بەیەکەوە لەگەڵ پینەکان بە جوانی بجووڵێت و زیاتر لە ٢٥٪ مەودا بە شاشەکە ببەخشێت
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(4, 8, 4, 4),
+                      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                        Text(appLanguageGlobal == 'English' ? 'Bourse' : (appLanguageGlobal == 'العربية' ? 'البورصة' : 'بۆرسە'), style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white.withValues(alpha: 0.45))),
+                        Row(children: [
+                          SizedBox(width: 76, child: Center(child: Text(getTxt('buy'), style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: const Color(0xFF4ADE80).withValues(alpha: 0.9))))),
+                          const SizedBox(width: 6),
+                          SizedBox(width: 76, child: Center(child: Text(getTxt('sell'), style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: const Color(0xFFFF6B6B).withValues(alpha: 0.9))))),
+                        ]),
+                      ]),
+                    ),
+                  ],
+                );
+              }
+
+              // ڕێکخستنی سەرجەم کارتەکانی شارەکان بەپێی ئیندێکسە نوێیەکە (Index - 1)
+              final itemIndex = index - 1;
+              final item = widget.cities[itemIndex];
               final String status = item['status'] ?? 'neutral';
-              final Color trendColor = status == 'down' ? const Color(0xFFFF6B6B) : const Color(0xFF4ADE80);
-              final IconData statusIcon = status == 'up' ? Icons.arrow_upward_rounded : status == 'down' ? Icons.arrow_downward_rounded : Icons.remove_rounded;
+              
+              final Color trendColor = status == 'down' 
+                  ? const Color(0xFFE53E3E) 
+                  : const Color(0xFF4CD137);
+              final IconData statusIcon = status == 'up' 
+                  ? Icons.arrow_upward_rounded 
+                  : (status == 'down' ? Icons.arrow_downward_rounded : Icons.remove_rounded);
+
               return CityDragItem(
                 key: ValueKey('drag_${item['name']}'),
-                item: item, index: index, isActive: _activeDragIndex == index,
-                buyColor: trendColor, sellColor: trendColor, statusIcon: statusIcon,
+                item: item, 
+                index: itemIndex, // فۆرماتی دروستی ئیندێکسی لایڤ بۆ بڕینی کێشەی دراگ
+                isActive: _activeDragIndex == itemIndex, 
+                buyColor: trendColor, 
+                sellColor: trendColor, 
+                statusIcon: statusIcon,
                 scrollController: widget.citiesScrollController,
-                onActivate: (idx) { HapticFeedback.mediumImpact(); setState(() => _activeDragIndex = idx); },
-                onDeactivate: () => setState(() => _activeDragIndex = null),
+                onActivate: (idx) { HapticFeedback.mediumImpact(); setState(() => _activeDragIndex = idx); }, 
+                onDeactivate: () => setState(() => _activeDragIndex = null), 
                 onSwap: widget.onSwap,
                 onPinTap: () => _showPinSelectionDialog(item['name']!, item['buy']!, item['sell']!, item['status'] ?? 'neutral'),
               );
@@ -171,4 +258,31 @@ class _CitiesScreenState extends State<CitiesScreen> {
       ]),
     );
   }
+}
+
+// پێکهاتەی هۆشداری لای خوارەوە بە سوودوەرگرتن لە withValues فەرمی بێ کێشە
+Widget _buildDialogContactRow(BuildContext context, String number) {
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+    decoration: BoxDecoration(
+      color: const Color(0xFF0B121F), 
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+    ),
+    child: Row(
+      children: [
+        Text(
+          number,
+          textDirection: TextDirection.ltr,
+          style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 0.8),
+        ),
+        const Spacer(),
+        Icon(Icons.chat_bubble_outline_rounded, color: Colors.white.withValues(alpha: 0.6), size: 16),
+        const SizedBox(width: 10),
+        Icon(Icons.phone_outlined, color: Colors.white.withValues(alpha: 0.6), size: 16),
+        const SizedBox(width: 10),
+        Icon(Icons.chat_outlined, color: Colors.white.withValues(alpha: 0.6), size: 16),
+      ],
+    ),
+  );
 }
