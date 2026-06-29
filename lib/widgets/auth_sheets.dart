@@ -2,21 +2,19 @@
 // lib/widgets/auth_sheets.dart
 
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart'; // هاوردەکردنی url_launcher
 import '../global_state.dart';
 import '../main.dart';
 
-// فەنکشنی هۆشمەند بۆ فۆرماتکردن و یەکخستنی تەواوی ژمارەکان بێ کێشە
 String cleanAndFormatPhoneNumber(String raw) {
   String clean = raw.trim().replaceAll(' ', '').replaceAll('-', '');
   
-  // گۆڕینی ژمارە کوردی و عەرەبییەکان بۆ ئینگلیزی پێش فۆرماتکردن
   const eastern = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
   const western = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
   for (int i = 0; i < 10; i++) {
     clean = clean.replaceAll(eastern[i], western[i]);
   }
 
-  // لۆجیکی فەرمی ڕێکخستنی کۆدی عێراق
   if (clean.startsWith('0')) {
     clean = '+964${clean.substring(1)}';
   } else if (clean.startsWith('7') || clean.startsWith('5') || clean.startsWith('8')) {
@@ -41,35 +39,31 @@ void _toggleLanguage(BuildContext context, StateSetter setModalState) {
 }
 
 // ============================================================================
-// دیزاینە تایبەتەکان ڕێک هاوشێوەی وێنە ئەسڵییەکە (Pixel Perfect)
+// دیزاینی ئەوپەڕی کورتکراوە و ڕێکخراوی هێدەر بێ کێشەی سکرۆڵ
 // ============================================================================
-
 Widget _buildAuthHeader(BuildContext context, StateSetter setModalState, String title, String subtitle) {
   final textDirection = appLanguageGlobal == 'English' ? TextDirection.ltr : TextDirection.rtl;
 
   return Column(
     children: [
-      // ڕیزی سەرەوە: دوگمەی زمان لە لایەک و دوگمەی گەڕانەوە (سەهەم) لە لایەکەی تر
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // دوگمەی گۆڕینی زمان
           GestureDetector(
             onTap: () => _toggleLanguage(context, setModalState),
             child: Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(5), 
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.06),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.g_translate_rounded, color: Colors.white54, size: 20),
+              child: const Icon(Icons.g_translate_rounded, color: Colors.white54, size: 16), 
             ),
           ),
-          // دوگمەی سەهمی گەڕانەوە بۆ پێشوو (داخستنی بۆتەم شیتەکە)
           GestureDetector(
             onTap: () => Navigator.pop(context),
             child: Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(5),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.06),
                 borderRadius: BorderRadius.circular(10),
@@ -77,90 +71,82 @@ Widget _buildAuthHeader(BuildContext context, StateSetter setModalState, String 
               child: Icon(
                 textDirection == TextDirection.ltr 
                     ? Icons.arrow_back_rounded 
-                    : Icons.arrow_forward_rounded, // خۆکار گۆڕینی ئاڕاستەی سەهەمەکە بەپێی زمان
+                    : Icons.arrow_forward_rounded, 
                 color: Colors.white54, 
-                size: 20
+                size: 16
               ),
             ),
           ),
         ],
       ),
-      const SizedBox(height: 10),
+      const SizedBox(height: 6), // کەمکراوەتەوە بۆ ٦
       
-      // ==========================================
-      // لێرەدا وێنەی لۆگۆکە بە بازنەیی ڕێک دادەنرێت
-      // ==========================================
+      // بچووککردنەوەی لۆگۆکە بۆ قەباری ٨٠ بۆ ئەوەی ڕێک لەگەڵ شاشەدا فلات ببێتەوە
       Container(
-        width: 130,
-        height: 130,
+        width: 80,
+        height: 80,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: Colors.white.withOpacity(0.02),
           boxShadow: [
             BoxShadow(
               color: Colors.white.withOpacity(0.08),
-              blurRadius: 40,
-              spreadRadius: 10,
+              blurRadius: 30,
+              spreadRadius: 8,
             )
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(65),
+          borderRadius: BorderRadius.circular(40),
           child: Image.asset(
-            'assets/log.png', // ناوی لۆگۆکەت لێرە بنووسە
+            'assets/log.png', 
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) {
-              // ئەگەر وێنەکە بوونی نەبوو یان کێشەی تێدابوو، ئەم ئایکۆنە کاتییە پیشان دەدات تا وێنەکە دادەنێیت
               return const Center(
-                child: Icon(Icons.image_outlined, size: 50, color: Colors.white24),
+                child: Icon(Icons.image_outlined, size: 36, color: Colors.white24),
               );
             },
           ),
         ),
       ),
-      const SizedBox(height: 16),
-      
-      // ناونیشانی سەرەکی (چوونەژوورەوە)
+      const SizedBox(height: 8), // کەمکراوەتەوە بۆ ٨
       Text(
         title,
-        style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+        style: const TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.bold), 
       ),
-      const SizedBox(height: 8),
-      
-      // ژێر ناونیشان
+      const SizedBox(height: 4), // کەمکراوەتەوە بۆ ٤
       Text(
         subtitle,
-        style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13),
+        style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 11.5), 
         textAlign: TextAlign.center,
       ),
-      const SizedBox(height: 40),
+      const SizedBox(height: 12), // کورتکردنەوەی کۆتایی بۆ ١٢
     ],
   );
 }
 
-// پێکهاتەی سندوقی هۆشداری شاهانە (Inline error Warning Box)
 Widget _buildSleekErrorBox(String message) {
   return Container(
     width: double.infinity,
-    margin: const EdgeInsets.only(bottom: 18),
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    margin: const EdgeInsets.only(bottom: 14),
+    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
     decoration: BoxDecoration(
-      color: const Color(0xFF2E1212), // سووری مۆدێرن و تاریک بۆ گونجان لەگەڵ تیمی ئەپەکە
+      color: const Color(0xFF2E1212), 
       borderRadius: BorderRadius.circular(16),
       border: Border.all(color: const Color(0xFFE53E3E).withOpacity(0.25), width: 1.2),
     ),
     child: Row(
       children: [
-        const Icon(Icons.info_outline_rounded, color: Color(0xFFE53E3E), size: 20),
-        const SizedBox(width: 12),
+        const Icon(Icons.info_outline_rounded, color: Color(0xFFE53E3E), size: 18),
+        const SizedBox(width: 10),
         Expanded(
           child: Text(
             message,
             style: const TextStyle(
               color: Color(0xFFFF9E9E),
-              fontSize: 12.5,
+              fontSize: 12,
               fontWeight: FontWeight.w600,
-              height: 1.45,
+              height: 1.4,
             ),
           ),
         ),
@@ -169,7 +155,6 @@ Widget _buildSleekErrorBox(String message) {
   );
 }
 
-// مۆداڵی دیالۆگی شاهانەی نێوەڕاستی شاشە بۆ گۆڕینی پاسۆرد یان بیرچوونەوە
 void showSupportContactDialog(BuildContext context) {
   showDialog(
     context: context,
@@ -184,9 +169,9 @@ void showSupportContactDialog(BuildContext context) {
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color(0xFF13151B), // باکگراوندێکی یەکجار جوان و شاهانەی تاریک
+              color: const Color(0xFF13151B), 
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.2), // هێڵی سپی باریک بە دەوری سندوقەکەدا
+              border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.2), 
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.5),
@@ -198,7 +183,6 @@ void showSupportContactDialog(BuildContext context) {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // ئایکۆنی پشتگیری بە ڕەنگێکی گەشاوە
                 Container(
                   padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
@@ -213,13 +197,11 @@ void showSupportContactDialog(BuildContext context) {
                   ),
                 ),
                 const SizedBox(height: 20),
-                // ناونیشان
                 Text(
                   appLanguageGlobal == 'English' ? 'Change Password' : (appLanguageGlobal == 'العربية' ? 'تغيير كلمة السر' : 'گۆڕینی پاسۆرد'),
                   style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
-                // هۆشداری بە تێکستی جوان
                 Text(
                   appLanguageGlobal == 'English' 
                       ? 'To change or recover your password, please contact our support team.' 
@@ -228,12 +210,8 @@ void showSupportContactDialog(BuildContext context) {
                   style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13, height: 1.5, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 24),
-                // لیستەکەی خوارەوە کە ژمارەکانی تێدایە
-                _buildContactCardItem('+964 750 585 6964'),
-                const SizedBox(height: 10),
-                _buildContactCardItem('+964 772 585 6969'),
+                _buildContactCardItem('+964 773 145 4737'),
                 const SizedBox(height: 24),
-                // دوگمەی داخستن
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -258,7 +236,6 @@ void showSupportContactDialog(BuildContext context) {
   );
 }
 
-// دیزاینی خانەی تێکستەکان (خەتی ژێرەوەی ناسک) ڕێک وەک وێنەکە
 Widget _buildAuthTextField({
   required TextEditingController controller,
   required String hintText,
@@ -272,13 +249,13 @@ Widget _buildAuthTextField({
     controller: controller,
     obscureText: isPassword && !isVisible,
     keyboardType: keyboardType,
-    style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
+    style: const TextStyle(color: Colors.white, fontSize: 14.5, fontWeight: FontWeight.w600),
     decoration: InputDecoration(
       hintText: hintText,
-      hintStyle: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 14),
+      hintStyle: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 13.5),
       prefixIcon: Padding(
         padding: const EdgeInsets.only(left: 10),
-        child: Icon(prefixIcon, color: Colors.white.withOpacity(0.3), size: 22),
+        child: Icon(prefixIcon, color: Colors.white.withOpacity(0.3), size: 20),
       ), 
       suffixIcon: isPassword 
           ? GestureDetector(
@@ -286,7 +263,7 @@ Widget _buildAuthTextField({
               child: Icon(
                 isVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined, 
                 color: Colors.white.withOpacity(0.3), 
-                size: 20
+                size: 18
               ),
             ) 
           : null,
@@ -296,18 +273,17 @@ Widget _buildAuthTextField({
       focusedBorder: const UnderlineInputBorder(
         borderSide: BorderSide(color: Color(0xFF3BEE7B), width: 1.5),
       ),
-      contentPadding: const EdgeInsets.symmetric(vertical: 16),
+      contentPadding: const EdgeInsets.symmetric(vertical: 12), // بچووککردنەوەی پادینگی ناوەکی لە ١٦ بۆ ١٢
     ),
   );
 }
 
-// دیزاینی دوگمە سەوزەکە بە درەوشانەوە (Neon Glow) ڕێک وەک وێنەکە
 Widget _buildGlowButton(String text, VoidCallback onTap) {
   return GestureDetector(
     onTap: onTap,
     child: Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.symmetric(vertical: 12), // کەمکردنەوەی پادینگ لە ١٦ بۆ ١٢
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Color(0xFF5CF58E), Color(0xFF1CB75D)],
@@ -318,8 +294,8 @@ Widget _buildGlowButton(String text, VoidCallback onTap) {
         boxShadow: [
           BoxShadow(
             color: const Color(0xFF23D063).withOpacity(0.4),
-            blurRadius: 25,
-            spreadRadius: 2,
+            blurRadius: 20,
+            spreadRadius: 1,
             offset: const Offset(0, 2),
           )
         ],
@@ -327,20 +303,19 @@ Widget _buildGlowButton(String text, VoidCallback onTap) {
       child: Center(
         child: Text(
           text,
-          style: const TextStyle(color: Color(0xFF04101A), fontSize: 15, fontWeight: FontWeight.w900),
+          style: const TextStyle(color: Color(0xFF04101A), fontSize: 14, fontWeight: FontWeight.w900),
         ),
       ),
     ),
   );
 }
 
-// دیزاینی دوگمەی بەتاڵی خوارەوە ڕێک وەک وێنەکە
 Widget _buildOutlineButton(String text, VoidCallback onTap) {
   return GestureDetector(
     onTap: onTap,
     child: Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.symmetric(vertical: 12), // کەمکردنەوەی پادینگ لە ١٦ بۆ ١٢
       decoration: BoxDecoration(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(14),
@@ -349,16 +324,16 @@ Widget _buildOutlineButton(String text, VoidCallback onTap) {
       child: Center(
         child: Text(
           text,
-          style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+          style: const TextStyle(color: Colors.white, fontSize: 13.5, fontWeight: FontWeight.bold),
         ),
       ),
     ),
   );
 }
 
-// -----------------------------------------------------------------------------
-// بەشی ١: شاشەی چوونەژوورەوەی سەرەکی (Login)
-// -----------------------------------------------------------------------------
+// ============================================================================
+// فلووی چوونەژوورەوەی ئەوپەڕی کورتکراوی نوێ بێ کێشەی سکرۆڵ
+// ============================================================================
 void showLoginBottomSheet(BuildContext context, {required VoidCallback onStateChanged}) {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -376,10 +351,9 @@ void showLoginBottomSheet(BuildContext context, {required VoidCallback onStateCh
         return Directionality(
           textDirection: textDirection,
           child: Align(
-            alignment: Alignment.bottomCenter, // نێوەڕاستکردنی مۆدێرن بە لای خوارەوەدا
+            alignment: Alignment.bottomCenter, 
             child: Container(
-              constraints: const BoxConstraints(maxWidth: 330), // پاراستنی پانی سندووقەکە هاوشێوەی لاپەڕەی قوفڵ
-              height: MediaQuery.of(context).size.height * 0.92,
+              constraints: const BoxConstraints(maxWidth: 330), 
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [Color(0xFF131834), Color(0xFF0B0E1D)],
@@ -387,16 +361,16 @@ void showLoginBottomSheet(BuildContext context, {required VoidCallback onStateCh
                   end: Alignment.bottomCenter,
                 ),
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-                border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.0), // هێڵی سپی باریک بە دەوری سندوقەکەدا
+                border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.0), 
               ),
               padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-                left: 24, right: 24, top: 20,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 12, // پاڵنانی کورت و گونجاوی کیبۆرد
+                left: 24, right: 24, top: 12,
               ),
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisSize: MainAxisSize.min, // ناچارکردنی گشتی بە کورتترین بەها
                   children: [
                     _buildAuthHeader(
                       context, 
@@ -411,7 +385,7 @@ void showLoginBottomSheet(BuildContext context, {required VoidCallback onStateCh
                       prefixIcon: Icons.phone_iphone_rounded, 
                       keyboardType: TextInputType.phone,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 8), // کەمکردنەوە بۆ ٨
                     
                     _buildAuthTextField(
                       controller: passwordController,
@@ -423,13 +397,12 @@ void showLoginBottomSheet(BuildContext context, {required VoidCallback onStateCh
                         setModalState(() => isPasswordVisible = !isPasswordVisible);
                       },
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8), // کەمکردنەوە بۆ ٨
 
                     Align(
                       alignment: appLanguageGlobal == 'English' ? Alignment.centerRight : Alignment.centerLeft,
                       child: GestureDetector(
                         onTap: () {
-                          // گۆڕینی پاسۆرد لەبیرچوو بۆ پیشاندانی مۆداڵی دیالۆگی مۆدێرنی ناوەڕاست
                           showSupportContactDialog(context);
                         },
                         child: Text(
@@ -438,7 +411,7 @@ void showLoginBottomSheet(BuildContext context, {required VoidCallback onStateCh
                         ),
                       ),
                     ),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 14), // کەمکردنەوە بۆ ١٤
 
                     if (localError != null) _buildSleekErrorBox(localError!),
 
@@ -472,7 +445,7 @@ void showLoginBottomSheet(BuildContext context, {required VoidCallback onStateCh
                       }
                     }),
                     
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 12), // کەمکردنەوە بۆ ١٢
                     Row(
                       children: [
                         Expanded(child: Divider(color: Colors.white.withOpacity(0.1), thickness: 1)),
@@ -483,7 +456,7 @@ void showLoginBottomSheet(BuildContext context, {required VoidCallback onStateCh
                         Expanded(child: Divider(color: Colors.white.withOpacity(0.1), thickness: 1)),
                       ],
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 12), // کەمکردنەوە بۆ ١٢
 
                     _buildOutlineButton(appLanguageGlobal == 'English' ? 'Create New Account' : (appLanguageGlobal == 'العربية' ? 'إنشاء حساب جديد' : 'دروستکردنی هەژماری نوێ'), () {
                       setModalState(() {
@@ -492,7 +465,7 @@ void showLoginBottomSheet(BuildContext context, {required VoidCallback onStateCh
                       Navigator.pop(context);
                       showRegisterPhoneBottomSheet(context, onStateChanged: onStateChanged);
                     }),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 10), // کەمکردنەوە بۆ ١٠
                   ],
                 ),
               ),
@@ -504,9 +477,9 @@ void showLoginBottomSheet(BuildContext context, {required VoidCallback onStateCh
   );
 }
 
-// -----------------------------------------------------------------------------
-// بەشی ٢: دروستکردنی ئەژماری نوێ (مۆبایل) - بەپێی ستایلی وێنە نوێیەکە
-// -----------------------------------------------------------------------------
+// ============================================================================
+// فلووی تۆمارکردنی کورت بێ کێشەی سکرۆڵ
+// ============================================================================
 void showRegisterPhoneBottomSheet(BuildContext context, {required VoidCallback onStateChanged}) {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
@@ -530,7 +503,7 @@ void showRegisterPhoneBottomSheet(BuildContext context, {required VoidCallback o
             child: Align(
               alignment: Alignment.bottomCenter,
               child: Container(
-                constraints: const BoxConstraints(maxWidth: 330), // پاراستنی یەکپارچەیی پانی سندوقەکە بۆ جوانی شاهانە
+                constraints: const BoxConstraints(maxWidth: 330), 
                 height: MediaQuery.of(context).size.height * 0.92,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
@@ -539,15 +512,17 @@ void showRegisterPhoneBottomSheet(BuildContext context, {required VoidCallback o
                     end: Alignment.bottomCenter,
                   ),
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-                  border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.0), // هێڵی سپی باریک بە دەوری سندوقەکەدا
+                  border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.0), 
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-                child: Center(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+                child: SingleChildScrollView( 
+                  physics: const BouncingScrollPhysics(),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      const SizedBox(height: 16),
                       Container(
-                        padding: const EdgeInsets.all(24),
+                        padding: const EdgeInsets.all(18),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: const Color(0xFF16181F),
@@ -555,41 +530,50 @@ void showRegisterPhoneBottomSheet(BuildContext context, {required VoidCallback o
                           boxShadow: [
                             BoxShadow(
                               color: const Color(0xFF76C917).withOpacity(0.15),
-                              blurRadius: 40,
-                              spreadRadius: 10,
+                              blurRadius: 30,
+                              spreadRadius: 5,
                             )
                           ],
                         ),
                         child: const Icon(
                           Icons.check_circle_outline_rounded, 
-                          size: 72, 
+                          size: 60, 
                           color: Color(0xFF76C917)
                         ),
                       ),
-                      const SizedBox(height: 36),
+                      const SizedBox(height: 24),
                       Text(
                         appLanguageGlobal == 'English' 
                             ? 'Registration Successful! Congratulations.' 
-                            : (appLanguageGlobal == 'العربية' ? 'تمت العملية بنجاح! مبروك.' : 'کارەکە سەرکەوتووبوو پیرۆزە.'),
-                        style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                            : (appLanguageGlobal == 'العربية' ? 'تمت العملية بنجاح! مبروك.' : 'پیرۆزە کارەکە سەرکەوتووبوو.'),
+                        style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 16),
                       Text(
                         appLanguageGlobal == 'English'
-                            ? 'Your account has been created. Please proceed to log in.'
-                            : (appLanguageGlobal == 'العربية' ? 'تم إنشاء حسابك بنجاح. يرجى المتابعة لتسجيل الدخول.' : 'هەژمارەکەت بە سەرکەوتوویی دروستکرا! تکایە بەردەوامبە بۆ چوونەژوورەوە.'),
-                        style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13, height: 1.5, fontWeight: FontWeight.w600),
+                            ? 'To complete your process, contact us now:'
+                            : (appLanguageGlobal == 'العربية' ? 'لإكمال عمليتك اتصل بنا الآن:' : 'بۆ تەواوکردنی کارەکەت ئێستا پەیوەندیمان پێوەبکە:'),
+                        style: const TextStyle(
+                          color: Color(0xFFECC880), 
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.bold,
+                        ),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 48),
-                      _buildGlowButton(
-                        appLanguageGlobal == 'English' ? 'Proceed to Log In' : (appLanguageGlobal == 'العربية' ? 'المتابعة لتسجيل الدخول' : 'بەردەوامبە بۆ چوونەژوورەوە'), 
+                      const SizedBox(height: 18),
+                      _buildContactCardItem('+964 773 145 4737'),
+                      const SizedBox(height: 10),
+                      _buildContactCardItem('+964 773 154 7371'),
+                      const SizedBox(height: 28),
+                      _buildOutlineButton(
+                        appLanguageGlobal == 'English' ? 'Close' : (appLanguageGlobal == 'العربية' ? 'إغلاق' : 'داخستن'),
                         () {
                           Navigator.pop(context);
-                          showLoginBottomSheet(context, onStateChanged: onStateChanged);
+                          onStateChanged(); 
                         }
                       ),
+                      const SizedBox(height: 16),
                     ],
                   ),
                 ),
@@ -601,10 +585,9 @@ void showRegisterPhoneBottomSheet(BuildContext context, {required VoidCallback o
         return Directionality(
           textDirection: textDirection,
           child: Align(
-            alignment: Alignment.bottomCenter, // نێوەڕاستکردنی شاهانە
+            alignment: Alignment.bottomCenter, 
             child: Container(
-              constraints: const BoxConstraints(maxWidth: 330), // ڕێکخستن و کورتکردنەوەی پانی بۆتەم شیتەکە بۆ ڕێگری لە جەنجاڵی
-              height: MediaQuery.of(context).size.height * 0.92,
+              constraints: const BoxConstraints(maxWidth: 330), 
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [Color(0xFF131419), Color(0xFF0C0D11)],
@@ -612,16 +595,16 @@ void showRegisterPhoneBottomSheet(BuildContext context, {required VoidCallback o
                   end: Alignment.bottomCenter,
                 ),
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-                border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.0), // هێڵی سپی باریک بە دەوری سندوقەکەدا
+                border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.0), 
               ),
               padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-                left: 24, right: 24, top: 20,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 12,
+                left: 24, right: 24, top: 12,
               ),
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisSize: MainAxisSize.min, // توندوتۆڵکردنەوە
                   children: [
                     _buildAuthHeader(
                       context, 
@@ -633,31 +616,31 @@ void showRegisterPhoneBottomSheet(BuildContext context, {required VoidCallback o
                     TextField(
                       controller: nameController,
                       textAlign: appLanguageGlobal == 'English' ? TextAlign.left : TextAlign.right,
-                      style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
+                      style: const TextStyle(color: Colors.white, fontSize: 14.5, fontWeight: FontWeight.w600),
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: const Color(0xFF16181F),
                         hintText: appLanguageGlobal == 'English' ? 'Name' : (appLanguageGlobal == 'العربية' ? 'الاسم' : 'ناو'),
-                        hintStyle: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 14),
+                        hintStyle: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 13.5),
                         prefixIcon: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 14),
-                          child: Icon(Icons.person_outline_rounded, color: Colors.white.withOpacity(0.3), size: 22),
+                          child: Icon(Icons.person_outline_rounded, color: Colors.white.withOpacity(0.3), size: 20),
                         ),
                         prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.white.withOpacity(0.06))),
                         enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.white.withOpacity(0.06))),
                         focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF76C917), width: 1.5)),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 8), // کەمکراوەتەوە بۆ ٨
 
                     Row(
                       textDirection: TextDirection.ltr,
                       children: [
                         Container(
                           width: 95,
-                          height: 56,
+                          height: 52, // کەمکردنەوە بۆ ٥٢ لە جیاتی ٥٦
                           decoration: BoxDecoration(
                             color: const Color(0xFF16181F),
                             borderRadius: BorderRadius.circular(16),
@@ -666,9 +649,9 @@ void showRegisterPhoneBottomSheet(BuildContext context, {required VoidCallback o
                           child: const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text('🇮🇶', style: TextStyle(fontSize: 18)),
-                              SizedBox(width: 6),
-                              Text('+964', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
+                              Text('🇮🇶', style: TextStyle(fontSize: 16)),
+                              SizedBox(width: 4),
+                              Text('+964', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
                             ],
                           ),
                         ),
@@ -677,7 +660,7 @@ void showRegisterPhoneBottomSheet(BuildContext context, {required VoidCallback o
                           child: TextField(
                             controller: phoneController,
                             keyboardType: TextInputType.phone,
-                            style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
+                            style: const TextStyle(color: Colors.white, fontSize: 14.5, fontWeight: FontWeight.w600),
                             onChanged: (v) {
                               setModalState(() {
                                 phoneLength = v.length;
@@ -687,38 +670,38 @@ void showRegisterPhoneBottomSheet(BuildContext context, {required VoidCallback o
                               filled: true,
                               fillColor: const Color(0xFF16181F),
                               hintText: '07XXXXXXXXX',
-                              hintStyle: TextStyle(color: Colors.white.withOpacity(0.2), fontSize: 14),
+                              hintStyle: TextStyle(color: Colors.white.withOpacity(0.2), fontSize: 13.5),
                               suffixIcon: Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 14),
                                 child: Text(
                                   '$phoneLength/11',
-                                  style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 12, fontWeight: FontWeight.bold),
+                                  style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 11, fontWeight: FontWeight.bold),
                                 ),
                               ),
                               suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.white.withOpacity(0.06))),
                               enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.white.withOpacity(0.06))),
                               focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF76C917), width: 1.5)),
-                              contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+                              contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                             ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 8), // کەمکراوەتەوە بۆ ٨
 
                     TextField(
                       controller: passwordController,
                       obscureText: !isPasswordVisible,
-                      style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
+                      style: const TextStyle(color: Colors.white, fontSize: 14.5, fontWeight: FontWeight.w600),
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: const Color(0xFF16181F),
                         hintText: appLanguageGlobal == 'English' ? 'Password' : (appLanguageGlobal == 'العربية' ? 'كلمة السر' : 'ووشەی نهێنی'),
-                        hintStyle: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 14),
+                        hintStyle: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 13.5),
                         prefixIcon: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 14),
-                          child: Icon(Icons.shield_outlined, color: Colors.white.withOpacity(0.3), size: 22),
+                          child: Icon(Icons.shield_outlined, color: Colors.white.withOpacity(0.3), size: 20),
                         ),
                         prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
                         suffixIcon: GestureDetector(
@@ -730,7 +713,7 @@ void showRegisterPhoneBottomSheet(BuildContext context, {required VoidCallback o
                             child: Icon(
                               isPasswordVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined, 
                               color: Colors.white.withOpacity(0.3), 
-                              size: 20
+                              size: 18
                             ),
                           ),
                         ),
@@ -738,10 +721,10 @@ void showRegisterPhoneBottomSheet(BuildContext context, {required VoidCallback o
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.white.withOpacity(0.06))),
                         enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.white.withOpacity(0.06))),
                         focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF76C917), width: 1.5)),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                       ),
                     ),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 18), // کەمکراوەتەوە بۆ ١٨
 
                     if (localError != null) _buildSleekErrorBox(localError!),
 
@@ -785,18 +768,21 @@ void showRegisterPhoneBottomSheet(BuildContext context, {required VoidCallback o
                           return;
                         }
 
-                        // تۆمارکردنی کات و ناوەکان لە داتابەیسی کاتی
                         registeredUsersDb[formattedPhone] = pass;
                         registeredNamesDb[formattedPhone] = name;
 
-                        // گۆڕینی سکرینەکە بۆ دۆخی سەرکەوتوویی لە نێوەڕاست
+                        isLoggedInGlobal = true;
+                        userPhoneNumberGlobal = formattedPhone;
+                        userDisplayNameGlobal = name;
+                        isPremiumActiveGlobal = false; 
+
                         setModalState(() {
                           isSuccessState = true;
                         });
                       },
                       child: Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        padding: const EdgeInsets.symmetric(vertical: 14), // کەمکردنەوە بۆ ١٤
                         decoration: BoxDecoration(
                           color: const Color(0xFF76C917),
                           borderRadius: BorderRadius.circular(16),
@@ -811,15 +797,15 @@ void showRegisterPhoneBottomSheet(BuildContext context, {required VoidCallback o
                         child: Center(
                           child: Text(
                             appLanguageGlobal == 'English' ? 'Create Account' : (appLanguageGlobal == 'العربية' ? 'إنشاء حساب' : 'دروستکردنی هەژماری نوێ'),
-                            style: const TextStyle(color: Color(0xFF0F1015), fontSize: 16, fontWeight: FontWeight.w900),
+                            style: const TextStyle(color: Color(0xFF0F1015), fontSize: 15, fontWeight: FontWeight.w900),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 14), // کەمکراوەتەوە بۆ ١٤
 
                     Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(14), // کەمکردنەوە بۆ ١٤
                       decoration: BoxDecoration(
                         color: const Color(0xFF13151B),
                         borderRadius: BorderRadius.circular(20),
@@ -832,18 +818,16 @@ void showRegisterPhoneBottomSheet(BuildContext context, {required VoidCallback o
                                 ? 'After creating your account, contact us via WhatsApp or Viber to activate your account.'
                                 : (appLanguageGlobal == 'العربية'
                                     ? 'بعد إنشاء حسابك، تواصل معنا عبر واتساب أو فايبر لتفعيل حسابك.'
-                                    : 'پاش دروستکردنی هەژمارەکەت پەیوەندیمان پێوە بکە لە واتساپ یان ڤایبەر تا هەژمارەکەت چالاک بکریت'),
+                                    : 'پاش دروستکردنی هەژمارەکەت پەیوەندیمان پێوە بکە لە واتساپ یان پەیوەندی تا هەژمارەکەت چالاک بکریت'),
                             textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12, height: 1.6, fontWeight: FontWeight.w600),
+                            style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 11.5, height: 1.5, fontWeight: FontWeight.w600),
                           ),
-                          const SizedBox(height: 18),
-                          _buildContactCardItem('+964 750 585 6964'),
-                          const SizedBox(height: 10),
-                          _buildContactCardItem('+964 772 585 6969'),
+                          const SizedBox(height: 12),
+                          _buildContactCardItem('+964 773 145 4737'),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 10), // کەمکراوەتەوە بۆ ١٠
                   ],
                 ),
               ),
@@ -857,7 +841,7 @@ void showRegisterPhoneBottomSheet(BuildContext context, {required VoidCallback o
 
 Widget _buildContactCardItem(String number) {
   return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8), // کەمکردنەوە بۆ ٨
     decoration: BoxDecoration(
       color: const Color(0xFF16181F),
       borderRadius: BorderRadius.circular(16),
@@ -866,29 +850,56 @@ Widget _buildContactCardItem(String number) {
     child: Row(
       textDirection: TextDirection.ltr,
       children: [
-        Container(
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            color: const Color(0xFF6F3EBF).withOpacity(0.12),
-            shape: BoxShape.circle,
+        GestureDetector(
+          onTap: () async {
+            final cleanNumber = number.replaceAll(' ', '').replaceAll('+', '');
+            final message = Uri.encodeComponent(
+              appLanguageGlobal == 'English'
+                  ? "Hello, please renew my account."
+                  : (appLanguageGlobal == 'العربية'
+                      ? "مرحباً، يرجى تجديد حسابي من فضلك."
+                      : "تکایە ئەژمارەکەم بۆ نوێ بکەنەوە ..."),
+            );
+            final Uri url = Uri.parse('https://wa.me/$cleanNumber?text=$message');
+            if (await canLaunchUrl(url)) {
+              await launchUrl(url, mode: LaunchMode.externalApplication);
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.all(5), // کەمکردنەوەی پادینگی ئایکۆنەکان بۆ سووکی
+            decoration: BoxDecoration(
+              color: const Color(0xFF25D366).withOpacity(0.12),
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFF25D366).withOpacity(0.3)),
+            ),
+            child: const Icon(Icons.chat_bubble_rounded, color: Color(0xFF25D366), size: 13), // سایزی ١٣
           ),
-          child: const Icon(Icons.phone_iphone_rounded, color: Color(0xFF8F5EBF), size: 14),
         ),
         const SizedBox(width: 8),
-        Container(
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            color: const Color(0xFF25D366).withOpacity(0.12),
-            shape: BoxShape.circle,
+        GestureDetector(
+          onTap: () async {
+            final cleanNumber = number.replaceAll(' ', '');
+            final Uri url = Uri.parse('tel:$cleanNumber');
+            if (await canLaunchUrl(url)) {
+              await launchUrl(url);
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.all(5),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0072FF).withOpacity(0.12),
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFF0072FF).withOpacity(0.3)),
+            ),
+            child: const Icon(Icons.phone_iphone_rounded, color: Color(0xFF4FC3F7), size: 13),
           ),
-          child: const Icon(Icons.chat_bubble_rounded, color: Color(0xFF25D366), size: 14),
         ),
         const Spacer(),
         Text(
           number,
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 14,
+            fontSize: 13, // کەمکردنەوە بۆ ١٣
             fontWeight: FontWeight.bold,
             letterSpacing: 0.8,
           ),
@@ -898,9 +909,6 @@ Widget _buildContactCardItem(String number) {
   );
 }
 
-// -----------------------------------------------------------------------------
-// بەشی ٣: داخڵکردنی کۆدی دڵنیاکەرەوە (OTP) - چاککردنی تەواوی فەنکشنەکە بێ کێشە
-// -----------------------------------------------------------------------------
 void showRegisterOtpBottomSheet(BuildContext context, String phoneNumber, {required VoidCallback onStateChanged}) {
   final TextEditingController otpController = TextEditingController();
   showModalBottomSheet(
@@ -920,7 +928,7 @@ void showRegisterOtpBottomSheet(BuildContext context, String phoneNumber, {requi
               decoration: BoxDecoration(
                 gradient: const LinearGradient(colors: [Color(0xFF131834), Color(0xFF0B0E1D)], begin: Alignment.topCenter, end: Alignment.bottomCenter),
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-                border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.0), // هێڵی سپی باریک بە دەوری سندوقەکەدا
+                border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.0), 
               ),
               padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 28, right: 28, top: 20),
               child: SingleChildScrollView(
@@ -959,9 +967,6 @@ void showRegisterOtpBottomSheet(BuildContext context, String phoneNumber, {requi
   );
 }
 
-// -----------------------------------------------------------------------------
-// بەشی ٤: دانانی پاسۆردی نوێ بۆ تۆمارکردن
-// -----------------------------------------------------------------------------
 void showRegisterPasswordBottomSheet(BuildContext context, String phoneNumber, {required VoidCallback onStateChanged}) {
   final TextEditingController passwordController = TextEditingController();
   bool isPasswordVisible = false;
@@ -983,7 +988,7 @@ void showRegisterPasswordBottomSheet(BuildContext context, String phoneNumber, {
               decoration: BoxDecoration(
                 gradient: const LinearGradient(colors: [Color(0xFF131834), Color(0xFF0B0E1D)], begin: Alignment.topCenter, end: Alignment.bottomCenter),
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-                border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.0), // هێڵی سپی باریک بە دەوری سندوقەکە
+                border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.0), 
               ),
               padding: EdgeInsets.only(
                 bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -1034,9 +1039,6 @@ void showRegisterPasswordBottomSheet(BuildContext context, String phoneNumber, {
   );
 }
 
-// -----------------------------------------------------------------------------
-// بەشی ٥ و ٦ و ٧: بیرچوونەوەی پاسۆرد
-// -----------------------------------------------------------------------------
 void showForgotPasswordPhoneBottomSheet(BuildContext context, {required VoidCallback onStateChanged}) {
   final TextEditingController phoneController = TextEditingController();
   showModalBottomSheet(
@@ -1056,7 +1058,7 @@ void showForgotPasswordPhoneBottomSheet(BuildContext context, {required VoidCall
               decoration: BoxDecoration(
                 gradient: const LinearGradient(colors: [Color(0xFF131834), Color(0xFF0B0E1D)], begin: Alignment.topCenter, end: Alignment.bottomCenter),
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-                border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.0), // هێڵی سپی باریک بە دەوری سندوقەکە
+                border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.0), 
               ),
               padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 28, right: 28, top: 20),
               child: SingleChildScrollView(
@@ -1114,7 +1116,7 @@ void showForgotPasswordOtpBottomSheet(BuildContext context, String phoneNumber, 
               decoration: BoxDecoration(
                 gradient: const LinearGradient(colors: [Color(0xFF131834), Color(0xFF0B0E1D)], begin: Alignment.topCenter, end: Alignment.bottomCenter),
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-                border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.0), // هێڵی سپی باریک بە دەوری سندوقەکە
+                border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.0), 
               ),
               padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 28, right: 28, top: 20),
               child: SingleChildScrollView(
@@ -1130,7 +1132,7 @@ void showForgotPasswordOtpBottomSheet(BuildContext context, String phoneNumber, 
                     hintText: getTxt('otp_hint'),
                     prefixIcon: Icons.message_outlined,
                     keyboardType: TextInputType.number,
-                  ),
+                    ),
                   const SizedBox(height: 40),
                   _buildGlowButton(getTxt('submit_btn'), () {
                     if (otpController.text.trim() == '1234') {
@@ -1171,39 +1173,45 @@ void showForgotPasswordNewPasswordBottomSheet(BuildContext context, String phone
               decoration: BoxDecoration(
                 gradient: const LinearGradient(colors: [Color(0xFF131834), Color(0xFF0B0E1D)], begin: Alignment.topCenter, end: Alignment.bottomCenter),
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-                border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.0), // هێڵی سپی باریک بە دەوری سندوقەکەدا
+                border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.0), 
               ),
-              padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 28, right: 28, top: 20),
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+                left: 28, right: 28, top: 20,
+              ),
               child: SingleChildScrollView(
-                child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  _buildAuthHeader(
-                    context, 
-                    setModalState, 
-                    appLanguageGlobal == 'English' ? 'Enter New Password' : (appLanguageGlobal == 'العربية' ? 'أدخل كلمة السر الجديدة' : 'پاسۆردی نوێ بنووسە'), 
-                    getTxt('password_length_hint')
-                  ),
-                  _buildAuthTextField(
-                    controller: passwordController,
-                    hintText: appLanguageGlobal == 'English' ? 'Password' : (appLanguageGlobal == 'العربية' ? 'كلمة السر' : 'ووشەی نهێنی'),
-                    prefixIcon: Icons.lock_outline_rounded,
-                    isPassword: true,
-                    isVisible: isPasswordVisible,
-                    onVisibilityToggle: () {
-                      setModalState(() => isPasswordVisible = !isPasswordVisible);
-                    },
-                  ),
-                  const SizedBox(height: 40),
-                  _buildGlowButton(getTxt('submit_btn'), () {
-                    String newPass = passwordController.text.trim();
-                    if (newPass.length < 4) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(appLanguageGlobal == 'English' ? 'At least 4 characters!' : 'پاسۆرد نابێت لە ٤ پیت کەمتر بێت'), backgroundColor: Colors.redAccent));
-                      return;
-                    }
-                    registeredUsersDb[phoneNumber] = newPass;
-                    Navigator.pop(context);
-                    onStateChanged();
-                  }),
-                ]),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildAuthHeader(
+                      context, 
+                      setModalState, 
+                      appLanguageGlobal == 'English' ? 'Enter New Password' : (appLanguageGlobal == 'العربية' ? 'أدخل كلمة السر الجديدة' : 'پاسۆردی نوێ بنووسە'), 
+                      getTxt('password_length_hint')
+                    ),
+                    _buildAuthTextField(
+                      controller: passwordController,
+                      hintText: appLanguageGlobal == 'English' ? 'Password' : (appLanguageGlobal == 'العربية' ? 'كلمة السر' : 'ووشەی نهێنی'),
+                      prefixIcon: Icons.lock_outline_rounded,
+                      isPassword: true,
+                      isVisible: isPasswordVisible,
+                      onVisibilityToggle: () {
+                        setModalState(() => isPasswordVisible = !isPasswordVisible);
+                      },
+                    ),
+                    const SizedBox(height: 40),
+                    _buildGlowButton(getTxt('submit_btn'), () {
+                      String newPass = passwordController.text.trim();
+                      if (newPass.length < 4) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(appLanguageGlobal == 'English' ? 'At least 4 characters!' : 'پاسۆرد نابێت لە ٤ پیت کەمتر بێت'), backgroundColor: Colors.redAccent));
+                        return;
+                      }
+                      registeredUsersDb[phoneNumber] = newPass;
+                      Navigator.pop(context);
+                      onStateChanged();
+                    }),
+                  ],
+                ),
               ),
             ),
           ),

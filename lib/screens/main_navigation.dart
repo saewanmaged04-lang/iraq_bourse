@@ -1,14 +1,16 @@
+// ignore_for_file: deprecated_member_use
 // lib/screens/main_navigation.dart
 
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart'; // هاوردەکردنی url_launcher
 import '../global_state.dart';
 import '../models/office_model.dart';
 import '../widgets/auth_sheets.dart';
 import 'cities_screen.dart';
 import 'currencies_screen.dart';
 import 'calculator_screen.dart';
+import 'market_analysis_screen.dart';
 import 'offices_screen.dart';
 import 'settings_screen.dart';
 
@@ -28,16 +30,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
   late AnimationController _refreshRotationController;
   late Timer _refreshTimer;
 
-  // --- داتای بۆرسەی شارەکان (سەرچاوەی لایڤی نرخەکان بۆ حاسیبە) ---
+  // --- داتای بۆرسەی شارەکان (ئەم نرخە لێرە بگۆڕە، حاسیبەکە خۆی دەیخوێنێتەوە) ---
   final List<Map<String, String>> pinnedRates = [
     {'city': 'بەغداد', 'buy': '١٥٣,٨٥٠', 'sell': '١٥٤,٢٥٠', 'status': 'up'},
-    {'city': 'سلێمانی', 'buy': '١٥٣,٦٥٠', 'sell': '١٥٤,٨٠٠', 'status': 'neutral'},
+    {'city': 'سلێمانی', 'buy': '١٥٣,٦٥٠', 'sell': '١٥٤,٠٠٠', 'status': 'neutral'},
     {'city': 'هەولێر', 'buy': '١٥٣,٦٦٠', 'sell': '١٥٣,٩٥٠', 'status': 'up'},
   ];
 
   final List<Map<String, String>> cities = [
     {'name': 'هەولێر', 'buy': '١٥٣,٧٥٠', 'sell': '١٥٤,١٠٠', 'status': 'up'},
-    {'name': 'سلێمانی', 'buy': '١٥٣,٨٠٠', 'sell': '١٥٤,٨٠٠', 'status': 'neutral'},
+    {'name': 'سلێمانی', 'buy': '١٥٣,٨٠٠', 'sell': '١٥٤,٨٠٠', 'status': 'neutral'}, // نرخ لە سلێمانی کراوەتە ١٥٤,٨٠٠
     {'name': 'بەغداد (کِفاح)', 'buy': '١٥٣,٩٥٠', 'sell': '١٥٤,٣٠٠', 'status': 'neutral'},
     {'name': 'کەڕادە', 'buy': '١٥٤,٠٠٠', 'sell': '١٥٤,٤٠٠', 'status': 'up'},
     {'name': 'حاریشیە', 'buy': '١٥٣,٩٥٠', 'sell': '١٥٤,٣٥٠', 'status': 'neutral'},
@@ -47,9 +49,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
     {'name': 'بەسرە', 'buy': '١٥٣,٩٥٠', 'sell': '١٥٤,٣٠٠', 'status': 'down'},
   ];
 
-  // --- گۆڕاوەکانی باری حاسیبە ---
+  // --- گۆڕاوەکانی حاسیبە ---
   String _fromAmount = '100';
-  String _toAmount = '';
+  String _toAmount = ''; 
   String _fromCurrencySelected = 'دۆلار USD';
   String _toCurrencySelected = 'دینار IQD';
   String _activeField = 'amount';
@@ -60,7 +62,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
   String _selectedCurrency = 'دۆلار USD';
   Map<String, dynamic>? _profitResult;
 
-  // --- لۆجیکی هۆشمەند بۆ بەستنەوەی حاسیبە بە بۆرسە و بانکی ناوەندی ---
+  // --- لۆجیکی هۆشمەندی وەرگرتنی نرخ ---
   double _parseRate(String rateStr) {
     String clean = rateStr.replaceAll(',', '').replaceAll(' ', '');
     const eastern = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
@@ -72,22 +74,18 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
   }
 
   double _getCurrentBaseUSDValue() {
-    if (isAutoRateGlobal) {
-      return _parseRate(cities[1]['sell']!); // بۆرسەی سلێمانی کاتێک ئۆتۆماتیکە
-    }
     if (selectedBaseRateSourceGlobal == 'Central Bank') {
-      return usdToIqdCentralBankRate / 100.0;
+      return usdToIqdCentralBankRate; // هاوئاراستەکردنی تەواو بێ دابەشکردنی ١٠٠
     }
     String cityName = (selectedBaseRateSourceGlobal == 'Baghdad Bourse') 
         ? 'بەغداد (کِفاح)' : 'سلێمانی';
 
     final cityData = cities.firstWhere((c) => c['name'] == cityName, orElse: () => cities[1]);
-    return _parseRate(cityData['sell']!);
+    return _parseRate(cityData['sell']!); 
   }
 
   Map<String, double> get _rateToIQD {
     double base = _getCurrentBaseUSDValue() * 100;
-    activeBaseUsdToIqdRate = base; // نوێکردنەوەی جیهانی بۆ پیشاندانی نرخ
     return {
       'دۆلار USD': base,
       'دینار IQD': 1.0,
@@ -101,32 +99,49 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
     setState(() {
       final double v = double.tryParse(_fromAmount.replaceAll(',', '')) ?? 0.0;
       double fromRate = _rateToIQD[_fromCurrencySelected] ?? 1.0;
-      double toRate = _rateToIQD[_toCurrencySelected] ?? 1.0;
+      double toRate = _toCurrencySelected == 'تمەن IRR' || _toCurrencySelected == 'دینار IQD' ? 1.0 : _rateToIQD[_toCurrencySelected] ?? 1.0;
       double result = (v * fromRate) / toRate;
       _toAmount = (_toCurrencySelected == 'تمەن IRR' || _toCurrencySelected == 'دینار IQD') 
           ? result.toStringAsFixed(0) : result.toStringAsFixed(2);
     });
   }
 
+  // ============================================================================
+  // چارەسەرکردنی ڕەق و تەواوی هاوکێشەی ماتماتیکی کڕین و فرۆشتنی لایڤی دۆلار و دینار
+  // ============================================================================
   void _calculateProfit() {
     final double amount = double.tryParse(_amountVal.replaceAll(',', '')) ?? 0.0;
     final double buyPrice = double.tryParse(_buyPriceVal.replaceAll(',', '')) ?? 0.0;
     final double sellPrice = double.tryParse(_sellPriceVal.replaceAll(',', '')) ?? 0.0;
     if (amount <= 0 || buyPrice <= 0 || sellPrice <= 0) return;
     
-    double rate = _rateToIQD[_selectedCurrency] ?? (activeBaseUsdToIqdRate);
-    double amountInIQD = amount * rate;
-    double units = amountInIQD / buyPrice;
-    double totalSell = units * sellPrice;
+    double rate = _rateToIQD['دۆلار USD'] ?? (_getCurrentBaseUSDValue() * 100);
+
+    // ١. سەرمایەی سەرەتایی بە دیناری عێراقی بە دروستی (بڕی پارەکە هەمیشە وەک دۆلار وەرگرە)
+    double amountInIQD = amount * (buyPrice / 100.0);
+
+    // ٢. کۆی گشتی فرۆشتن بە دیناری عێراقی بە دروستی
+    double totalSell = amount * (sellPrice / 100.0);
+
+    // ٣. لۆجیکی کەمیسیۆن بە دینار
     double commission = double.tryParse(_commissionVal) ?? 0.0;
     double commAmount = amountInIQD * (commission / 100);
+
+    // ٤. صافی قازانج بە دیناری عێراقی
     double profitIQD = totalSell - amountInIQD - commAmount;
+
+    // ٥. صافی قازانج بە دۆلاری فەرمی بەگوێرەی تێکڕای لایڤی بازاڕ
+    double profitUSD = profitIQD / (rate / 100.0);
 
     setState(() {
       _profitResult = {
-        'profitIQD': profitIQD, 'profitCurrency': profitIQD / rate,
-        'profitPercent': (profitIQD / amountInIQD) * 100, 'totalSell': totalSell,
-        'isProfit': profitIQD >= 0, 'currency': _selectedCurrency, 'commissionAmount': commAmount,
+        'profitIQD': profitIQD,
+        'profitCurrency': profitUSD, // بەهاکە سەد لە سەد ڕاست و بێ هەڵەیە ئێستا
+        'profitPercent': (profitIQD / amountInIQD) * 100,
+        'totalSell': totalSell,
+        'isProfit': profitIQD >= 0,
+        'currency': 'USD', // ناونیشانی دووەم هەمیشە بە دۆلار بێت تا کڕیار بە قەبارەی ڕوون بیبینێت
+        'commissionAmount': commAmount,
       };
     });
   }
@@ -153,6 +168,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
     setState(() {
       _calculateConversionFromStr();
     });
+  }
+
+  List<Map<String, dynamic>> getDynamicCurrencyData() {
+    double base = _getCurrentBaseUSDValue();
+    return [
+      {'name': 'دینار عێراقی', 'code': 'IQD', 'flag': '🇮🇶', 'price': base * 100, 'color': const Color(0xFF00C6FF)},
+      {'name': 'تمەنی ئێرانی', 'code': 'IRR', 'flag': '🇮🇷', 'price': (1000000 / 62000.0) * base * 100, 'color': const Color(0xFFFF4D4D)},
+      {'name': 'پاوەندی بەریتانی', 'code': 'GBP', 'flag': '🇬🇧', 'price': (100 / 0.794) * base, 'color': const Color(0xFF22C55E)},
+      {'name': 'یۆرۆی ئەورووپی', 'code': 'EUR', 'flag': '🇪🇺', 'price': (100 / 0.915) * base, 'color': const Color(0xFFEAB308)},
+    ];
   }
 
   @override
@@ -188,37 +213,56 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
         const Icon(Icons.campaign_rounded, color: Colors.orangeAccent, size: 16),
         const SizedBox(width: 8),
         Expanded(child: Text(appLanguageGlobal == 'English' ? 'News: Rates updated.' : 'هەواڵ: نرخەکان نوێکرانەوە.', style: const TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
-        const SizedBox(width: 8),
         GestureDetector(onTap: _triggerRefresh, child: Stack(alignment: Alignment.center, children: [SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 1.5, valueColor: AlwaysStoppedAnimation<Color>(const Color(0xFF00C6FF).withOpacity(0.12)), value: 1.0)), RotationTransition(turns: _refreshRotationController, child: const Icon(Icons.sync_rounded, color: Color(0xFF76C917), size: 14))])),
       ]),
     );
   }
 
   Widget _buildBottomNav() {
-    return Directionality(textDirection: appLanguageGlobal == 'English' ? TextDirection.ltr : TextDirection.rtl, child: BottomNavigationBar(backgroundColor: const Color(0xFF0F172A), currentIndex: _selectedIndex, selectedItemColor: Colors.blueAccent, unselectedItemColor: Colors.grey, onTap: (i) => setState(() => _selectedIndex = i), type: BottomNavigationBarType.fixed, selectedFontSize: 10, unselectedFontSize: 10, items: [BottomNavigationBarItem(icon: const Icon(Icons.trending_up), label: getTxt('cities_tab')), BottomNavigationBarItem(icon: const Icon(Icons.currency_exchange), label: getTxt('currencies_tab')), BottomNavigationBarItem(icon: const Icon(Icons.calculate), label: getTxt('calculator_tab')), BottomNavigationBarItem(icon: const Icon(Icons.store_rounded), label: getTxt('offices_tab'))]));
-  }
-
-  List<Map<String, dynamic>> getDynamicCurrencyData() {
-    double base = _getCurrentBaseUSDValue();
-    return [
-      {'name': 'دینار عێراقی', 'code': 'IQD', 'flag': '🇮🇶', 'price': base * 100, 'color': const Color(0xFF00C6FF)},
-      {'name': 'تمەنی ئێرانی', 'code': 'IRR', 'flag': '🇮🇷', 'price': (1000000 / 62000.0) * base * 100, 'color': const Color(0xFFFF4D4D)},
-      {'name': 'پاوەندی بەریتانی', 'code': 'GBP', 'flag': '🇬🇧', 'price': (100 / 0.794) * base, 'color': const Color(0xFF22C55E)},
-      {'name': 'یۆرۆی ئەورووپی', 'code': 'EUR', 'flag': '🇪🇺', 'price': (100 / 0.915) * base, 'color': const Color(0xFFEAB308)},
-    ];
+    return Directionality(
+      textDirection: appLanguageGlobal == 'English' ? TextDirection.ltr : TextDirection.rtl, 
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF0F172A),
+          border: Border(
+            top: BorderSide(
+              color: Colors.white.withOpacity(0.08), 
+              width: 1.2,
+            ),
+          ),
+        ),
+        child: BottomNavigationBar(
+          backgroundColor: Colors.transparent, 
+          elevation: 0, 
+          currentIndex: _selectedIndex, 
+          selectedItemColor: Colors.blueAccent, 
+          unselectedItemColor: Colors.grey, 
+          onTap: (i) => setState(() => _selectedIndex = i), 
+          type: BottomNavigationBarType.fixed, 
+          selectedFontSize: 10, 
+          unselectedFontSize: 10, 
+          items: [
+            BottomNavigationBarItem(icon: const Icon(Icons.trending_up), label: getTxt('cities_tab')), 
+            BottomNavigationBarItem(icon: const Icon(Icons.currency_exchange), label: getTxt('currencies_tab')), 
+            BottomNavigationBarItem(icon: const Icon(Icons.analytics_rounded), label: getTxt('analysis_tab')), 
+            BottomNavigationBarItem(icon: const Icon(Icons.calculate), label: getTxt('calculator_tab')), 
+            BottomNavigationBarItem(icon: const Icon(Icons.store_rounded), label: getTxt('offices_tab'))
+          ]
+        ),
+      )
+    );
   }
 
   Widget _buildCurrentScreen() {
-    Widget child;
     switch (_selectedIndex) {
       case 0:
-        child = isCitiesLockedGlobal ? _buildLockedScreen(getTxt('cities_tab')) : CitiesScreen(pinnedRates: pinnedRates, cities: cities, citiesScrollController: _citiesScrollController, onPinUpdated: (idx, c, b, s, st) { setState(() => pinnedRates[idx] = {'city': c, 'buy': b, 'sell': s, 'status': st}); }, onSwap: (f, t) { setState(() { final temp = cities[f]; cities[f] = cities[t]; cities[t] = temp; }); });
-        break;
+        return isCitiesLockedGlobal ? _buildLockedScreen(getTxt('cities_tab')) : CitiesScreen(pinnedRates: pinnedRates, cities: cities, citiesScrollController: _citiesScrollController, onPinUpdated: (idx, c, b, s, st) { setState(() => pinnedRates[idx] = {'city': c, 'buy': b, 'sell': s, 'status': st}); }, onSwap: (f, t) { setState(() { final temp = cities[f]; cities[f] = cities[t]; cities[t] = temp; }); });
       case 1:
-        child = isCurrenciesLockedGlobal ? _buildLockedScreen(getTxt('currencies_tab')) : CurrenciesScreen(currencyData: getDynamicCurrencyData(), formatPrice: (p) => p.toString());
-        break;
+        return isCurrenciesLockedGlobal ? _buildLockedScreen(getTxt('currencies_tab')) : CurrenciesScreen(currencyData: getDynamicCurrencyData(), formatPrice: (p) => p.toString());
       case 2:
-        child = CalculatorScreen(
+        return const MarketAnalysisScreen(); 
+      case 3:
+        return CalculatorScreen( 
           tabController: _tabController,
           availableCurrencies: const ['دۆلار USD', 'دینار IQD', 'تمەن IRR', 'یۆرۆ EUR', 'پاوەند GBP'],
           rateToIQD: _rateToIQD,
@@ -235,11 +279,36 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
           activeField: _activeField,
           onKeyTap: (key) {
             setState(() {
-              String current = _amountVal.replaceAll(',', '');
-              if (key == '⌫') { if (current.isNotEmpty) current = current.substring(0, current.length - 1); }
-              else if (key == 'C') { current = ''; _profitResult = null; }
-              else { if (current.length < 12) current += key; }
-              _amountVal = current;
+              String current = '';
+              if (_activeField == 'amount') {
+                current = _amountVal.replaceAll(',', '');
+              } else if (_activeField == 'buy') {
+                current = _buyPriceVal.replaceAll(',', '');
+              } else if (_activeField == 'sell') {
+                current = _sellPriceVal.replaceAll(',', '');
+              } else if (_activeField == 'commission') {
+                current = _commissionVal.replaceAll(',', '');
+              }
+
+              if (key == '⌫') {
+                if (current.isNotEmpty) current = current.substring(0, current.length - 1);
+              } else if (key == 'C') {
+                current = '';
+                _profitResult = null;
+              } else {
+                if (current.length < 12) current += key;
+              }
+
+              if (_activeField == 'amount') {
+                _amountVal = current;
+              } else if (_activeField == 'buy') {
+                _buyPriceVal = current;
+              } else if (_activeField == 'sell') {
+                _sellPriceVal = current;
+              } else if (_activeField == 'commission') {
+                _commissionVal = current;
+              }
+
               _calculateProfit();
             });
           },
@@ -260,17 +329,211 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
           onProfitCurrencyChanged: (curr) { setState(() { _selectedCurrency = curr; _calculateProfit(); }); },
           onFieldTapped: (field, val) { setState(() { _activeField = field; }); },
         );
-        break;
-      default: child = OfficesScreen(offices: allOffices);
+      default: return OfficesScreen(offices: allOffices);
     }
-
-    if (_selectedIndex == 0 || _selectedIndex == 1 || _selectedIndex == 3) {
-      return RefreshIndicator(backgroundColor: const Color(0xFF131C2E), color: const Color(0xFF76C917), onRefresh: () async { _triggerRefresh(); await Future.delayed(const Duration(milliseconds: 1000)); }, child: child);
-    }
-    return child;
   }
 
   Widget _buildLockedScreen(String sectionName) {
-    return Center(child: SingleChildScrollView(padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0), child: Container(constraints: const BoxConstraints(maxWidth: 320), padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24), decoration: BoxDecoration(color: const Color(0xFF131724), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white.withOpacity(0.06), width: 1.0), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 20, spreadRadius: 1)]), child: Column(mainAxisSize: MainAxisSize.min, children: [Container(width: 100, height: 100, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: const Color(0xFFC59A5C).withOpacity(0.25), width: 2), boxShadow: [BoxShadow(color: const Color(0xFFC59A5C).withOpacity(0.12), blurRadius: 35, spreadRadius: 4)]), child: ClipOval(child: Image.asset('assets/fanus.png', width: 100, height: 100, fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) => const Icon(Icons.hourglass_empty_rounded, size: 56, color: Color(0xFFC59A5C))))), const SizedBox(height: 24), Text(getTxt('locked_title'), style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Color(0xFFC59A5C))), const SizedBox(height: 12), Text(getTxt('locked_desc'), textAlign: TextAlign.center, style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.7), height: 1.6, fontWeight: FontWeight.w600)), const SizedBox(height: 24), SizedBox(width: double.infinity, child: Container(decoration: BoxDecoration(boxShadow: [BoxShadow(color: const Color(0xFFB83939).withOpacity(0.2), blurRadius: 15, offset: const Offset(0, 3))]), child: ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFB83939), padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)), elevation: 0), onPressed: () { showRegisterPhoneBottomSheet(context, onStateChanged: () { setState(() {}); }); }, child: Text(getTxt('lock_create_account_btn'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13.5)))))]))));
+    final String lockedDescText = appLanguageGlobal == 'English'
+        ? "Your account usage period has expired. To renew, simply tap the WhatsApp icon below to send us an automatic account renewal message."
+        : (appLanguageGlobal == 'العربية'
+            ? "لقد انتهت فترة استخدام حسابك. للتجديد, فقط اضغط على أيقونة الواتساب أدناه لإرسال رسالة تجديد تلقائية إلينا."
+            : "ماوەی بەکارهێنانی ئەژمارەکەت بەسەرچوو، بۆ نوێکردنەوە تەنیا دەست بنێ بە ئایکۆنی وەتساپی خوارەوە بۆ ئەوەی نامەی تۆماتیکی نوێنکردنەوەی ئەژمارەکەتمان پێ بگات ...");
+
+    return Container(
+      color: const Color(0xFF0B121F), 
+      width: double.infinity,
+      height: double.infinity,
+      alignment: Alignment.center, 
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 65), 
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 20),
+        decoration: BoxDecoration(
+          color: const Color(0xFF131C2E), 
+          borderRadius: BorderRadius.circular(20), 
+          border: Border.all(
+            color: Colors.white.withOpacity(0.08), 
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.5), 
+              blurRadius: 28,
+              spreadRadius: 1,
+              offset: const Offset(0, 8),
+            )
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min, 
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              width: 85,
+              height: 85,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: const Color(0xFFECC880).withOpacity(0.45),
+                  width: 1.5,
+                ),
+              ),
+              child: ClipOval(
+                child: Image.asset(
+                  'assets/fanus.png', 
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(Icons.hourglass_empty_rounded, size: 40, color: Color(0xFFECC880));
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              getTxt('locked_title'),
+              style: const TextStyle(
+                color: Color(0xFFECC880), 
+                fontSize: 16.5,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              lockedDescText, 
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.85),
+                fontSize: 10.5,
+                fontWeight: FontWeight.w600,
+                height: 1.45,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              getTxt('locked_note'),
+              style: const TextStyle(
+                color: Color(0xFFECC880),
+                fontSize: 8.5,
+                fontWeight: FontWeight.bold,
+                height: 1.4,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            _buildLockScreenContactRow('+964 773 145 4737'),
+            _buildLockScreenContactRow('+964 773 154 7371'), 
+            const SizedBox(height: 14),
+            GestureDetector(
+              onTap: () {
+                showRegisterPhoneBottomSheet(context, onStateChanged: () {
+                  setState(() {});
+                });
+              },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD54C4C), 
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFD54C4C).withOpacity(0.2),
+                      blurRadius: 10,
+                      spreadRadius: 1,
+                    )
+                  ],
+                ),
+                child: Center(
+                  child: Text(
+                    getTxt('lock_create_account_btn'),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLockScreenContactRow(String number) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0F121A).withOpacity(0.6), 
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.white.withOpacity(0.06), width: 1.0),
+      ),
+      child: Row(
+        children: [
+          Text(
+            number,
+            textDirection: TextDirection.ltr,
+            style: const TextStyle(
+              color: Color(0xFFECC880), 
+              fontSize: 11.5,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const Spacer(),
+          Row(
+            children: [
+              GestureDetector(
+                onTap: () async {
+                  final cleanNumber = number.replaceAll(' ', '').replaceAll('+', '');
+                  final message = Uri.encodeComponent(
+                    appLanguageGlobal == 'English'
+                        ? "Hello, please renew my account."
+                        : (appLanguageGlobal == 'العربية'
+                            ? "مرحباً، يرجى تجديد حسابي من فضلك."
+                            : "تکایە ئەژمارەکەم بۆ نوێ بکەنەوە ..."),
+                  );
+                  final Uri url = Uri.parse('https://wa.me/$cleanNumber?text=$message');
+                  if (await canLaunchUrl(url)) {
+                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF25D366).withOpacity(0.12),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: const Color(0xFF25D366).withOpacity(0.3), width: 1),
+                  ),
+                  child: const Icon(Icons.chat_bubble_rounded, color: Color(0xFF25D366), size: 14),
+                ),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () async {
+                  final cleanNumber = number.replaceAll(' ', '');
+                  final Uri url = Uri.parse('tel:$cleanNumber');
+                  if (await canLaunchUrl(url)) {
+                    await launchUrl(url);
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0072FF).withOpacity(0.12),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: const Color(0xFF0072FF).withOpacity(0.3), width: 1),
+                  ),
+                  child: const Icon(Icons.phone_iphone_rounded, color: Color(0xFF4FC3F7), size: 14),
+                ),
+              ),
+            ],
+          )
+        ],
+      ),
+    );
   }
 }

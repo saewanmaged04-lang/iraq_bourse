@@ -59,6 +59,7 @@ class CalculatorScreen extends StatefulWidget {
 class _CalculatorScreenState extends State<CalculatorScreen>
     with TickerProviderStateMixin {
   bool _isAutomatic = true;
+  bool _showResultPopup = false; // کۆنتڕۆڵکردنی باری سەرئاوکەوتنی لەوحەی ئەنجامەکان
   late AnimationController _glowController;
   late AnimationController _swapController;
   late Animation<double> _glowAnim;
@@ -113,17 +114,17 @@ class _CalculatorScreenState extends State<CalculatorScreen>
     super.dispose();
   }
 
+  @override
+  void didUpdateWidget(CalculatorScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // لۆجیکی خۆکارانەی کردنەوەی لێکدراوە لێرەدا بە تەواوی لادراوە تاوەکو ڕێگری لە نووسینی تەواوی نرخەکان نەکات
+  }
+
   void _triggerSwap() {
     _swapController.forward(from: 0).then((_) => _swapController.reset());
-    
-    // پاشەکەوتکردنی کاتی بۆ دراوی یەکەم (From)
     final String tempCurrency = widget.fromCurrencySelected;
-    
-    // گۆڕینی دراوی یەکەم بۆ دراوی دووەم (To -> From)
     widget.onConverterFieldsChanged(
         widget.toCurrencySelected, widget.rateToIQD[widget.toCurrencySelected] ?? 1.0, true);
-        
-    // گۆڕینی دراوی دووەم بۆ دراوی یەکەم (From -> To)
     widget.onConverterFieldsChanged(
         tempCurrency, widget.rateToIQD[tempCurrency] ?? 1.0, false);
   }
@@ -218,7 +219,6 @@ class _CalculatorScreenState extends State<CalculatorScreen>
     ]);
   }
 
-  // --- ئۆتۆماتیک / سەرچاوە ---
   Widget _buildAutoSourceRow() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -250,16 +250,10 @@ class _CalculatorScreenState extends State<CalculatorScreen>
           const SizedBox(width: 8),
           Text(
             _isAutomatic
-                ? (appLanguageGlobal == 'English'
-                    ? 'Auto Rate'
-                    : 'نرخی ئۆتۆماتیک')
-                : (appLanguageGlobal == 'English'
-                    ? 'Manual'
-                    : 'دەستی'),
+                ? (appLanguageGlobal == 'English' ? 'Auto Rate' : 'نرخی ئۆتۆماتیک')
+                : (appLanguageGlobal == 'English' ? 'Manual' : 'دەستی'),
             style: TextStyle(
-              color: _isAutomatic
-                  ? const Color(0xFF4ADE80)
-                  : Colors.orange,
+              color: _isAutomatic ? const Color(0xFF4ADE80) : Colors.orange,
               fontSize: 11,
               fontWeight: FontWeight.bold,
             ),
@@ -287,8 +281,7 @@ class _CalculatorScreenState extends State<CalculatorScreen>
         ]),
         if (!_isAutomatic)
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: Colors.orange.withOpacity(0.08),
               borderRadius: BorderRadius.circular(20),
@@ -299,33 +292,16 @@ class _CalculatorScreenState extends State<CalculatorScreen>
                 value: selectedBaseRateSourceGlobal,
                 dropdownColor: const Color(0xFF131C2E),
                 isDense: true,
-                icon: const Icon(Icons.expand_more_rounded,
-                    color: Colors.orange, size: 16),
-                style: const TextStyle(
-                    color: Colors.orange,
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold),
+                icon: const Icon(Icons.expand_more_rounded, color: Colors.orange, size: 16),
+                style: const TextStyle(color: Colors.orange, fontSize: 11, fontWeight: FontWeight.bold),
                 items: [
-                  DropdownMenuItem(
-                      value: 'Central Bank',
-                      child: Text(appLanguageGlobal == 'English'
-                          ? 'Central Bank'
-                          : 'بانکی ناوەندی')),
-                  DropdownMenuItem(
-                      value: 'Sulaymaniyah Bourse',
-                      child: Text(appLanguageGlobal == 'English'
-                          ? 'Slemani Bourse'
-                          : 'بۆرسەی سلێمانی')),
-                  DropdownMenuItem(
-                      value: 'Baghdad Bourse',
-                      child: Text(appLanguageGlobal == 'English'
-                          ? 'Baghdad Bourse'
-                          : 'بۆرسەی بەغداد')),
+                  DropdownMenuItem(value: 'Central Bank', child: Text(appLanguageGlobal == 'English' ? 'Central Bank' : 'بانکی ناوەندی')),
+                  DropdownMenuItem(value: 'Sulaymaniyah Bourse', child: Text(appLanguageGlobal == 'English' ? 'Slemani Bourse' : 'بۆرسەی سلێمانی')),
+                  DropdownMenuItem(value: 'Baghdad Bourse', child: Text(appLanguageGlobal == 'English' ? 'Baghdad Bourse' : 'بۆرسەی بەغداد')),
                 ],
                 onChanged: (val) {
                   if (val != null) {
-                    setState(
-                        () => selectedBaseRateSourceGlobal = val);
+                    setState(() => selectedBaseRateSourceGlobal = val);
                     BoursePremiumApp.rebuild(context);
                   }
                 },
@@ -334,27 +310,21 @@ class _CalculatorScreenState extends State<CalculatorScreen>
           )
         else
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
               color: const Color(0xFF4ADE80).withOpacity(0.08),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                  color: const Color(0xFF4ADE80).withOpacity(0.25)),
+              border: Border.all(color: const Color(0xFF4ADE80).withOpacity(0.25)),
             ),
             child: Text(
               '1 USD = ${formatDisplayNumbers(_addCommas(activeBaseUsdToIqdRate.toStringAsFixed(0)))} IQD',
-              style: const TextStyle(
-                  color: Color(0xFF4ADE80),
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold),
+              style: const TextStyle(color: Color(0xFF4ADE80), fontSize: 10, fontWeight: FontWeight.bold),
             ),
           ),
       ],
     );
   }
 
-  // --- کارتی گشتی گۆڕینەوە ---
   Widget _buildConverterCard() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 32), 
@@ -377,17 +347,9 @@ class _CalculatorScreenState extends State<CalculatorScreen>
         children: [
           Column(
             children: [
-              _buildCurrencyRow(
-                currency: widget.fromCurrencySelected,
-                amount: widget.fromAmount,
-                isFrom: true,
-              ),
+              _buildCurrencyRow(currency: widget.fromCurrencySelected, amount: widget.fromAmount, isFrom: true),
               const SizedBox(height: 14), 
-              _buildCurrencyRow(
-                currency: widget.toCurrencySelected,
-                amount: widget.toAmount,
-                isFrom: false,
-              ),
+              _buildCurrencyRow(currency: widget.toCurrencySelected, amount: widget.toAmount, isFrom: false),
             ],
           ),
           Positioned(
@@ -400,12 +362,7 @@ class _CalculatorScreenState extends State<CalculatorScreen>
     );
   }
 
-  // --- دوو لاکێشە ناوەکییە کورتەکان ---
-  Widget _buildCurrencyRow({
-    required String currency,
-    required String amount,
-    required bool isFrom,
-  }) {
+  Widget _buildCurrencyRow({required String currency, required String amount, required bool isFrom}) {
     final String flag = _getCurrencyFlag(currency);
     final String shortCode = _getShortCode(currency);
     final bool isEmpty = amount.isEmpty || amount == '0' || amount == '';
@@ -420,42 +377,22 @@ class _CalculatorScreenState extends State<CalculatorScreen>
         border: Border.all(color: Colors.white.withOpacity(0.12), width: 1.0),
       ),
       child: Row(children: [
-        // ناوی دراوەکە
         GestureDetector(
           onTap: () {},
           child: Stack(alignment: Alignment.center, children: [
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
               decoration: BoxDecoration(
-                color: isFrom
-                    ? const Color(0xFF0072FF).withOpacity(0.08)
-                    : const Color(0xFF4ADE80).withOpacity(0.08),
+                color: isFrom ? const Color(0xFF0072FF).withOpacity(0.08) : const Color(0xFF4ADE80).withOpacity(0.08),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: isFrom
-                      ? const Color(0xFF0072FF).withOpacity(0.15)
-                      : const Color(0xFF4ADE80).withOpacity(0.15),
-                ),
+                border: Border.all(color: isFrom ? const Color(0xFF0072FF).withOpacity(0.15) : const Color(0xFF4ADE80).withOpacity(0.15)),
               ),
               child: Row(mainAxisSize: MainAxisSize.min, children: [
                 Text(flag, style: const TextStyle(fontSize: 14)),
                 const SizedBox(width: 4),
-                Text(
-                  shortCode,
-                  style: TextStyle(
-                    color: isFrom ? const Color(0xFF4FC3F7) : const Color(0xFF4ADE80),
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                Text(shortCode, style: TextStyle(color: isFrom ? const Color(0xFF4FC3F7) : const Color(0xFF4ADE80), fontSize: 11, fontWeight: FontWeight.bold)),
                 const SizedBox(width: 2),
-                Icon(
-                  Icons.keyboard_arrow_down_rounded,
-                  color: isFrom
-                      ? const Color(0xFF4FC3F7).withOpacity(0.6)
-                      : const Color(0xFF4ADE80).withOpacity(0.6),
-                  size: 13,
-                ),
+                Icon(Icons.keyboard_arrow_down_rounded, color: isFrom ? const Color(0xFF4FC3F7).withOpacity(0.6) : const Color(0xFF4ADE80).withOpacity(0.6), size: 13),
               ]),
             ),
             Positioned.fill(
@@ -463,44 +400,20 @@ class _CalculatorScreenState extends State<CalculatorScreen>
                 opacity: 0.0,
                 child: DropdownButton<String>(
                   value: currency,
-                  items: widget.availableCurrencies
-                      .map((val) => DropdownMenuItem<String>(
-                          value: val, child: Text(val)))
-                      .toList(),
+                  items: widget.availableCurrencies.map((val) => DropdownMenuItem<String>(value: val, child: Text(val))).toList(),
                   onChanged: (val) {
-                    if (val != null) {
-                      widget.onConverterFieldsChanged(
-                          val, widget.rateToIQD[val] ?? 1.0, isFrom);
-                    }
+                    if (val != null) widget.onConverterFieldsChanged(val, widget.rateToIQD[val] ?? 1.0, isFrom);
                   },
                 ),
               ),
             ),
           ]),
         ),
-        
-        // هێڵی جیاکەرەوە
-        Container(
-          height: 18,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: VerticalDivider(
-            color: Colors.white.withOpacity(0.1),
-            thickness: 1,
-          ),
-        ),
-
-        // بڕەکە
+        Container(height: 18, padding: const EdgeInsets.symmetric(horizontal: 8), child: VerticalDivider(color: Colors.white.withOpacity(0.1), thickness: 1)),
         Expanded(
           child: Text(
-            isEmpty
-                ? (appLanguageGlobal == 'English' ? 'Enter amount' : 'بڕێک بنووسە')
-                : formatDisplayNumbers(amount),
-            style: TextStyle(
-              color: isEmpty ? Colors.white.withOpacity(0.2) : amountColor,
-              fontSize: isEmpty ? 11 : 15,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -0.5,
-            ),
+            isEmpty ? (appLanguageGlobal == 'English' ? 'Enter amount' : 'بڕێک بنووسە') : formatDisplayNumbers(amount),
+            style: TextStyle(color: isEmpty ? Colors.white.withOpacity(0.2) : amountColor, fontSize: isEmpty ? 11 : 15, fontWeight: FontWeight.w900, letterSpacing: -0.5),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -512,31 +425,18 @@ class _CalculatorScreenState extends State<CalculatorScreen>
   Widget _buildDividerWithSwap() {
     return AnimatedBuilder(
       animation: _swapAnim,
-      builder: (_, child) => Transform.rotate(
-        angle: _swapAnim.value,
-        child: child,
-      ),
+      builder: (_, child) => Transform.rotate(angle: _swapAnim.value, child: child),
       child: GestureDetector(
         onTap: _triggerSwap,
         child: Container(
-          width: 30,
-          height: 30,
+          width: 30, height: 30,
           decoration: BoxDecoration(
             color: const Color(0xFF0D1117),
             shape: BoxShape.circle,
-            border: Border.all(
-                color: const Color(0xFF4ADE80).withOpacity(0.4),
-                width: 1.5),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF4ADE80).withOpacity(0.15),
-                blurRadius: 10,
-                spreadRadius: 1,
-              )
-            ],
+            border: Border.all(color: const Color(0xFF4ADE80).withOpacity(0.4), width: 1.5),
+            boxShadow: [BoxShadow(color: const Color(0xFF4ADE80).withOpacity(0.15), blurRadius: 10, spreadRadius: 1)],
           ),
-          child: const Icon(Icons.swap_vert_rounded,
-              color: Color(0xFF4ADE80), size: 16),
+          child: const Icon(Icons.swap_vert_rounded, color: Color(0xFF4ADE80), size: 16),
         ),
       ),
     );
@@ -546,39 +446,33 @@ class _CalculatorScreenState extends State<CalculatorScreen>
   // PROFIT TAB
   // ============================================================
   Widget _buildProfitTab() {
-    final bool isProfit = widget.profitResult != null &&
-        (widget.profitResult!['isProfit'] as bool? ?? false);
-    final Color resultColor = widget.profitResult == null
-        ? Colors.grey
-        : isProfit
-            ? const Color(0xFF4ADE80)
-            : const Color(0xFFFF6B6B);
-
-    return Column(children: [
-      Expanded(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-          child: Column(children: [
-            _buildProfitCurrencySelector(),
-            const SizedBox(height: 12),
-            _buildInputGrid(),
-            const SizedBox(height: 12),
-            _buildCalculateButton(),
-            const SizedBox(height: 12),
-            if (widget.profitResult != null)
-              _buildResultCard(isProfit, resultColor)
-            else
-              _buildEmptyResult(),
-          ]),
-        ),
-      ),
-      _buildKeyboard(onTap: widget.onKeyTap, isConverter: false),
-    ]);
+    return Stack(
+      children: [
+        Column(children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+              child: Column(children: [
+                _buildProfitCurrencySelector(),
+                const SizedBox(height: 10),
+                _buildInputGrid(), // تۆڕی ٢*٢ی کورتکراوە بۆ قوبڵنەکردنی سکرۆڵ
+                const SizedBox(height: 12),
+                _buildCalculateButton(),
+              ]),
+            ),
+          ),
+          _buildKeyboard(onTap: widget.onKeyTap, isConverter: false),
+        ]),
+        // کێشانی داینامیکی لەوحەی سەرئاوکەوتووی ئەنجامەکان (Floating Popup) وەک فەرمانت
+        if (_showResultPopup && widget.profitResult != null)
+          _buildFloatingResultPopup(),
+      ],
+    );
   }
 
   Widget _buildProfitCurrencySelector() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4), 
       decoration: BoxDecoration(
         color: const Color(0xFF0D1117),
         borderRadius: BorderRadius.circular(16),
@@ -589,40 +483,23 @@ class _CalculatorScreenState extends State<CalculatorScreen>
           children: [
             Row(children: [
               Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0072FF).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(Icons.currency_exchange_rounded,
-                    color: Color(0xFF4FC3F7), size: 14),
+                padding: const EdgeInsets.all(5),
+                decoration: BoxDecoration(color: const Color(0xFF0072FF).withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                child: const Icon(Icons.currency_exchange_rounded, color: Color(0xFF4FC3F7), size: 13),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Text(
-                appLanguageGlobal == 'English'
-                    ? 'Base Currency'
-                    : 'دراوی بنەڕەت',
-                style: TextStyle(
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white.withOpacity(0.7)),
+                appLanguageGlobal == 'English' ? 'Base Currency' : 'دراوی بنەڕەت',
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white.withOpacity(0.7)),
               ),
             ]),
             DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 value: widget.selectedCurrency,
                 dropdownColor: const Color(0xFF131C2E),
-                icon: const Icon(Icons.keyboard_arrow_down_rounded,
-                    color: Color(0xFF4FC3F7), size: 18),
-                style: const TextStyle(
-                    color: Color(0xFF4FC3F7),
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold),
-                items: widget.availableCurrencies
-                    .map((val) => DropdownMenuItem<String>(
-                        value: val,
-                        child: Text(getCurrencyDisplayName(val))))
-                    .toList(),
+                icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF4FC3F7), size: 16),
+                style: const TextStyle(color: Color(0xFF4FC3F7), fontSize: 11, fontWeight: FontWeight.bold),
+                items: widget.availableCurrencies.map((val) => DropdownMenuItem<String>(value: val, child: Text(getCurrencyDisplayName(val)))).toList(),
                 onChanged: (val) {
                   if (val != null) widget.onProfitCurrencyChanged(val);
                 },
@@ -632,9 +509,13 @@ class _CalculatorScreenState extends State<CalculatorScreen>
     );
   }
 
+  // تۆڕی نوێی کلیلەکان بە جێگیرکردنی لۆجیکی داینامیکی کڕین و فرۆشتن بەپێی جۆری دراوەکە
   Widget _buildInputGrid() {
+    final bool isIQD = widget.selectedCurrency == 'دینار IQD'; // دۆخی دینار
+
     return Column(children: [
       Row(children: [
+        // ١. بڕی پارە (Amount)
         Expanded(
             child: _buildModernField(
                 getTxt('amount_label'),
@@ -643,24 +524,27 @@ class _CalculatorScreenState extends State<CalculatorScreen>
                 const Color(0xFF0072FF),
                 Icons.attach_money_rounded)),
         const SizedBox(width: 10),
+        // ٢. نرخی کڕین (بۆ دۆلار لە سەرەوەیە، بۆ دینار لۆجیکی فرۆشتنەکە دەچێتە پێشەوە)
         Expanded(
             child: _buildModernField(
-                getTxt('buy_price_label'),
-                widget.buyPriceVal,
-                'buy',
-                const Color(0xFFFF6B6B),
-                Icons.trending_down_rounded)),
+                isIQD ? getTxt('sell_price_label') : getTxt('buy_price_label'),
+                isIQD ? widget.sellPriceVal : widget.buyPriceVal,
+                isIQD ? 'sell' : 'buy',
+                isIQD ? const Color(0xFF4ADE80) : const Color(0xFFFF6B6B),
+                isIQD ? Icons.trending_up_rounded : Icons.trending_down_rounded)),
       ]),
       const SizedBox(height: 10),
       Row(children: [
+        // ٣. نرخی فرۆشتن (بۆ دۆلار لە خوارەوەیە، بۆ دینار لۆجیکی کڕین دێتە دووەم)
         Expanded(
             child: _buildModernField(
-                getTxt('sell_price_label'),
-                widget.sellPriceVal,
-                'sell',
-                const Color(0xFF4ADE80),
-                Icons.trending_up_rounded)),
+                isIQD ? getTxt('buy_price_label') : getTxt('sell_price_label'),
+                isIQD ? widget.buyPriceVal : widget.sellPriceVal,
+                isIQD ? 'buy' : 'sell',
+                isIQD ? const Color(0xFFFF6B6B) : const Color(0xFF4ADE80),
+                isIQD ? Icons.trending_down_rounded : Icons.trending_up_rounded)),
         const SizedBox(width: 10),
+        // ٤. کەمیسیۆن (Commission)
         Expanded(
             child: _buildModernField(
                 getTxt('commission_label'),
@@ -672,8 +556,7 @@ class _CalculatorScreenState extends State<CalculatorScreen>
     ]);
   }
 
-  Widget _buildModernField(String label, String value, String fieldKey,
-      Color color, IconData icon) {
+  Widget _buildModernField(String label, String value, String fieldKey, Color color, IconData icon) {
     final bool isActive = widget.activeField == fieldKey;
     final String display = value.isEmpty ? '' : _addCommas(value);
 
@@ -681,69 +564,37 @@ class _CalculatorScreenState extends State<CalculatorScreen>
       onTap: () => widget.onFieldTapped(fieldKey, value),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8), 
         decoration: BoxDecoration(
-          color: isActive
-              ? color.withOpacity(0.06)
-              : const Color(0xFF0D1117),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isActive
-                ? color.withOpacity(0.5)
-                : Colors.white.withOpacity(0.07),
-            width: isActive ? 1.5 : 1,
-          ),
-          boxShadow: isActive
-              ? [
-                  BoxShadow(
-                    color: color.withOpacity(0.12),
-                    blurRadius: 16,
-                    spreadRadius: 0,
-                  )
-                ]
-              : [],
+          color: isActive ? color.withOpacity(0.06) : const Color(0xFF0D1117),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: isActive ? color.withOpacity(0.5) : Colors.white.withOpacity(0.07), width: isActive ? 1.5 : 1),
+          boxShadow: isActive ? [BoxShadow(color: color.withOpacity(0.12), blurRadius: 16)] : [],
         ),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
-            Icon(icon, size: 12, color: isActive ? color : Colors.white24),
+            Icon(icon, size: 11, color: isActive ? color : Colors.white24),
             const SizedBox(width: 5),
             Expanded(
               child: Text(
                 label,
-                style: TextStyle(
-                    fontSize: 9.5,
-                    color: isActive
-                        ? color.withOpacity(0.9)
-                        : Colors.white.withOpacity(0.35),
-                    fontWeight: FontWeight.w600),
+                style: TextStyle(fontSize: 9, color: isActive ? color.withOpacity(0.9) : Colors.white.withOpacity(0.35), fontWeight: FontWeight.w600),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
           ]),
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           Row(children: [
             Expanded(
               child: Text(
-                display.isEmpty
-                    ? (appLanguageGlobal == 'English' ? 'Tap to enter' : 'بنووسە')
-                    : formatDisplayNumbers(display),
-                style: TextStyle(
-                  fontSize: display.isEmpty ? 11 : 16,
-                  fontWeight: FontWeight.w900,
-                  color: display.isEmpty
-                      ? Colors.white.withOpacity(0.15)
-                      : (isActive ? color : Colors.white.withOpacity(0.85)),
-                ),
+                display.isEmpty ? (appLanguageGlobal == 'English' ? 'Tap' : 'بنووسە') : formatDisplayNumbers(display),
+                style: TextStyle(fontSize: display.isEmpty ? 10.5 : 14.5, fontWeight: FontWeight.w900, color: display.isEmpty ? Colors.white.withOpacity(0.15) : (isActive ? color : Colors.white.withOpacity(0.85))),
               ),
             ),
             if (isActive)
               AnimatedBuilder(
                 animation: _glowAnim,
-                builder: (_, __) => Opacity(
-                  opacity: _glowAnim.value,
-                  child: Container(
-                      width: 2, height: 18, color: color),
-                ),
+                builder: (_, __) => Opacity(opacity: _glowAnim.value, child: Container(width: 2, height: 14, color: color)),
               ),
           ]),
         ]),
@@ -753,202 +604,137 @@ class _CalculatorScreenState extends State<CalculatorScreen>
 
   Widget _buildCalculateButton() {
     return GestureDetector(
-      onTap: widget.onCalculateProfit,
+      onTap: () {
+        widget.onCalculateProfit();
+        setState(() {
+          _showResultPopup = true; // دڵنیابوون لەوەی تەنیا بە داگرتنی دەستی دوگمەکە لەوحەکە دەکرێتەوە
+        });
+      },
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: const EdgeInsets.symmetric(vertical: 11), 
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-              colors: [Color(0xFF0072FF), Color(0xFF00C6FF)]),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF0072FF).withOpacity(0.35),
-              blurRadius: 20,
-              spreadRadius: 0,
-              offset: const Offset(0, 6),
-            )
-          ],
+          gradient: const LinearGradient(colors: [Color(0xFF0072FF), Color(0xFF00C6FF)]),
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [BoxShadow(color: const Color(0xFF0072FF).withOpacity(0.35), blurRadius: 16, offset: const Offset(0, 4))],
         ),
         child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          const Icon(Icons.calculate_rounded,
-              color: Colors.white, size: 18),
+          const Icon(Icons.calculate_rounded, color: Colors.white, size: 16),
           const SizedBox(width: 8),
-          Text(
-            getTxt('calculate_btn'),
-            style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w900,
-                color: Colors.white),
-          ),
+          Text(getTxt('calculate_btn'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: Colors.white)),
         ]),
       ),
     );
   }
 
-  Widget _buildResultCard(bool isProfit, Color resultColor) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0D1117),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-            color: resultColor.withOpacity(0.25), width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: resultColor.withOpacity(0.08),
-            blurRadius: 24,
-            spreadRadius: 0,
-          )
-        ],
-      ),
-      child: Column(children: [
-        Container(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+  // ============================================================================
+  // دروستکردنی شاشەی سەرئاوکەوتووی ئەنجامەکان بە دەق و فۆنتی زۆر گەورەتر بە داواکاریت
+  // ============================================================================
+  Widget _buildFloatingResultPopup() {
+    final bool isProfit = widget.profitResult != null && (widget.profitResult!['isProfit'] as bool? ?? false);
+    final Color resultColor = isProfit ? const Color(0xFF4ADE80) : const Color(0xFFFF6B6B);
+
+    return Positioned.fill(
+      child: Container(
+        color: Colors.black.withOpacity(0.7), 
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 24), // زیادکردنی مەودای چواردەور بۆ ئەوەی جوانتر بێت
+        child: Container(
+          padding: const EdgeInsets.all(20), // گەورەکردنی پادینگی دەرەوەی لەوحەکە
           decoration: BoxDecoration(
-            color: resultColor.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(12),
+            color: const Color(0xFF131C2E), 
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.white.withOpacity(0.08), width: 1.2),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 30, spreadRadius: 2)],
           ),
-          child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                    isProfit
-                        ? Icons.trending_up_rounded
-                        : Icons.trending_down_rounded,
-                    color: resultColor,
-                    size: 22),
-                const SizedBox(width: 10),
-                Text(
-                  isProfit
-                      ? getTxt('profit_won')
-                      : getTxt('profit_lost'),
-                  style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w900,
-                      color: resultColor),
+          child: Column(
+            mainAxisSize: MainAxisSize.min, 
+            children: [
+              // نازناوی سەرەکی: قازانج یان زیان
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10), // گەورەکردن بۆ دیاریبوون
+                decoration: BoxDecoration(color: resultColor.withOpacity(0.08), borderRadius: BorderRadius.circular(14)),
+                child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Icon(isProfit ? Icons.trending_up_rounded : Icons.trending_down_rounded, color: resultColor, size: 24), // گەورەکردنی سایزی ئایکۆن بۆ ٢٤
+                  const SizedBox(width: 10),
+                  Text(
+                    isProfit ? getTxt('profit_won') : getTxt('profit_lost'), 
+                    style: TextStyle(fontSize: 16.5, fontWeight: FontWeight.w900, color: resultColor), // ✅ گەورەکردنی فۆنتی سەرەکی بۆ ١٦.٥
+                  ),
+                ]),
+              ),
+              const SizedBox(height: 18),
+              // ڕیزی ئەنجامەکان بە فۆنت و ئایکۆنی گەورەتر بەبێ دروستبوونی سکرۆڵ
+              _buildResultRow(getTxt('profit_iqd_label'), '${(widget.profitResult!['profitIQD'] as double) >= 0 ? '+' : ''}${formatDisplayNumbers(_addCommas((widget.profitResult!['profitIQD'] as double).toStringAsFixed(0)))} د.ع', resultColor, Icons.monetization_on_rounded),
+              const SizedBox(height: 10),
+              _buildResultRow('${getTxt('profit_curr_label')} ${widget.profitResult!['currency']}', '${(widget.profitResult!['profitCurrency'] as double) >= 0 ? '+' : ''}${formatDisplayNumbers(_addCommas((widget.profitResult!['profitCurrency'] as double).toStringAsFixed(2)))}', resultColor, Icons.currency_exchange_rounded),
+              const SizedBox(height: 10),
+              _buildResultRow(getTxt('profit_percent_label'), '${(widget.profitResult!['profitPercent'] as double) >= 0 ? '+' : ''}${formatDisplayNumbers((widget.profitResult!['profitPercent'] as double).toStringAsFixed(2))}٪', resultColor, Icons.percent_rounded),
+              Padding(padding: const EdgeInsets.symmetric(vertical: 10), child: Divider(color: Colors.white.withOpacity(0.06), height: 1)),
+              _buildResultRow(getTxt('commission_iqd'), '${formatDisplayNumbers(_addCommas((widget.profitResult!['commissionAmount'] as double).toStringAsFixed(0)))} د.ع', Colors.orange, Icons.receipt_long_rounded),
+              const SizedBox(height: 10),
+              _buildResultRow(getTxt('total_sell'), '${formatDisplayNumbers(_addCommas((widget.profitResult!['totalSell'] as double).toStringAsFixed(0)))} د.ع', Colors.white60, Icons.sell_rounded),
+              const SizedBox(height: 22),
+              // دوگمەی سەرەکی داخستنی سەرئاوکەوتووی پۆپئەپ
+              GestureDetector(
+                onTap: () => setState(() => _showResultPopup = false),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 11),
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.2),
+                  ),
+                  child: Center(
+                    child: Text(
+                      appLanguageGlobal == 'English' ? 'Close' : 'داخستن',
+                      style: const TextStyle(color: Colors.white, fontSize: 13.5, fontWeight: FontWeight.bold), // ✅ گەورەکردنی دوگمەی داخستن بۆ ١٣.٥
+                    ),
+                  ),
                 ),
-              ]),
+              )
+            ],
+          ),
         ),
-        const SizedBox(height: 14),
-        _buildResultRow(
-          getTxt('profit_iqd_label'),
-          '${(widget.profitResult!['profitIQD'] as double) >= 0 ? '+' : ''}${formatDisplayNumbers(_addCommas((widget.profitResult!['profitIQD'] as double).toStringAsFixed(0)))} د.ع',
-          resultColor,
-          Icons.monetization_on_rounded,
-        ),
-        const SizedBox(height: 8),
-        _buildResultRow(
-          '${getTxt('profit_curr_label')} ${widget.profitResult!['currency']}',
-          '${(widget.profitResult!['profitCurrency'] as double) >= 0 ? '+' : ''}${formatDisplayNumbers(_addCommas((widget.profitResult!['profitCurrency'] as double).toStringAsFixed(2)))}',
-          resultColor,
-          Icons.currency_exchange_rounded,
-        ),
-        const SizedBox(height: 8),
-        _buildResultRow(
-          getTxt('profit_percent_label'),
-          '${(widget.profitResult!['profitPercent'] as double) >= 0 ? '+' : ''}${formatDisplayNumbers((widget.profitResult!['profitPercent'] as double).toStringAsFixed(2))}٪',
-          resultColor,
-          Icons.percent_rounded,
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Divider(
-              color: Colors.white.withOpacity(0.06), height: 1),
-        ),
-        _buildResultRow(
-          getTxt('commission_iqd'),
-          '${formatDisplayNumbers(_addCommas((widget.profitResult!['commissionAmount'] as double).toStringAsFixed(0)))} د.ع',
-          Colors.orange,
-          Icons.receipt_long_rounded,
-        ),
-        const SizedBox(height: 8),
-        _buildResultRow(
-          getTxt('total_sell'),
-          '${formatDisplayNumbers(_addCommas((widget.profitResult!['totalSell'] as double).toStringAsFixed(0)))} د.ع',
-          Colors.white60,
-          Icons.sell_rounded,
-        ),
-      ]),
-    );
-  }
-
-  Widget _buildEmptyResult() {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0D1117),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
       ),
-      child: Column(children: [
-        Icon(Icons.calculate_outlined,
-            size: 36, color: Colors.white.withOpacity(0.08)),
-        const SizedBox(height: 8),
-        Text(
-          getTxt('calculator_desc'),
-          style: TextStyle(
-              fontSize: 11,
-              color: Colors.white.withOpacity(0.25)),
-          textAlign: TextAlign.center,
-        ),
-      ]),
     );
   }
 
-  Widget _buildResultRow(
-      String label, String value, Color valueColor, IconData icon) {
-    return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(children: [
-            Icon(icon,
-                size: 13,
-                color: valueColor.withOpacity(0.5)),
-            const SizedBox(width: 6),
-            Text(label,
-                style: const TextStyle(
-                    fontSize: 10.5, color: Colors.white54)),
-          ]),
-          Text(value,
-              style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w900,
-                  color: valueColor)),
-        ]);
+  // نوێکردنەوەی پڕفیشناڵی ڕیزی ئەنجامەکان بە فۆنت و قەبارەی ڕێژەیی زۆر گەورەتر
+  Widget _buildResultRow(String label, String value, Color valueColor, IconData icon) {
+    return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+      Row(children: [
+        Icon(icon, size: 15, color: valueColor.withOpacity(0.5)), // ✅ گەورەکردنی ئایکۆن لەناو ڕیزەکە بۆ ١٥
+        const SizedBox(width: 8),
+        Text(label, style: const TextStyle(fontSize: 12.5, color: Colors.white54)), // ✅ گەورەکردنی تێکستی ڕیز بۆ ١٢.٥
+      ]),
+      Text(value, style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w900, color: valueColor)), // ✅ گەورەکردنی بەهای ڕیزەکە بۆ ١٤.٥
+    ]);
   }
 
   // ============================================================
   // KEYBOARD
   // ============================================================
-  Widget _buildKeyboard(
-      {required Function(String) onTap, required bool isConverter}) {
+  Widget _buildKeyboard({required Function(String) onTap, required bool isConverter}) {
     return Container(
       margin: const EdgeInsets.fromLTRB(56, 0, 56, 0),
-      padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-      decoration: BoxDecoration(
-        color: const Color(0xFF080C12),
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
+      padding: const EdgeInsets.fromLTRB(10, 8, 10, 8), 
+      decoration: const BoxDecoration(
+        color: Color(0xFF080C12),
+        borderRadius: BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24)),
+        border: Border(top: BorderSide(color: Colors.white12, width: 0.5)),
       ),
       child: Column(mainAxisSize: MainAxisSize.min, children: [
         Row(children: [
-          _buildSpecialKey('⌫', onTap,
-              bgColor: const Color(0xFF1A0808),
-              iconColor: const Color(0xFFFF6B6B)),
+          _buildSpecialKey('⌫', onTap, bgColor: const Color(0xFF1A0808), iconColor: const Color(0xFFFF6B6B)),
           _buildKey('9', onTap),
           _buildKey('8', onTap),
           _buildKey('7', onTap),
         ]),
         const SizedBox(height: 6),
         Row(children: [
-          _buildSpecialKey('C', onTap,
-              bgColor: const Color(0xFF0D1117),
-              textColor: Colors.orange),
+          _buildSpecialKey('C', onTap, bgColor: const Color(0xFF0D1117), textColor: Colors.orange),
           _buildKey('6', onTap),
           _buildKey('5', onTap),
           _buildKey('4', onTap),
@@ -962,11 +748,8 @@ class _CalculatorScreenState extends State<CalculatorScreen>
         ]),
         const SizedBox(height: 6),
         Row(children: [
-          _buildSpecialKey('⇅', onTap,
-              bgColor: const Color(0xFF4ADE80).withOpacity(0.06),
-              iconColor: const Color(0xFF4ADE80),
-              flex: 1),
-          _buildKey('000', onTap, flex: 1),
+          _buildSpecialKey('⇅', onTap, bgColor: const Color(0xFF4ADE80).withOpacity(0.06), iconColor: const Color(0xFF4ADE80)),
+          _buildKey('000', onTap),
           _buildKey('0', onTap, flex: 2),
         ]),
       ]),
@@ -981,20 +764,16 @@ class _CalculatorScreenState extends State<CalculatorScreen>
         child: GestureDetector(
           onTap: () => onTap(key),
           child: Container(
-            height: 36,
+            height: 34, 
             decoration: BoxDecoration(
               color: const Color(0xFF0D1117),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                  color: Colors.white.withOpacity(0.07)),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.white.withOpacity(0.07)),
             ),
             child: Center(
               child: Text(
                 key,
-                style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white),
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Colors.white),
               ),
             ),
           ),
@@ -1003,14 +782,7 @@ class _CalculatorScreenState extends State<CalculatorScreen>
     );
   }
 
-  Widget _buildSpecialKey(
-    String key,
-    Function(String) onTap, {
-    required Color bgColor,
-    Color? iconColor,
-    Color? textColor,
-    int flex = 1,
-  }) {
+  Widget _buildSpecialKey(String key, Function(String) onTap, {required Color bgColor, Color? iconColor, Color? textColor, int flex = 1}) {
     final bool isDelete = key == '⌫';
     final bool isSwap = key == '⇅';
 
@@ -1021,10 +793,10 @@ class _CalculatorScreenState extends State<CalculatorScreen>
         child: GestureDetector(
           onTap: () => onTap(key),
           child: Container(
-            height: 36,
+            height: 34, 
             decoration: BoxDecoration(
               color: bgColor,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10),
               border: Border.all(
                 color: isSwap
                     ? const Color(0xFF4ADE80).withOpacity(0.2)
@@ -1035,17 +807,12 @@ class _CalculatorScreenState extends State<CalculatorScreen>
             ),
             child: Center(
               child: isDelete
-                  ? Icon(Icons.backspace_outlined,
-                      color: iconColor, size: 15)
+                  ? Icon(Icons.backspace_outlined, color: iconColor, size: 14)
                   : isSwap
-                      ? Icon(Icons.swap_vert_rounded,
-                          color: iconColor, size: 16)
+                      ? Icon(Icons.swap_vert_rounded, color: iconColor, size: 15)
                       : Text(
                           key,
-                          style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: textColor ?? Colors.white),
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: textColor ?? Colors.white),
                         ),
             ),
           ),

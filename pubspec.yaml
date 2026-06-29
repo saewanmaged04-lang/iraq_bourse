@@ -7,14 +7,12 @@ version: 1.0.0+1
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
-  
+
 dependencies:
   flutter:
     sdk: flutter
 
   cupertino_icons: ^1.0.6
-  
-  # ئەم دوو پاکێجە پێویستەمان بۆ فرۆنت-ئێند و پاراستنی زانیارییەکان زیاد کردووە:
   url_launcher: ^6.2.5
   shared_preferences: ^2.2.3
 
