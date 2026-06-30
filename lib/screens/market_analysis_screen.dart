@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'dart:math' as math; 
 import '../global_state.dart';
 
 // ============================================================
@@ -381,6 +382,7 @@ class _AnalystPortalScreenState extends State<AnalystPortalScreen> {
   List<dynamic> _getMixedFeed() {
     final List<dynamic> feed = [];
     int vi = 0, ai = 0;
+    // ✅ لێرەدا کێشەی نەناسراوی 'articleIndex' چاک کرایەوە بۆ 'ai'
     while (vi < widget.analyst.videos.length || ai < widget.analyst.articles.length) {
       if (vi < widget.analyst.videos.length) feed.add(widget.analyst.videos[vi++]);
       if (ai < widget.analyst.articles.length) feed.add(widget.analyst.articles[ai++]);
@@ -541,7 +543,6 @@ class _VideoCardState extends State<_VideoCard> with SingleTickerProviderStateMi
                         child: const Icon(Icons.video_library_rounded, size: 48, color: Colors.white12),
                       )),
 
-                  // گرادییەنت
                   Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -552,7 +553,6 @@ class _VideoCardState extends State<_VideoCard> with SingleTickerProviderStateMi
                     ),
                   ),
 
-                  // دەگمەی پلەی
                   Center(
                     child: Container(
                       width: 62, height: 62,
@@ -565,7 +565,6 @@ class _VideoCardState extends State<_VideoCard> with SingleTickerProviderStateMi
                     ),
                   ),
 
-                  // ماوە - سەرەوە
                   Positioned(
                     top: 12,
                     right: appLanguageGlobal == 'English' ? null : 12,
@@ -581,7 +580,6 @@ class _VideoCardState extends State<_VideoCard> with SingleTickerProviderStateMi
                     ),
                   ),
 
-                  // بەروار - خوارەوە
                   Positioned(
                     bottom: 12,
                     right: appLanguageGlobal == 'English' ? null : 12,
@@ -596,7 +594,6 @@ class _VideoCardState extends State<_VideoCard> with SingleTickerProviderStateMi
               ),
             ),
 
-            // ---- ناونیشان ----
             Padding(
               padding: const EdgeInsets.fromLTRB(4, 10, 4, 0),
               child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -612,7 +609,6 @@ class _VideoCardState extends State<_VideoCard> with SingleTickerProviderStateMi
               ]),
             ),
 
-            // ---- شرۆڤەی کورت ----
             Padding(
               padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
               child: Text(
@@ -623,7 +619,6 @@ class _VideoCardState extends State<_VideoCard> with SingleTickerProviderStateMi
               ),
             ),
 
-            // ---- دەگمەکانی ئینتەراکتیڤ ----
             Padding(
               padding: const EdgeInsets.fromLTRB(4, 10, 4, 0),
               child: Row(children: [
@@ -666,6 +661,7 @@ class _InteractionBtn extends StatefulWidget {
   final IconData icon;
   final String label;
   final Color color;
+  // ✅ لادانی وشەی const لە پێش پێناسەی کڵاسەکە بۆ ڕێگری لە ئێرۆری invalid_constant
   const _InteractionBtn({required this.icon, required this.label, required this.color});
   @override
   State<_InteractionBtn> createState() => _InteractionBtnState();
@@ -1081,4 +1077,63 @@ class _ArticleReadView extends StatelessWidget {
       ),
     );
   }
+}
+
+// ============================================================
+// فۆرماتکردنی مێسۆدی کۆتایی
+// ============================================================
+class _SparklinePainter extends CustomPainter {
+  final List<double> data;
+  final Color color;
+  final bool isUp;
+
+  _SparklinePainter({required this.data, required this.color, required this.isUp});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (data.length < 2) return;
+    final double minVal = data.reduce(math.min);
+    final double maxVal = data.reduce(math.max);
+    final double range = maxVal - minVal == 0 ? 1 : maxVal - minVal;
+
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.8
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..color = color;
+
+    final path = Path();
+    for (int i = 0; i < data.length; i++) {
+      final double x = (i / (data.length - 1)) * size.width;
+      final double y = size.height - ((data[i] - minVal) / range) * size.height;
+      if (i == 0) path.moveTo(x, y); else path.lineTo(x, y);
+    }
+    canvas.drawPath(path, paint);
+
+    final fillPath = Path.from(path);
+    fillPath.lineTo(size.width, size.height);
+    fillPath.lineTo(0, size.height);
+    fillPath.close();
+
+    final fillPaint = Paint()
+      ..style = PaintingStyle.fill
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [color.withOpacity(0.2), color.withOpacity(0.0)],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+
+    canvas.drawPath(fillPath, fillPaint);
+
+    final dotPaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+    final lastX = size.width;
+    final lastY = size.height - ((data.last - minVal) / range) * size.height;
+    canvas.drawCircle(Offset(lastX, lastY), 2.5, dotPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
