@@ -28,7 +28,8 @@ class _OfficesScreenState extends State<OfficesScreen> {
   
   List<OfficeModel> get filtered => widget.offices.where((o) {
     final matchCity = _selectedCity == 'هەمووی' || o.city == _selectedCity;
-    final matchSearch = _searchText.isEmpty || o.name.contains(_searchText) || o.city.contains(_searchText);
+    // لێرەدا فلتەرکردنی گەڕانەکەشمان بەستەوە بە ناوی داینامیکی وەرگێڕدراوی نووسینگەکان
+    final matchSearch = _searchText.isEmpty || getTxt('office_${o.id}').contains(_searchText) || o.name.contains(_searchText) || o.city.contains(_searchText);
     return matchCity && matchSearch;
   }).toList()..sort((a, b) => b.rating.compareTo(a.rating));
 
@@ -138,7 +139,8 @@ class _OfficesScreenState extends State<OfficesScreen> {
                             ),
                             const SizedBox(width: 12),
                             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                              Text(office.name, style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.bold, color: Colors.white), maxLines: 1, overflow: TextOverflow.ellipsis),
+                              // گۆڕینی ناوی نووسینگە لێرەش بۆ دەقی داینامیکی وەرگێڕدراوی سەر شاشە
+                              Text(getTxt('office_${office.id}'), style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.bold, color: Colors.white), maxLines: 1, overflow: TextOverflow.ellipsis), // 🔹 وەرگێڕانی ناوی سەرەکی نووسینگە
                               const SizedBox(height: 5),
                               Row(children: [
                                 Container(width: 8, height: 8, decoration: BoxDecoration(color: office.isOpen ? const Color(0xFF4ADE80) : Colors.grey, shape: BoxShape.circle)),
@@ -207,224 +209,234 @@ class OfficeDashboard extends StatelessWidget {
     final openTxt = office.isOpen ? getTxt('open_status') : getTxt('closed_status');
     final staffList = _getOfficeStaff();
 
-    // بەهای داینامیکی وەرگێڕانی تایتڵی لاکێشەی کارمەند بەگوێرەی زمان
-    final String staffSectionTitle = appLanguageGlobal == 'English'
-        ? "Office Staff Contacts"
-        : (appLanguageGlobal == 'العربية' ? "أسماء وأرقام هواتف موظفي المكتب" : "ناو و ژمارەی کارمەندانی نوسینگە");
-
-    // بەهای داینامیکی وشەی "کارمەند" بەگوێرەی زمان
-    final String staffPrefix = appLanguageGlobal == 'English'
-        ? "Staff: "
-        : (appLanguageGlobal == 'العربية' ? "الموظف: " : "کارمەند: ");
+    final String staffSectionTitle = getTxt('office_staff_header');
+    final String staffPrefix = getTxt('office_staff_prefix');
 
     return Directionality(
       textDirection: textDirection,
       child: Scaffold(
-        backgroundColor: const Color(0xFF0B121F), // پاشبنەمای فەرمی ئەپەکە
-        body: SafeArea(child: Column(children: [
-          // ١. هێدەر و دوگمەی گەڕانەوەی سەرەوە
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: const BoxDecoration(color: Color(0xFF0F172A), border: Border(bottom: BorderSide(color: Color(0xFF1E293B), width: 1))),
-            child: Row(children: [
-              GestureDetector(
-                onTap: () => Navigator.pop(context), 
-                child: Container(
-                  padding: const EdgeInsets.all(8), 
-                  decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(10)), 
-                  child: Icon(
-                    appLanguageGlobal == 'English' ? Icons.arrow_back_ios_new_rounded : Icons.arrow_back_ios_rounded, 
-                    color: Colors.white, 
-                    size: 16
-                  )
-                )
+        backgroundColor: const Color(0xFF0B121F), 
+        body: SafeArea(
+          child: Column(
+            children: [
+              // ١. هێدەر و دوگمەی گەڕانەوەی سەرەوە
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: const BoxDecoration(color: Color(0xFF0F172A), border: Border(bottom: BorderSide(color: Color(0xFF1E293B), width: 1))),
+                child: Row(children: [
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context), 
+                    child: Container(
+                      padding: const EdgeInsets.all(8), 
+                      decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(10)), 
+                      child: Icon(
+                        appLanguageGlobal == 'English' ? Icons.arrow_back_ios_new_rounded : Icons.arrow_back_ios_rounded, 
+                        color: Colors.white, 
+                        size: 16
+                      )
+                    )
+                  ),
+                  const SizedBox(width: 12),
+                  Text(office.emoji, style: const TextStyle(fontSize: 22)),
+                  const SizedBox(width: 8),
+                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    // گۆڕینی ناوی نووسینگە لێرەش بۆ داینامیکی لۆکاڵی تا بێ کەموکوڕی بێت
+                    Text(getTxt('office_${office.id}'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white), maxLines: 1, overflow: TextOverflow.ellipsis), // 🔹 وەرگێڕانی ناوی نووسینگە لێرەدا
+                    Text(getCityName(office.city), style: TextStyle(fontSize: 10, color: Colors.white.withOpacity(0.5))),
+                  ])),
+                ]),
               ),
-              const SizedBox(width: 12),
-              Text(office.emoji, style: const TextStyle(fontSize: 22)),
-              const SizedBox(width: 8),
-              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(office.name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white), maxLines: 1, overflow: TextOverflow.ellipsis),
-                Text(getCityName(office.city), style: TextStyle(fontSize: 10, color: Colors.white.withOpacity(0.5))),
-              ])),
-            ]),
-          ),
-          
-          // ٢. بەشی سێ لاکێشە ڕێکخراوەکە بەبێ جەنجاڵی ڕەخنە و سەبسکرایب
-          Expanded(child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(children: [
               
-              // 🔴 لاکێشەی یەکەم: کاتی کارکردن، کردنەوە و داخستن
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF131C2E),
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: Colors.white.withOpacity(0.08), width: 1.2),
-                ),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Row(children: [
-                    const Icon(Icons.access_time_filled_rounded, color: Color(0xFFECC880), size: 18),
-                    const SizedBox(width: 8),
-                    Text(
-                      appLanguageGlobal == 'English' ? 'Working Hours' : 'کاتی کارکردنی نوسینگە',
-                      style: const TextStyle(color: Color(0xFFECC880), fontSize: 13, fontWeight: FontWeight.bold),
-                    ),
-                  ]),
-                  const SizedBox(height: 12),
-                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                    Text('${getTxt('working_hours')}:', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
-                    Text('${formatDisplayNumbers(office.openTime)} - ${formatDisplayNumbers(office.closeTime)}', style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
-                  ]),
-                  const SizedBox(height: 8),
-                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                    Text(appLanguageGlobal == 'English' ? 'Live Status:' : 'باری ئێستا:', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: office.isOpen ? const Color(0xFF4ADE80).withOpacity(0.12) : Colors.grey.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(children: [
-                        Container(width: 6, height: 6, decoration: BoxDecoration(color: office.isOpen ? const Color(0xFF4ADE80) : Colors.grey, shape: BoxShape.circle)),
-                        const SizedBox(width: 5),
-                        Text(openTxt, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: office.isOpen ? const Color(0xFF4ADE80) : Colors.grey)),
-                      ]),
-                    ),
-                  ]),
-                ]),
-              ),
-              const SizedBox(height: 12),
-
-              // 🔴 لاکێشەی دووەم: ناونیشان و خزمەتگوزارییەکان
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF131C2E),
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: Colors.white.withOpacity(0.08), width: 1.2),
-                ),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Row(children: [
-                    const Icon(Icons.home_work_rounded, color: Color(0xFF00C6FF), size: 18),
-                    const SizedBox(width: 8),
-                    Text(
-                      appLanguageGlobal == 'English' ? 'Address & Services' : 'ناونیشان و خزمەتگوزارییەکان',
-                      style: const TextStyle(color: Color(0xFF00C6FF), fontSize: 13, fontWeight: FontWeight.bold),
-                    ),
-                  ]),
-                  const SizedBox(height: 12),
-                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                    Text('${getTxt('address_label')}:', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
-                    Text('${getCityName(office.city)} - ${office.address}', style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
-                  ]),
-                  const SizedBox(height: 12),
-                  Text('${getTxt('services_label')}:', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
-                  const SizedBox(height: 8),
-                  Wrap(spacing: 6, runSpacing: 6, children: office.services.map((s) => Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(colors: [Color(0xFF0072FF), Color(0xFF00C6FF)]),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(s, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
-                  )).toList()),
-                ]),
-              ),
-              const SizedBox(height: 12),
-
-              // 🔴 لاکێشەی سێیەم: ناو و ژمارەی کارمەندان (مۆزەفەکان) بە پیشاندانی لایڤی تەلەفۆن و زمانەکەی بە تەواوی
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF131C2E),
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: Colors.white.withOpacity(0.08), width: 1.2),
-                ),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Row(children: [
-                    const Icon(Icons.people_alt_rounded, color: Color(0xFF76C917), size: 18),
-                    const SizedBox(width: 8),
-                    Text(
-                      staffSectionTitle, // تایتڵی وەرگێڕدراوی داینامیکی لێرەیە
-                      style: const TextStyle(color: Color(0xFF76C917), fontSize: 13, fontWeight: FontWeight.bold),
-                    ),
-                  ]),
-                  const SizedBox(height: 12),
-                  ...staffList.map((staff) => Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF0B121F),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white.withOpacity(0.04)),
-                    ),
-                    child: Row(children: [
-                      // کێشانی مۆدێرنی ناو و ژمارەی کارمەندان لە ژێر یەکدی بە زمانە فەرمییەکە بە هاوئاراستەی دروست
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('$staffPrefix${staff['name']!}', style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 4),
-                          Text(
-                            formatDisplayNumbers(staff['phone']!), 
-                            style: TextStyle(color: Colors.white.withOpacity(0.45), fontSize: 10.5, fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                      const Spacer(),
-                      Row(children: [
-                        // دوگمەی واتسئەپی کارمەند لەگەڵ نامەی وەرگێڕدراوی مۆدێرن بەگوێرەی زمانی مۆبایلەکەی
-                        GestureDetector(
-                          onTap: () async {
-                            final cleanNumber = staff['phone']!.replaceAll(' ', '').replaceAll('+', '');
-                            // لۆجیکی ناردنی خۆکاری نامەکە بە زمانی مۆبایلی کڕیار بێ کێشە
-                            final message = Uri.encodeComponent(
-                              appLanguageGlobal == 'English'
-                                  ? "Hello, I am using the app and have a question regarding your office..."
-                                  : (appLanguageGlobal == 'العربية'
-                                      ? "مرحباً يا فندم، أنا أحد مستخدمي التطبيق ولدي استفسار بخصوص مكتبكم..."
-                                      : "سڵاو کارمەندی بەڕێز، من یەکێک لە بەکارهێنەرانی ئەپەکەم و پرسیارم هەیە سەبارەت بە نوسینگەکەتان..."),
-                            );
-                            final Uri url = Uri.parse('https://wa.me/$cleanNumber?text=$message');
-                            if (await canLaunchUrl(url)) {
-                              await launchUrl(url, mode: LaunchMode.externalApplication);
-                            }
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(5),
-                            decoration: BoxDecoration(color: const Color(0xFF25D366).withOpacity(0.12), shape: BoxShape.circle),
-                            child: const Icon(Icons.chat_bubble_rounded, color: Color(0xFF25D366), size: 12),
-                          ),
+              // ٢. بەشی سێ لاکێشە ڕێکخراوەکە بەبێ جەنجاڵی ڕەخنە و سەبسکرایب
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      
+                      // 🔴 لاکێشەی یەکەم: کاتی کارکردن، کردنەوە و داخستن
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF131C2E),
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(color: Colors.white.withOpacity(0.08), width: 1.2),
                         ),
-                        const SizedBox(width: 8),
-                        // دوگمەی تەلەفۆنی کارمەند
-                        GestureDetector(
-                          onTap: () async {
-                            final cleanNumber = staff['phone']!.replaceAll(' ', '');
-                            final Uri url = Uri.parse('tel:$cleanNumber');
-                            if (await canLaunchUrl(url)) {
-                              await launchUrl(url);
-                            }
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(5),
-                            decoration: BoxDecoration(color: const Color(0xFF0072FF).withOpacity(0.12), shape: BoxShape.circle),
-                            child: const Icon(Icons.phone_iphone_rounded, color: Color(0xFF4FC3F7), size: 14),
-                          ),
-                        ),
-                      ]),
-                    ]),
-                  )),
-                ]),
-              ),
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Row(children: [
+                            const Icon(Icons.access_time_filled_rounded, color: Color(0xFFECC880), size: 18),
+                            const SizedBox(width: 8),
+                            Text(
+                              getTxt('office_working_hours_header'), 
+                              style: const TextStyle(color: Color(0xFFECC880), fontSize: 13, fontWeight: FontWeight.bold),
+                            ),
+                          ]),
+                          const SizedBox(height: 12),
+                          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                            Text('${getTxt('working_hours')}:', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
+                            Text('${formatDisplayNumbers(office.openTime)} - ${formatDisplayNumbers(office.closeTime)}', style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+                          ]),
+                          const SizedBox(height: 8),
+                          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                            Text(getTxt('office_live_status'), style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)), 
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: office.isOpen ? const Color(0xFF4ADE80).withOpacity(0.12) : Colors.grey.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(children: [
+                                Container(width: 6, height: 6, decoration: BoxDecoration(color: office.isOpen ? const Color(0xFF4ADE80) : Colors.grey, shape: BoxShape.circle)),
+                                const SizedBox(width: 5),
+                                Text(openTxt, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: office.isOpen ? const Color(0xFF4ADE80) : Colors.grey)),
+                              ]),
+                            ),
+                          ]),
+                        ]),
+                      ),
+                      const SizedBox(height: 12),
 
-            ]),
-          )),
-        ])),
+                      // 🔴 لاکێشەی دووەم: ناونیشان و خزمەتگوزارییەکان
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF131C2E),
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(color: Colors.white.withOpacity(0.08), width: 1.2),
+                        ),
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Row(children: [
+                            const Icon(Icons.home_work_rounded, color: Color(0xFF00C6FF), size: 18),
+                            const SizedBox(width: 8),
+                            Text(
+                              getTxt('office_address_services_header'), 
+                              style: const TextStyle(color: Color(0xFF00C6FF), fontSize: 13, fontWeight: FontWeight.bold),
+                            ),
+                          ]),
+                          const SizedBox(height: 12),
+                          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                            Text('${getTxt('address_label')}:', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
+                            Text('${getCityName(office.city)} - ${office.address}', style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+                          ]),
+                          const SizedBox(height: 12),
+                          Text('${getTxt('services_label')}:', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
+                          const SizedBox(height: 8),
+                          Wrap(spacing: 6, runSpacing: 6, children: office.services.map((s) => Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(colors: [Color(0xFF0072FF), Color(0xFF00C6FF)]),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              getTxt(s), 
+                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)
+                            ),
+                          )).toList()),
+                        ]),
+                      ),
+                      const SizedBox(height: 12),
+
+                      // 🔴 لاکێشەی سێیەم: ناو و ژمارەی کارمەندان (مۆزەفەکان) بە شێوازی ئاسۆیی نوێ و بێ هاوتا
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF131C2E),
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(color: Colors.white.withOpacity(0.08), width: 1.2),
+                        ),
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Row(children: [
+                            const Icon(Icons.people_alt_rounded, color: Color(0xFF76C917), size: 18),
+                            const SizedBox(width: 8),
+                            Text(
+                              staffSectionTitle, 
+                              style: const TextStyle(color: Color(0xFF76C917), fontSize: 13, fontWeight: FontWeight.bold),
+                            ),
+                          ]),
+                          const SizedBox(height: 12),
+                          ...staffList.map((staff) => Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF0B121F),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.white.withOpacity(0.04)),
+                            ),
+                            child: Row(children: [
+                              Expanded(
+                                child: Wrap(
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  children: [
+                                    Text(
+                                      '$staffPrefix${staff['name']!}', 
+                                      style: const TextStyle(color: Colors.white, fontSize: 12.5, fontWeight: FontWeight.bold)
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      '•', 
+                                      style: TextStyle(color: Colors.white.withOpacity(0.25), fontSize: 12)
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      formatDisplayNumbers(staff['phone']!), 
+                                      textDirection: TextDirection.ltr, // 🔹 ڕێگریکردنی لایڤ لە تێکچوونی سەرەوژووری ژمارەی مۆبایلی کارمەندان بەپێی وێنەکە
+                                      style: TextStyle(color: Colors.white.withOpacity(0.45), fontSize: 11.5, fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Row(children: [
+                                GestureDetector(
+                                  onTap: () async {
+                                    final cleanNumber = staff['phone']!.replaceAll(' ', '').replaceAll('+', '');
+                                    final message = Uri.encodeComponent(
+                                      appLanguageGlobal == 'English'
+                                          ? "Hello, I am using the app and have a question regarding your office..."
+                                          : (appLanguageGlobal == 'العربية'
+                                              ? "مرحباً يا فندم، أنا أحد مستخدمي التطبيق ولدي استفسار بخصوص مكتبكم..."
+                                              : "سڵاو کارمەندی بەڕێز، من یەکێک لە بەکارهێنەرانی ئەپەکەم و پرسیارم هەیە سەبارەت بە نوسینگەکەتان..."),
+                                    );
+                                    final Uri url = Uri.parse('https://wa.me/$cleanNumber?text=$message');
+                                    if (await canLaunchUrl(url)) {
+                                      await launchUrl(url, mode: LaunchMode.externalApplication);
+                                    }
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(5),
+                                    decoration: BoxDecoration(color: const Color(0xFF25D366).withOpacity(0.12), shape: BoxShape.circle),
+                                    child: const Icon(Icons.chat_bubble_rounded, color: Color(0xFF25D366), size: 12),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                GestureDetector(
+                                  onTap: () async {
+                                    final cleanNumber = staff['phone']!.replaceAll(' ', '');
+                                    final Uri url = Uri.parse('tel:$cleanNumber');
+                                    if (await canLaunchUrl(url)) {
+                                      await launchUrl(url);
+                                    }
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(5),
+                                    decoration: BoxDecoration(color: const Color(0xFF0072FF).withOpacity(0.12), shape: BoxShape.circle),
+                                    child: const Icon(Icons.phone_iphone_rounded, color: Color(0xFF4FC3F7), size: 13),
+                                  ),
+                                ),
+                              ]),
+                            ]),
+                          )),
+                        ]),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

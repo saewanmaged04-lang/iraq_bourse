@@ -3,10 +3,11 @@
 
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart'; // هاوردەکردنی url_launcher
+import 'package:url_launcher/url_launcher.dart';
 import '../global_state.dart';
 import '../models/office_model.dart';
 import '../widgets/auth_sheets.dart';
+import '../main.dart'; // هاوردەکردنی فایلی سەرەکی بۆ ناسینەوەی BoursePremiumApp [1]
 import 'cities_screen.dart';
 import 'currencies_screen.dart';
 import 'calculator_screen.dart';
@@ -30,7 +31,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
   late AnimationController _refreshRotationController;
   late Timer _refreshTimer;
 
-  // --- داتای بۆرسەی شارەکان (ئەم نرخە لێرە بگۆڕە، حاسیبەکە خۆی دەیخوێنێتەوە) ---
   final List<Map<String, String>> pinnedRates = [
     {'city': 'بەغداد', 'buy': '١٥٣,٨٥٠', 'sell': '١٥٤,٢٥٠', 'status': 'up'},
     {'city': 'سلێمانی', 'buy': '١٥٣,٦٥٠', 'sell': '١٥٤,٠٠٠', 'status': 'neutral'},
@@ -39,9 +39,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
 
   final List<Map<String, String>> cities = [
     {'name': 'هەولێر', 'buy': '١٥٣,٧٥٠', 'sell': '١٥٤,١٠٠', 'status': 'up'},
-    {'name': 'سلێمانی', 'buy': '١٥٣,٨٠٠', 'sell': '١٥٤,٨٠٠', 'status': 'neutral'}, 
+    {'name': 'سلێمانی', 'buy': '١٥٣,٨٠٠', 'sell': '١٥٤,٨٠٠', 'status': 'neutral'},
     {'name': 'بەغداد (کِفاح)', 'buy': '١٥٣,٩٥٠', 'sell': '١٥٤,٣٠٠', 'status': 'neutral'},
-    {'name': 'کەڕادە', 'buy': '١٥٤,٠٠٠', 'sell': '١٥٤,٤٠٠', 'status': 'up'},
+    {'name': 'کەڕادە', 'buy': '١٥٤,٠٠٠', 'sell': '١٥٤,٤٠0', 'status': 'up'},
     {'name': 'حاریشیە', 'buy': '١٥٣,٩٥٠', 'sell': '١٥٤,٣٥٠', 'status': 'neutral'},
     {'name': 'کەرکوک', 'buy': '١٥٣,٩٠٠', 'sell': '١٥٤,٢٥٠', 'status': 'down'},
     {'name': 'دهۆک', 'buy': '١٥٣,٨٥٠', 'sell': '١٥٤,٢٠٠', 'status': 'neutral'},
@@ -108,30 +108,19 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
     final double amount = double.tryParse(_amountVal.replaceAll(',', '')) ?? 0.0;
     final double buyPrice = double.tryParse(_buyPriceVal.replaceAll(',', '')) ?? 0.0;
     final double sellPrice = double.tryParse(_sellPriceVal.replaceAll(',', '')) ?? 0.0;
-    if (amount <= 0 || buyPrice <= 0 || sellPrice <= 0) return;
+    if (amount <= 0 || buyPrice <= 0 || sellPrice <= 0) {
+      return;
+    }
     
     double rate = _rateToIQD['دۆلار USD'] ?? (_getCurrentBaseUSDValue() * 100);
     final bool isIQD = _selectedCurrency.contains('IQD');
 
-    double amountInIQD;
-    double totalSell;
-
-    if (isIQD) {
-      amountInIQD = amount;
-      double usdBought = amountInIQD / (buyPrice / 100.0);
-      totalSell = usdBought * (sellPrice / 100.0);
-    } else {
-      amountInIQD = amount * (buyPrice / 100.0);
-      totalSell = amount * (sellPrice / 100.0);
-    }
-
+    double amountInIQD = isIQD ? amount : amount * (buyPrice / 100.0);
+    double totalSell = isIQD ? (amount / (buyPrice / 100.0)) * (sellPrice / 100.0) : amount * (sellPrice / 100.0);
     double commission = double.tryParse(_commissionVal) ?? 0.0;
     double commAmount = amountInIQD * (commission / 100);
     double profitIQD = totalSell - amountInIQD - commAmount;
-
-    double profitCurrency = isIQD
-        ? profitIQD
-        : profitIQD / (rate / 100.0);
+    double profitCurrency = isIQD ? profitIQD : profitIQD / (rate / 100.0);
 
     setState(() {
       _profitResult = {
@@ -140,10 +129,27 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
         'profitPercent': (profitIQD / amountInIQD) * 100,
         'totalSell': totalSell,
         'isProfit': profitIQD >= 0,
-        'currency': _selectedCurrency.replaceAll(' دۆلار', '').replaceAll(' دینار', '').replaceAll(' تمەن', '').replaceAll(' یۆرۆ', '').replaceAll(' پاوەند', ''),
+        'currency': 'USD',
         'commissionAmount': commAmount,
       };
     });
+  }
+
+  // مێتۆدی هۆشمەندی گۆڕینی زمانی ئەپەکە لای شاشەی قوفڵکراو
+  void _toggleLanguageInsideLock() {
+    setState(() {
+      if (appLanguageGlobal == 'کوردی') {
+        appLanguageGlobal = 'العربية';
+      } else if (appLanguageGlobal == 'العربية') {
+        appLanguageGlobal = 'English';
+      } else {
+        appLanguageGlobal = 'کوردی';
+      }
+      if (appLanguageGlobal == 'English') {
+        appNumeralStyleGlobal = '123';
+      }
+    });
+    BoursePremiumApp.rebuild(context); // نوێکردنەوەی لایڤی سەرانسەری ئەپەکە
   }
 
   @override
@@ -203,8 +209,20 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
       decoration: const BoxDecoration(color: Color(0xFF0F172A), border: Border(bottom: BorderSide(color: Color(0xFF1E293B), width: 1))),
       child: Stack(alignment: Alignment.center, children: [
         Align(alignment: Alignment.centerLeft, child: GestureDetector(onTap: () async { await Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())); setState(() {}); }, child: Row(mainAxisSize: MainAxisSize.min, children: [Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: const Color(0xFF0072FF).withOpacity(0.12), borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFF00C6FF).withOpacity(0.35))), child: const Icon(Icons.settings_rounded, color: Color(0xFF00C6FF), size: 14)), const SizedBox(width: 6), Text(getTxt('settings_title'), style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white.withOpacity(0.8)))]))),
-        Center(child: Text(getTxt('app_subtitle'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 0.5))),
-        Align(alignment: Alignment.centerRight, child: Column(crossAxisAlignment: CrossAxisAlignment.end, mainAxisSize: MainAxisSize.min, children: [Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.calendar_month_rounded, size: 10, color: Color(0xFF00C6FF)), const SizedBox(width: 3), Text(formatDisplayNumbers('٦/٦/٢٠٢٦'), style: const TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.w700))]), const SizedBox(height: 1), Text(appLanguageGlobal == 'English' ? 'Saturday • 12:00 AM' : (appLanguageGlobal == 'العربية' ? 'السبت • ١٢:٠٠ ص' : 'شەممە • ١٢:٠٠ پ.ن'), style: const TextStyle(fontSize: 8, color: Color(0xFF4ADE80), fontWeight: FontWeight.w600))])),
+        
+        Row(
+          mainAxisSize: MainAxisSize.min, 
+          children: [
+            const Icon(Icons.trending_up_rounded, color: Color(0xFFECC880), size: 16), 
+            const SizedBox(width: 6),
+            Text(
+              getTxt('app_subtitle'), 
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 0.3),
+            ),
+          ]
+        ),
+        
+        Align(alignment: Alignment.centerRight, child: Column(crossAxisAlignment: CrossAxisAlignment.end, mainAxisSize: MainAxisSize.min, children: [Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.calendar_month_rounded, size: 10, color: Color(0xFF00C6FF)), const SizedBox(width: 3), Text(formatDisplayNumbers('6/6/2026'), style: const TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.w700))]), const SizedBox(height: 1), Text(getTxt('header_time'), style: const TextStyle(fontSize: 8, color: Color(0xFF4ADE80), fontWeight: FontWeight.w600))])),
       ]),
     );
   }
@@ -216,25 +234,22 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
       child: Row(children: [
         const Icon(Icons.campaign_rounded, color: Colors.orangeAccent, size: 16),
         const SizedBox(width: 8),
-        Expanded(child: Text(appLanguageGlobal == 'English' ? 'News: Rates updated.' : 'هەواڵ: نرخەکان نوێکرانەوە.', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white), overflow: TextOverflow.ellipsis)),
+        Expanded(child: Text(getTxt('news_ticker'), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white), overflow: TextOverflow.ellipsis)),
         GestureDetector(onTap: _triggerRefresh, child: Stack(alignment: Alignment.center, children: [SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 1.5, valueColor: AlwaysStoppedAnimation<Color>(const Color(0xFF00C6FF).withOpacity(0.12)), value: 1.0)), RotationTransition(turns: _refreshRotationController, child: const Icon(Icons.sync_rounded, color: Color(0xFF76C917), size: 14))])),
       ]),
     );
   }
 
-  // ============================================================================
-  // کێشانی ناڤیگەیشن باڕی قەوسی سەرئاوکەوتوو بە دیزاینی خنجیلانە و بچووککراوە
-  // ============================================================================
   Widget _buildBottomNav() {
     return Directionality(
       textDirection: appLanguageGlobal == 'English' ? TextDirection.ltr : TextDirection.rtl, 
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12), // کەمێک دوورخراوەتەوە لە خوارەوە
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12), 
         child: Container(
-          height: 58, // ✅ دیاریکردنی بەرزی بۆ بچووککردنەوەی تەواوی ناڤیگەیشن باڕەکە
+          height: 56, 
           decoration: BoxDecoration(
             color: const Color(0xFF131C2E).withOpacity(0.92), 
-            borderRadius: BorderRadius.circular(18), 
+            borderRadius: BorderRadius.circular(16), 
             border: Border.all(
               color: const Color(0xFFECC880).withOpacity(0.35), 
               width: 1.2,
@@ -249,25 +264,31 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
             ],
           ),
           child: ClipRRect( 
-            borderRadius: BorderRadius.circular(18),
-            child: BottomNavigationBar(
-              backgroundColor: Colors.transparent, 
-              elevation: 0, 
-              currentIndex: _selectedIndex, 
-              selectedItemColor: Colors.blueAccent, 
-              unselectedItemColor: Colors.grey, 
-              onTap: (i) => setState(() => _selectedIndex = i), 
-              type: BottomNavigationBarType.fixed, 
-              iconSize: 20, // ✅ بچووککردنەوەی ئایکۆنەکان
-              selectedFontSize: 9.5, // ✅ بچووککردنەوەی فۆنت
-              unselectedFontSize: 9.5, 
-              items: [
-                BottomNavigationBarItem(icon: const Icon(Icons.trending_up), label: getTxt('cities_tab')), 
-                BottomNavigationBarItem(icon: const Icon(Icons.currency_exchange), label: getTxt('currencies_tab')), 
-                BottomNavigationBarItem(icon: const Icon(Icons.analytics_rounded), label: getTxt('analysis_tab')), 
-                BottomNavigationBarItem(icon: const Icon(Icons.calculate), label: getTxt('calculator_tab')), 
-                BottomNavigationBarItem(icon: const Icon(Icons.store_rounded), label: getTxt('offices_tab'))
-              ]
+            borderRadius: BorderRadius.circular(16),
+            child: Theme(
+              data: Theme.of(context).copyWith(
+                splashColor: Colors.transparent, 
+                highlightColor: Colors.transparent,
+              ),
+              child: BottomNavigationBar(
+                backgroundColor: Colors.transparent, 
+                elevation: 0, 
+                currentIndex: _selectedIndex, 
+                selectedItemColor: Colors.blueAccent, 
+                unselectedItemColor: Colors.grey, 
+                onTap: (i) => setState(() => _selectedIndex = i), 
+                type: BottomNavigationBarType.fixed, 
+                iconSize: 21, 
+                selectedFontSize: 9.0, 
+                unselectedFontSize: 9.0, 
+                items: [
+                  BottomNavigationBarItem(icon: const Icon(Icons.trending_up_rounded), label: getTxt('cities_tab')), 
+                  BottomNavigationBarItem(icon: const Icon(Icons.monetization_on_rounded), label: getTxt('currencies_tab')), 
+                  BottomNavigationBarItem(icon: const Icon(Icons.assessment_rounded), label: getTxt('analysis_tab')), 
+                  BottomNavigationBarItem(icon: const Icon(Icons.calculate_rounded), label: getTxt('calculator_tab')), 
+                  BottomNavigationBarItem(icon: const Icon(Icons.store_rounded), label: getTxt('offices_tab'))
+                ]
+              ),
             ),
           ),
         ),
@@ -280,12 +301,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
       case 0:
         return isCitiesLockedGlobal ? _buildLockedScreen(getTxt('cities_tab')) : CitiesScreen(pinnedRates: pinnedRates, cities: cities, citiesScrollController: _citiesScrollController, onPinUpdated: (idx, c, b, s, st) { setState(() => pinnedRates[idx] = {'city': c, 'buy': b, 'sell': s, 'status': st}); }, onSwap: (f, t) { setState(() { final temp = cities[f]; cities[f] = cities[t]; cities[t] = temp; }); });
       case 1:
-        return isCurrenciesLockedGlobal ? _buildLockedScreen(getTxt('currencies_tab')) : CurrenciesScreen(currencyData: getDynamicCurrencyData(), formatPrice: (p) => p.toString());
+        return isCurrenciesLockedGlobal ? _buildLockedScreen(getTxt('currencies_tab')) : CurrenciesScreen(currencyData: getDynamicCurrencyData(), formatPrice: (p) => p.toString(),);
       case 2:
         return const MarketAnalysisScreen(); 
       case 3:
         return Padding(
-          // ✅ هێنانە سەرەوەی حاسیبەکە بە بڕی ٧٢ پێکسڵ بۆ ئەوەی کیبۆردەکە نەچێتە ژێر ناڤیگەیشن باڕە سەرئاوکەوتووەکە
           padding: const EdgeInsets.only(bottom: 72), 
           child: CalculatorScreen( 
             tabController: _tabController,
@@ -316,12 +336,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
                 }
 
                 if (key == '⌫') {
-                  if (current.isNotEmpty) current = current.substring(0, current.length - 1);
+                  if (current.isNotEmpty) {
+                    current = current.substring(0, current.length - 1);
+                  }
                 } else if (key == 'C') {
                   current = '';
                   _profitResult = null;
                 } else {
-                  if (current.length < 12) current += key;
+                  if (current.length < 12) {
+                    current += key;
+                  }
                 }
 
                 if (_activeField == 'amount') {
@@ -340,32 +364,55 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
             onConverterTap: (key) {
               setState(() {
                 String current = _fromAmount.replaceAll(',', '');
-                if (key == '⌫') { if (current.isNotEmpty) current = current.substring(0, current.length - 1); if (current.isEmpty) current = '0'; }
-                else if (key == 'C') { current = '0'; }
-                else { if (current.length < 12) current += key; }
+                if (key == '⌫') {
+                  if (current.isNotEmpty) {
+                    current = current.substring(0, current.length - 1);
+                  }
+                  if (current.isEmpty) {
+                    current = '0';
+                  }
+                } else if (key == 'C') {
+                  current = '0';
+                } else {
+                  if (current.length < 12) {
+                    current += key;
+                  }
+                }
                 _fromAmount = current;
                 _calculateConversionFromStr();
               });
             },
             onCalculateProfit: _calculateProfit,
             onConverterFieldsChanged: (curr, rate, isFrom) {
-              setState(() { if (isFrom) _fromCurrencySelected = curr; else _toCurrencySelected = curr; _calculateConversionFromStr(); });
+              setState(() {
+                if (isFrom) {
+                  _fromCurrencySelected = curr;
+                } else {
+                  _toCurrencySelected = curr;
+                }
+                _calculateConversionFromStr();
+              });
             },
-            onProfitCurrencyChanged: (curr) { setState(() { _selectedCurrency = curr; _calculateProfit(); }); },
-            onFieldTapped: (field, val) { setState(() { _activeField = field; }); },
+            onProfitCurrencyChanged: (curr) {
+              setState(() {
+                _selectedCurrency = curr;
+                _calculateProfit();
+              });
+            },
+            onFieldTapped: (field, val) {
+              setState(() {
+                _activeField = field;
+              });
+            },
           ),
         );
       default: return OfficesScreen(offices: allOffices);
     }
   }
 
+  // ✅ لێرەدا ئایکۆنی زمان و نووسینە بچووکەکە بە تەواوی ئاوێتەکراون لای شاشەی قوفڵکراو
   Widget _buildLockedScreen(String sectionName) {
-    final String lockedDescText = appLanguageGlobal == 'English'
-        ? "Your account usage period has expired. To renew, simply tap the WhatsApp icon below to send us an automatic account renewal message."
-        : (appLanguageGlobal == 'العربية'
-            ? "لقد انتهت فترة استخدام حسابك. للتجديد, فقط اضغط على أيقونة الواتساب أدناه لإرسال رسالة تجديد تلقائية إلينا."
-            : "ماوەی بەکارهێنانی ئەژمارەکەت بەسەرچوو، بۆ نوێکردنەوە تەنیا دەست بنێ بە ئایکۆنی وەتساپی خوارەوە بۆ ئەوەی نامەی تۆماتیکی نوێنکردنەوەی ئەژمارەکەتمان پێ بگات ...");
-
+    final bool isLtr = appLanguageGlobal == 'English';
     return Container(
       color: const Color(0xFF0B121F), 
       width: double.infinity,
@@ -377,177 +424,128 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
         decoration: BoxDecoration(
           color: const Color(0xFF131C2E), 
           borderRadius: BorderRadius.circular(20), 
-          border: Border.all(
-            color: Colors.white.withOpacity(0.08), 
-            width: 1.2,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.5), 
-              blurRadius: 28,
-              spreadRadius: 1,
-              offset: const Offset(0, 8),
-            )
-          ],
+          border: Border.all(color: Colors.white.withOpacity(0.08), width: 1.2),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 28, spreadRadius: 1, offset: const Offset(0, 8))],
         ),
-        // گۆڕینی لایڤی تابلۆکە لەسەر شاشەی سەرەکی بەگوێرەی باری لۆگینبوون
-        child: isLoggedInGlobal 
-            ? _buildRegistrationSuccessView() 
-            : _buildAccountExpiredView(),      
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            isLoggedInGlobal ? _buildRegistrationSuccessView() : _buildAccountExpiredView(),
+            
+            // 🔹 ئایکۆنی مۆدێرنی زمان لای سەرەوەی ڕاست بە وەرگێڕانی تێکستی بچووکی لای ژێرەوەی بێ هیچ کەموکوڕی و کێشەیەک
+            Positioned(
+              top: -8, 
+              right: isLtr ? -6 : null, 
+              left: isLtr ? null : -6,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  GestureDetector(
+                    onTap: _toggleLanguageInsideLock, 
+                    child: Container(
+                      padding: const EdgeInsets.all(7),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.05),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white.withOpacity(0.08)),
+                      ),
+                      child: const Icon(
+                        Icons.g_translate_rounded, 
+                        color: Color(0xFFECC880), 
+                        size: 15
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  // 🔹 نیشاندانی دەقی بچووکی داینامیکی لۆکاڵ (اللغة لای کوردی، زمان لای عەرەبی، Language لای ئینگلیزی)
+                  Text(
+                    appLanguageGlobal == 'کوردی' 
+                        ? 'اللغة' 
+                        : (appLanguageGlobal == 'العربية' ? 'زمان' : 'Language'),
+                    style: TextStyle(
+                      color: const Color(0xFFECC880).withOpacity(0.55),
+                      fontSize: 8.0, // قەبارەی فۆنتی زۆر بچووک بۆ نیشاندانی زمان
+                      fontWeight: FontWeight.bold,
+                      height: 1.2,
+                    ),
+                  ),
+                ],
+              ),      
+            ),
+          ],
+        ),      
       ),
     );
   }
 
-  // --- تابلۆی یەکەم: کاتژمێرە لمییەکە ---
   Widget _buildAccountExpiredView() {
     return Column(
       mainAxisSize: MainAxisSize.min, 
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Container(
-          width: 85,
-          height: 85,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: const Color(0xFFECC880).withOpacity(0.45),
-              width: 1.5,
-            ),
-          ),
-          child: ClipOval(
-            child: Image.asset(
-              'assets/fanus.png', 
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return const Icon(Icons.hourglass_empty_rounded, size: 40, color: Color(0xFFECC880));
-              },
-            ),
-          ),
+          width: 85, height: 85,
+          decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: const Color(0xFFECC880).withOpacity(0.45), width: 1.5)),
+          child: ClipOval(child: Image.asset('assets/fanus.png', fit: BoxFit.cover, errorBuilder: (c, e, s) => const Icon(Icons.hourglass_empty_rounded, size: 40, color: Color(0xFFECC880)))),
         ),
         const SizedBox(height: 14),
-        Text(
-          getTxt('locked_title'),
-          style: const TextStyle(
-            color: Color(0xFFECC880), 
-            fontSize: 16.5,
-            fontWeight: FontWeight.bold,
-          ),
-          textAlign: TextAlign.center,
-        ),
+        Text(getTxt('locked_title'), style: const TextStyle(color: Color(0xFFECC880), fontSize: 16.5, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
         const SizedBox(height: 8),
         Text(
-          appLanguageGlobal == 'English'
-              ? "Your account usage period has expired. To renew, simply tap the WhatsApp icon below to send us an automatic account renewal message."
-              : (appLanguageGlobal == 'العربية'
-                  ? "لقد انتهت فترة استخدام حسابك. للتجديد, فقط اضغط على أيقونة الواتساب أدناه لإرسال رسالة تجديد تلقائية إلينا."
-                  : "ماوەی بەکارهێنانی ئەژمارەکەت بەسەرچوو، بۆ نوێکردنەوە تەنیا دەست بنێ بە ئایکۆنی وەتساپی خوارەوە بۆ ئەوەی نامەی تۆماتیکی نوێنکردنەوەی ئەژمارەکەتمان پێ بگات ..."), 
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.85),
-            fontSize: 10.5,
-            fontWeight: FontWeight.w600,
-            height: 1.45,
-          ),
-          textAlign: TextAlign.center,
+          getTxt('locked_desc'), 
+          style: TextStyle(color: Colors.white.withOpacity(0.85), fontSize: 10.5, fontWeight: FontWeight.w600, height: 1.45), textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 6),
+        
+        const SizedBox(height: 20), 
+        
         Text(
-          getTxt('locked_note'),
+          getTxt('locked_note'), 
           style: const TextStyle(
-            color: Color(0xFFECC880),
-            fontSize: 8.5,
-            fontWeight: FontWeight.bold,
-            height: 1.4,
-          ),
+            color: Color(0xFFECC880), 
+            fontSize: 11.0, 
+            fontWeight: FontWeight.bold, 
+            height: 1.4
+          ), 
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 10), 
+        
         _buildLockScreenContactRow('+964 773 145 4737'),
         _buildLockScreenContactRow('+964 773 154 7371'), 
         const SizedBox(height: 14),
         GestureDetector(
-          onTap: () {
-            showRegisterPhoneBottomSheet(context, onStateChanged: () {
-              setState(() {});
-            });
-          },
+          onTap: () { showRegisterPhoneBottomSheet(context, onStateChanged: () { setState(() {}); }); },
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 10),
-            decoration: BoxDecoration(
-              color: const Color(0xFFD54C4C), 
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFD54C4C).withOpacity(0.2),
-                  blurRadius: 10,
-                  spreadRadius: 1,
-                )
-              ],
-            ),
-            child: Center(
-              child: Text(
-                getTxt('lock_create_account_btn'),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
+            decoration: BoxDecoration(color: const Color(0xFFD54C4C), borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: const Color(0xFFD54C4C).withOpacity(0.2), blurRadius: 10, spreadRadius: 1)]),
+            child: Center(child: Text(getTxt('lock_create_account_btn'), style: const TextStyle(color: Colors.white, fontSize: 12.5, fontWeight: FontWeight.bold))),
           ),
         ),
       ],
     );
   }
 
-  // --- تابلۆی دووەم: بازنە سەوزەکە پاش دروستکردنی ئەژمار بە جێگیری دەمێنێتەوە ---
   Widget _buildRegistrationSuccessView() {
     return Column(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: MainAxisSize.min, 
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Container(
           padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: const Color(0xFF16181F),
-            border: Border.all(color: const Color(0xFF76C917).withOpacity(0.3), width: 1.5),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF76C917).withOpacity(0.15),
-                blurRadius: 20,
-                spreadRadius: 2,
-              )
-            ],
-          ),
-          child: const Icon(
-            Icons.check_circle_outline_rounded,
-            size: 44,
-            color: Color(0xFF76C917),
-          ),
+          decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xFF16181F), border: Border.all(color: const Color(0xFF76C917).withOpacity(0.3), width: 1.5), boxShadow: [BoxShadow(color: const Color(0xFF76C917).withOpacity(0.15), blurRadius: 20, spreadRadius: 2)]),
+          child: const Icon(Icons.check_circle_outline_rounded, size: 44, color: Color(0xFF76C917)),
         ),
         const SizedBox(height: 16),
         Text(
-          appLanguageGlobal == 'English'
-              ? 'Registration Successful!'
-              : (appLanguageGlobal == 'العربية' ? 'تمت العملية بنجاح!' : 'پیرۆزە کارەکە سەرکەوتووبوو.'),
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16.5,
-            fontWeight: FontWeight.bold,
-          ),
+          getTxt('reg_success_title'), 
+          style: const TextStyle(color: Colors.white, fontSize: 16.5, fontWeight: FontWeight.bold), 
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 8),
         Text(
-          appLanguageGlobal == 'English'
-              ? 'To complete your process, contact us now:'
-              : (appLanguageGlobal == 'العربية' ? 'لإكمال عمليتك اتصل بنا الآن:' : 'بۆ تەواوکردنی کارەکەت ئێستا پەیوەندیمان پێوەبکە:'),
-          style: const TextStyle(
-            color: Color(0xFFECC880),
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-          ),
+          getTxt('reg_success_subtitle'), 
+          style: const TextStyle(color: Color(0xFFECC880), fontSize: 13, fontWeight: FontWeight.bold), 
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 16), 
@@ -558,81 +556,35 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
     );
   }
 
-  // ============================================================================
-  // دیزاینی مۆدێرنی ئایکۆنەکانی سەر شاشەی قوفڵ
-  // ============================================================================
   Widget _buildLockScreenContactRow(String number) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0F121A).withOpacity(0.6), 
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.white.withOpacity(0.06), width: 1.0),
-      ),
-      child: Row(
-        children: [
-          Text(
-            number,
-            textDirection: TextDirection.ltr,
-            style: const TextStyle(
-              color: Color(0xFFECC880), 
-              fontSize: 11.5,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.5,
-            ),
+      decoration: BoxDecoration(color: const Color(0xFF0F121A).withOpacity(0.6), borderRadius: BorderRadius.circular(10), border: Border.all(color: Colors.white.withOpacity(0.06), width: 1.0)),
+      child: Row(children: [
+        Text(number, textDirection: TextDirection.ltr, style: const TextStyle(color: Color(0xFFECC880), fontSize: 11.5, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+        const Spacer(),
+        Row(children: [
+          GestureDetector(
+            onTap: () async {
+              final cleanNumber = number.replaceAll(' ', '').replaceAll('+', '');
+              final message = Uri.encodeComponent(appLanguageGlobal == 'English' ? "Hello, please renew my account." : "تکایە ئەژمارەکەم بۆ نوێ بکەنەوە ...");
+              final Uri url = Uri.parse('https://wa.me/$cleanNumber?text=$message');
+              if (await canLaunchUrl(url)) await launchUrl(url, mode: LaunchMode.externalApplication);
+            },
+            child: Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: const Color(0xFF25D366).withOpacity(0.12), shape: BoxShape.circle, border: Border.all(color: const Color(0xFF25D366).withOpacity(0.3), width: 1)), child: const Icon(Icons.chat_bubble_rounded, color: Color(0xFF25D366), size: 14)),
           ),
-          const Spacer(),
-          Row(
-            children: [
-              GestureDetector(
-                onTap: () async {
-                  final cleanNumber = number.replaceAll(' ', '').replaceAll('+', '');
-                  final message = Uri.encodeComponent(
-                    appLanguageGlobal == 'English'
-                        ? "Hello, please renew my account."
-                        : (appLanguageGlobal == 'العربية'
-                            ? "مرحباً، يرجى تجديد حسابي من فضلك."
-                            : "تکایە ئەژمارەکەم بۆ نوێ بکەنەوە ..."),
-                  );
-                  final Uri url = Uri.parse('https://wa.me/$cleanNumber?text=$message');
-                  if (await canLaunchUrl(url)) {
-                    await launchUrl(url, mode: LaunchMode.externalApplication);
-                  }
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF25D366).withOpacity(0.12),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: const Color(0xFF25D366).withOpacity(0.3), width: 1),
-                  ),
-                  child: const Icon(Icons.chat_bubble_rounded, color: Color(0xFF25D366), size: 14),
-                ),
-              ),
-              const SizedBox(width: 8),
-              GestureDetector(
-                onTap: () async {
-                  final cleanNumber = number.replaceAll(' ', '');
-                  final Uri url = Uri.parse('tel:$cleanNumber');
-                  if (await canLaunchUrl(url)) {
-                    await launchUrl(url);
-                  }
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 0, 255, 234).withOpacity(0.12),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: const Color(0xFF0072FF).withOpacity(0.3), width: 1),
-                  ),
-                  child: const Icon(Icons.phone_iphone_rounded, color: Color(0xFF4FC3F7), size: 14),
-                ),
-              ),
-            ],
-          )
-        ],
-      ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: () async {
+              final cleanNumber = number.replaceAll(' ', '');
+              final Uri url = Uri.parse('tel:$cleanNumber');
+              if (await canLaunchUrl(url)) await launchUrl(url);
+            },
+            child: Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: const Color(0xFF0072FF).withOpacity(0.12), shape: BoxShape.circle, border: Border.all(color: const Color(0xFF0072FF).withOpacity(0.3), width: 1)), child: const Icon(Icons.phone_iphone_rounded, color: Color(0xFF4FC3F7), size: 14)),
+          ),
+        ])
+      ]),
     );
   }
 }

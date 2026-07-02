@@ -4,8 +4,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'dart:math' as math; 
+import 'dart:math' as math; // هاوردەکردنی ماتماتیک
 import '../global_state.dart';
+
+// ============================================================
+// ڕەنگە ڕاستەقینەکانی فەیسبووک (Dark Mode)
+// ============================================================
+const Color kPageBg = Color(0xFF18191A);
+const Color kCardBg = Color(0xFF242526);
+const Color kCardBg2 = Color(0xFF3A3B3C);
+const Color kDividerLine = Color(0xFF3E4042);
+const Color kTextPrimary = Color(0xFFE4E6EB);
+const Color kTextSecondary = Color(0xFFB0B3B8);
+const Color kFbBlue = Color(0xFF2374E1);
+const Color kFbBlueLight = Color(0xFF4599FF);
 
 // ============================================================
 // مۆدێلەکان
@@ -32,11 +44,14 @@ class VideoAnalysis {
   });
 }
 
+// خانەی نوێ: imageUrl (ئۆپشناڵ) بۆ ئەوەی بتوانی وێنە لەگەڵ وتار دابنێیت
 class WrittenAnalysis {
   final String id, title, content, date;
+  final String? imageUrl;
   const WrittenAnalysis({
     required this.id, required this.title,
     required this.content, required this.date,
+    this.imageUrl,
   });
 }
 
@@ -53,28 +68,31 @@ String? extractYoutubeId(String url) {
   return regExp.firstMatch(url)?.group(1);
 }
 
+// ✅ لێرەدا فەنکشنەکە گۆڕدراوە تا ڕاستەوخۆ ستایلی ڕیشەیی سپی بە دەقەکە ببەخشێت
 Widget _buildLinkableText(String text, TextStyle baseStyle, Color linkColor) {
   final RegExp linkRegExp = RegExp(r'(https?:\/\/[^\s]+)', caseSensitive: false);
   final List<TextSpan> spans = [];
   int start = 0;
   for (final match in linkRegExp.allMatches(text)) {
     if (match.start > start) {
-      spans.add(TextSpan(text: text.substring(start, match.start), style: baseStyle));
+      spans.add(TextSpan(text: text.substring(start, match.start))); // لێرەدا بۆڵد و سپی ناوەکی دەپارێزێت
     }
     final String link = match.group(0)!;
     spans.add(TextSpan(
       text: link,
-      style: baseStyle.copyWith(color: linkColor, decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
-      recognizer: TapGestureRecognizer()..onTap = () async {
-        final Uri url = Uri.parse(link);
-        if (await canLaunchUrl(url)) await launchUrl(url, mode: LaunchMode.externalApplication);
-      },
+      style: TextStyle(
+        color: linkColor, 
+        decoration: TextDecoration.underline, 
+        fontWeight: FontWeight.bold
+      ),
     ));
     start = match.end;
   }
-  if (start < text.length) spans.add(TextSpan(text: text.substring(start), style: baseStyle));
+  if (start < text.length) {
+    spans.add(TextSpan(text: text.substring(start))); // لێرەدا بۆڵد و سپی کۆتایی دەپارێزێت
+  }
   return RichText(
-    text: TextSpan(children: spans),
+    text: TextSpan(style: baseStyle, children: spans), // 🔹 گواستنەوەی فەرمی ستایلەکە بۆ ناو دەقی سەرەکی
     textDirection: appLanguageGlobal == 'English' ? TextDirection.ltr : TextDirection.rtl,
   );
 }
@@ -92,10 +110,10 @@ final List<AnalystModel> _mockAnalysts = [
     description: 'پسپۆڕی سەرەکی سیاسەتی دراو و چاودێری جووڵەی بازارەکانی عێراق.',
     videos: [
       VideoAnalysis(id: 'v1', title: 'شیکاریی نوێ: بەهای دۆلار بەرامبەر دینار بۆ کۆتایی ساڵی ٢٠٢٦', youtubeUrl: 'https://www.youtube.com/watch?v=BBAyRBTfsOU', duration: '12:45', date: '٢٧/٦/٢٠٢٦', longDescription: 'لەم ڤیدیۆیەدا، دکتۆر ڕێبین شیکارییەکی زۆر ورد پێشکەش دەکات سەبارەت بە هەڵئاوسانی نێوخۆیی و بڕیارە درەنگوەختەکانی بانکی ناوەندی عێراق کە ڕاستەوخۆ کاریگەری لەسەر بەهای بازاڕی هاوتەریبی دۆلار دادەنێت لە بازارەکانی سلێمانی و بەغداد. زۆر گرنگی بۆ ئەوانەی کە سەرمایەیان هەیە.'),
-      VideoAnalysis(id: 'v2', title: 'کاریگەری بڕیارەکانی بانکی ناوەندی لەسەر بەهای بازاڕ', youtubeUrl: 'https://www.youtube.com/watch?v=y6Sxv-sUYtM', duration: '09:15', date: '٢٠/٦/٢٠٢٦', longDescription: 'لەم بابەتەدا، بە قووڵی باس لە ستراتیژی تەمویلکردنی نوێ دەکرێت کە چۆن گۆڕانکاری بەسەر جوڵەی بازرگانی گشتی دەهێنێت و چۆن کار دەکاتە سەر کەمکردنەوەی جیاوازی نێوان نرخی فەرمی و نافەرمی دۆلار.'),
+      VideoAnalysis(id: 'v2', title: 'کاریگەری بڕیارەکانی بانکی ناوەندی لەسەر بەهای بازاڕ', youtubeUrl: 'https://www.youtube.com/watch?v=y6Sxv-sUYtM', duration: '09:15', date: '٢٠/٦/٢٠٢٦', longDescription: 'لەم بابەتەدا, بە قووڵی باس لە ستراتیژی تەمویلکردنی نوێ دەکرێت کە چۆن گۆڕانکاری بەسەر جوڵەی بازرگانی گشتی دەهێنێت و چۆن کار دەکاتە سەر کەمکردنەوەی جیاوازی نێوان نرخی فەرمی و نافەرمی دۆلار.'),
     ],
     articles: [
-      WrittenAnalysis(id: 'art1', title: 'سیستمی تەمویلکردنی بازرگانی گشتی و کێشەی بازارە هاوتەریبەکان', content: 'لەم شرۆڤە فەرمییەدا، بە تەواوی ئاماژە بە هۆکارەکانی بەرزبوونەوەی کاتیی بەهای فرۆشتنی دۆلار لە بازارەکانی سلێمانی و بەغداد دەکەین. بۆ خوێندنەوەی ڕاپۆرتی فەرمی بانکی ناوەندی عێراق سەردانی ئەم بەستەرە بکە: https://cbi.iq هۆکاری سەرەکی گرفتەکە بریتییە لە نەبوونی متمانەی تەواوی نووسینگە بازرگانییە کاتییەکان بە مێتۆدە ئەلەکترۆنییەکان.', date: '٢٧/٦/٢٠٢٦'),
+      WrittenAnalysis(id: 'art1', title: 'سیستمی تەمویلکردنی بازرگانی گشتی و کێشەی بازارە هاوتەریبەکان', content: 'لەم شرۆڤە فەرمییەدا, بە تەواوی ئاماژە بە هۆکارەکانی بەرزبوونەوەی کاتیی بەهای فرۆشتنی دۆلار لە بازارەکانی سلێمانی و بەغداد دەکەین. بۆ خوێندنەوەی ڕاپۆرتی فەرمی بانکی ناوەندی عێراق سەردانی ئەم بەستەرە بکە: https://cbi.iq هۆکاری سەرەکی گرفتەکە بریتییە لە نەبوونی متمانەی تەواوی نووسینگە بازرگانییە کاتییەکان بە مێتۆدە ئەلەکترۆنییەکان.', date: '٢٧/٦/٢٠٢٦'),
       WrittenAnalysis(id: 'art2', title: 'پێشبینییەکانی تمەن بەرامبەر دۆلار بەپێی جووڵە نێودەوڵەتییەکان', content: 'جووڵەی دراوی تمەنی ئێرانی بە تەواوی بەستراوەتەوە بە سیاسەتە نێودەوڵەتییە گشتییەکان. هۆکاری جێگیربوونی نرخەکە لە کاتی نوێدا بۆ پەیوەندییە هاوبەشە بازرگانییەکان دەگەڕێتەوە، بەڵام پێشبینی دەکرێت لە مانگەکانی داهاتوودا سەرلەنوێ کێشە لە توانای دارایی بازارە کاتییەکانی تمەندا دروست ببێتەوە.', date: '٢٥/٦/٢٠٢٦'),
     ],
   ),
@@ -113,6 +131,7 @@ final List<AnalystModel> _mockAnalysts = [
   ),
 ];
 
+// فەنکشنە گرنگەکان بە سەرکەوتوویی گەڕێنراونەتەوە شوێنی خۆیان بۆ نەهێشتنی تەواوی ئیرۆڕەکان
 Widget _buildDynamicAvatar(String? imagePath, String emoji, double size) {
   if (imagePath != null && imagePath.isNotEmpty) {
     if (imagePath.startsWith('http')) {
@@ -139,7 +158,7 @@ class _MarketAnalysisScreenState extends State<MarketAnalysisScreen> {
   void _showNotificationCenter(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF131C2E),
+      backgroundColor: kCardBg,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (context) => StatefulBuilder(
@@ -151,20 +170,20 @@ class _MarketAnalysisScreenState extends State<MarketAnalysisScreen> {
               padding: const EdgeInsets.all(16),
               child: Column(children: [
                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                  const Text('ئاگادارکردنەوە فەرمییەکان', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                  Text('ئاگادارکردنەوە فەرمییەکان', style: TextStyle(color: kTextPrimary, fontSize: 14, fontWeight: FontWeight.bold)),
                   GestureDetector(
                     onTap: () => _simulatePublishDialog(context, setSheetState),
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF76C917).withOpacity(0.12),
+                        color: kFbBlue.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: const Color(0xFF76C917).withOpacity(0.3)),
+                        border: Border.all(color: kFbBlue.withOpacity(0.4)),
                       ),
                       child: const Row(children: [
-                        Icon(Icons.campaign_rounded, color: Color(0xFF76C917), size: 12),
+                        Icon(Icons.campaign_rounded, color: kFbBlueLight, size: 12),
                         SizedBox(width: 4),
-                        Text('ناردنی نوێ', style: TextStyle(color: Color(0xFF76C917), fontSize: 10, fontWeight: FontWeight.bold)),
+                        Text('ناردنی نوێ', style: TextStyle(color: kFbBlueLight, fontSize: 10, fontWeight: FontWeight.bold)),
                       ]),
                     ),
                   ),
@@ -172,7 +191,7 @@ class _MarketAnalysisScreenState extends State<MarketAnalysisScreen> {
                 const SizedBox(height: 14),
                 Expanded(
                   child: _globalNotifications.isEmpty
-                      ? const Center(child: Text('هیچ ئاگادارکردنەوەیەک نییە', style: TextStyle(color: Colors.white24)))
+                      ? Center(child: Text('هیچ ئاگادارکردنەوەیەک نییە', style: TextStyle(color: kTextSecondary.withOpacity(0.5))))
                       : ListView.builder(
                           itemCount: _globalNotifications.length,
                           itemBuilder: (context, idx) {
@@ -181,17 +200,17 @@ class _MarketAnalysisScreenState extends State<MarketAnalysisScreen> {
                               margin: const EdgeInsets.only(bottom: 10),
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF0B121F),
+                                color: kCardBg2,
                                 borderRadius: BorderRadius.circular(14),
-                                border: Border.all(color: Colors.white.withOpacity(0.08)),
+                                border: Border.all(color: kDividerLine),
                               ),
                               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                                  Expanded(child: Text(notif.title, style: const TextStyle(color: Color(0xFFECC880), fontSize: 12, fontWeight: FontWeight.bold))),
-                                  Text(formatDisplayNumbers(notif.date), style: const TextStyle(color: Colors.white24, fontSize: 9)),
+                                  Expanded(child: Text(notif.title, style: const TextStyle(color: kTextPrimary, fontSize: 12, fontWeight: FontWeight.bold))),
+                                  Text(formatDisplayNumbers(notif.date), style: TextStyle(color: kTextSecondary.withOpacity(0.6), fontSize: 9)),
                                 ]),
                                 const SizedBox(height: 5),
-                                Text(notif.body, style: TextStyle(color: Colors.white.withOpacity(0.65), fontSize: 11, height: 1.45)),
+                                Text(notif.body, style: TextStyle(color: kTextSecondary, fontSize: 11, height: 1.45)),
                               ]),
                             );
                           },
@@ -213,18 +232,18 @@ class _MarketAnalysisScreenState extends State<MarketAnalysisScreen> {
       builder: (context) => Directionality(
         textDirection: appLanguageGlobal == 'English' ? TextDirection.ltr : TextDirection.rtl,
         child: AlertDialog(
-          backgroundColor: const Color(0xFF131C2E),
+          backgroundColor: kCardBg,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Text('بڵاوکردنەوەی ئاگادارکردنەوەی نوێ', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+          title: Text('بڵاوکردنەوەی ئاگادارکردنەوەی نوێ', style: TextStyle(color: kTextPrimary, fontSize: 14, fontWeight: FontWeight.bold)),
           content: Column(mainAxisSize: MainAxisSize.min, children: [
-            TextField(controller: titleCtrl, style: const TextStyle(color: Colors.white, fontSize: 13), decoration: InputDecoration(hintText: 'ناونیشانی ئاگادارکردنەوە...', hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)), enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white.withOpacity(0.1))))),
+            TextField(controller: titleCtrl, style: TextStyle(color: kTextPrimary, fontSize: 13), decoration: InputDecoration(hintText: 'ناونیشانی ئاگادارکردنەوە...', hintStyle: TextStyle(color: kTextSecondary.withOpacity(0.5)), enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: kDividerLine)))),
             const SizedBox(height: 10),
-            TextField(controller: bodyCtrl, style: const TextStyle(color: Colors.white, fontSize: 13), decoration: InputDecoration(hintText: 'نامەی ئاگادارکردنەوە...', hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)), enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white.withOpacity(0.1))))),
+            TextField(controller: bodyCtrl, style: TextStyle(color: kTextPrimary, fontSize: 13), decoration: InputDecoration(hintText: 'نامەی ئاگادارکردنەوە...', hintStyle: TextStyle(color: kTextSecondary.withOpacity(0.5)), enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: kDividerLine)))),
           ]),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text('پاشگەزبوونەوە', style: TextStyle(color: Colors.white38))),
+            TextButton(onPressed: () => Navigator.pop(context), child: Text('پاشگەزبوونەوە', style: TextStyle(color: kTextSecondary))),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF76C917)),
+              style: ElevatedButton.styleFrom(backgroundColor: kFbBlue),
               onPressed: () {
                 if (titleCtrl.text.isEmpty || bodyCtrl.text.isEmpty) return;
                 _globalNotifications.insert(0, SystemNotification(id: DateTime.now().toString(), title: titleCtrl.text, body: bodyCtrl.text, date: '٢٩/٦/٢٠٢٦'));
@@ -232,7 +251,7 @@ class _MarketAnalysisScreenState extends State<MarketAnalysisScreen> {
                 Navigator.pop(context);
                 _showPushBanner(titleCtrl.text, bodyCtrl.text);
               },
-              child: const Text('بڵاوکردنەوە', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+              child: const Text('بڵاوکردنەوە', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -243,16 +262,16 @@ class _MarketAnalysisScreenState extends State<MarketAnalysisScreen> {
   void _showPushBanner(String title, String body) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Row(children: [
-        const Icon(Icons.notifications_active_rounded, color: Color(0xFF76C917), size: 20),
+        const Icon(Icons.notifications_active_rounded, color: kFbBlueLight, size: 20),
         const SizedBox(width: 10),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
-          Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
-          Text(body, style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 10), maxLines: 1, overflow: TextOverflow.ellipsis),
+          Text(title, style: const TextStyle(color: kTextPrimary, fontWeight: FontWeight.bold, fontSize: 12)),
+          Text(body, style: TextStyle(color: kTextSecondary, fontSize: 10), maxLines: 1, overflow: TextOverflow.ellipsis),
         ])),
       ]),
-      backgroundColor: const Color(0xFF131C2E),
+      backgroundColor: kCardBg,
       behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: const Color(0xFF76C917).withOpacity(0.3))),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: kFbBlue.withOpacity(0.4))),
       duration: const Duration(seconds: 4),
     ));
     setState(() {});
@@ -263,7 +282,7 @@ class _MarketAnalysisScreenState extends State<MarketAnalysisScreen> {
     return Directionality(
       textDirection: appLanguageGlobal == 'English' ? TextDirection.ltr : TextDirection.rtl,
       child: Container(
-        color: const Color(0xFF0B121F),
+        color: kPageBg,
         child: Column(children: [
           _buildHeader(),
           Expanded(
@@ -283,11 +302,11 @@ class _MarketAnalysisScreenState extends State<MarketAnalysisScreen> {
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
       child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(getTxt('analysis_title'), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white)),
+          Text(getTxt('analysis_title'), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: kTextPrimary)),
           const SizedBox(height: 3),
           Text(
             appLanguageGlobal == 'English' ? 'Expert Financial Commentary' : (appLanguageGlobal == 'العربية' ? 'مرئيات ومقالات خبراء المال' : 'ڤیدیۆ و نووسینی شرۆڤەکارانی دارایی'),
-            style: TextStyle(fontSize: 11, color: Colors.white.withOpacity(0.35)),
+            style: TextStyle(fontSize: 11, color: kTextSecondary.withOpacity(0.7)),
           ),
         ]),
         GestureDetector(
@@ -295,8 +314,8 @@ class _MarketAnalysisScreenState extends State<MarketAnalysisScreen> {
           child: Stack(clipBehavior: Clip.none, children: [
             Container(
               padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(color: const Color(0xFF131C2E), borderRadius: BorderRadius.circular(10), border: Border.all(color: Colors.white.withOpacity(0.08))),
-              child: const Icon(Icons.notifications_active_rounded, color: Color(0xFFECC880), size: 16),
+              decoration: BoxDecoration(color: kCardBg, borderRadius: BorderRadius.circular(10), border: Border.all(color: kDividerLine)),
+              child: const Icon(Icons.notifications_active_rounded, color: kFbBlueLight, size: 16),
             ),
             if (_globalNotifications.isNotEmpty)
               Positioned(top: -2, right: -2, child: Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.redAccent, shape: BoxShape.circle))),
@@ -308,7 +327,7 @@ class _MarketAnalysisScreenState extends State<MarketAnalysisScreen> {
 }
 
 // ============================================================
-// کارتی شرۆڤەکار
+// کارتی شرۆڤەکار (لیستی سەرەکی)
 // ============================================================
 class _AnalystCard extends StatelessWidget {
   final AnalystModel analyst;
@@ -317,38 +336,35 @@ class _AnalystCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Color> colors = [const Color(0xFF0072FF), const Color(0xFF8B5CF6)];
-    final Color accent = colors[index % colors.length];
-
     return GestureDetector(
       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AnalystPortalScreen(analyst: analyst))),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF131C2E),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.08), width: 1.2),
+          color: kCardBg,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: kDividerLine, width: 1),
         ),
         child: Row(children: [
           Container(
             width: 50, height: 50,
-            decoration: BoxDecoration(color: accent.withOpacity(0.1), borderRadius: BorderRadius.circular(14), border: Border.all(color: accent.withOpacity(0.2))),
-            child: ClipRRect(borderRadius: BorderRadius.circular(12), child: _buildDynamicAvatar(analyst.imagePath, analyst.emoji, 24)),
+            decoration: BoxDecoration(color: kFbBlue.withOpacity(0.12), borderRadius: BorderRadius.circular(25), border: Border.all(color: kDividerLine)),
+            child: ClipOval(child: _buildDynamicAvatar(analyst.imagePath, analyst.emoji, 24)),
           ),
           const SizedBox(width: 14),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(analyst.name, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
+            Text(analyst.name, style: const TextStyle(color: kTextPrimary, fontSize: 15, fontWeight: FontWeight.bold)),
             const SizedBox(height: 3),
-            Text(analyst.title, style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
+            Text(analyst.title, style: TextStyle(color: kTextSecondary, fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
             const SizedBox(height: 8),
             Row(children: [
-              _chip('${analyst.videos.length}', Icons.play_circle_rounded, const Color(0xFFFF6B6B)),
+              _chip('${analyst.videos.length}', Icons.play_circle_rounded, kFbBlueLight),
               const SizedBox(width: 6),
-              _chip('${analyst.articles.length}', Icons.article_rounded, const Color(0xFF4ADE80)),
+              _chip('${analyst.articles.length}', Icons.article_rounded, kTextSecondary),
             ]),
           ])),
-          Icon(appLanguageGlobal == 'English' ? Icons.arrow_forward_ios_rounded : Icons.arrow_back_ios_rounded, color: Colors.white24, size: 13),
+          Icon(appLanguageGlobal == 'English' ? Icons.arrow_forward_ios_rounded : Icons.arrow_back_ios_rounded, color: kTextSecondary.withOpacity(0.6), size: 13),
         ]),
       ),
     );
@@ -357,7 +373,7 @@ class _AnalystCard extends StatelessWidget {
   Widget _chip(String count, IconData icon, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-      decoration: BoxDecoration(color: color.withOpacity(0.08), borderRadius: BorderRadius.circular(8)),
+      decoration: BoxDecoration(color: kCardBg2, borderRadius: BorderRadius.circular(8)),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         Icon(icon, size: 10, color: color),
         const SizedBox(width: 4),
@@ -368,7 +384,7 @@ class _AnalystCard extends StatelessWidget {
 }
 
 // ============================================================
-// پۆڕتاڵی شرۆڤەکار - فیدی تێکەڵ
+// پۆڕتاڵی شرۆڤەکار - فیدی تێکەڵ (وەک لاپەڕەی فەیسبووک)
 // ============================================================
 class AnalystPortalScreen extends StatefulWidget {
   final AnalystModel analyst;
@@ -382,7 +398,6 @@ class _AnalystPortalScreenState extends State<AnalystPortalScreen> {
   List<dynamic> _getMixedFeed() {
     final List<dynamic> feed = [];
     int vi = 0, ai = 0;
-    // ✅ لێرەدا کێشەی نەناسراوی 'articleIndex' چاک کرایەوە بۆ 'ai'
     while (vi < widget.analyst.videos.length || ai < widget.analyst.articles.length) {
       if (vi < widget.analyst.videos.length) feed.add(widget.analyst.videos[vi++]);
       if (ai < widget.analyst.articles.length) feed.add(widget.analyst.articles[ai++]);
@@ -396,31 +411,21 @@ class _AnalystPortalScreenState extends State<AnalystPortalScreen> {
     return Directionality(
       textDirection: appLanguageGlobal == 'English' ? TextDirection.ltr : TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFF0B121F),
+        backgroundColor: kPageBg,
         body: SafeArea(child: Column(children: [
           _buildTopBar(),
           _buildProfile(),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 10, 20, 6),
-            child: Row(children: [
-              const Icon(Icons.dynamic_feed_rounded, color: Color(0xFFECC880), size: 15),
-              const SizedBox(width: 8),
-              Text(
-                appLanguageGlobal == 'English' ? 'Recent Analyses' : 'دواین شرۆڤەکان',
-                style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold),
-              ),
-            ]),
-          ),
+          Container(height: 8, color: kPageBg),
           Expanded(
             child: feed.isEmpty
-                ? Center(child: Text(getTxt('no_content'), style: TextStyle(color: Colors.white.withOpacity(0.3))))
+                ? Center(child: Text(getTxt('no_content'), style: TextStyle(color: kTextSecondary.withOpacity(0.6))))
                 : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 24),
                     itemCount: feed.length,
                     itemBuilder: (context, i) {
                       final item = feed[i];
-                      if (item is VideoAnalysis) return _VideoCard(video: item, index: i);
-                      return _ArticleCard(article: item as WrittenAnalysis, index: i);
+                      if (item is VideoAnalysis) return _VideoCard(video: item, index: i, analyst: widget.analyst);
+                      return _ArticleCard(article: item as WrittenAnalysis, index: i, analyst: widget.analyst);
                     },
                   ),
           ),
@@ -430,22 +435,23 @@ class _AnalystPortalScreenState extends State<AnalystPortalScreen> {
   }
 
   Widget _buildTopBar() {
-    return Padding(
+    return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      color: kPageBg,
       child: Row(children: [
         GestureDetector(
           onTap: () => Navigator.pop(context),
           child: Container(
             padding: const EdgeInsets.all(9),
-            decoration: BoxDecoration(color: const Color(0xFF131C2E), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white.withOpacity(0.08))),
-            child: Icon(appLanguageGlobal == 'English' ? Icons.arrow_back_ios_new_rounded : Icons.arrow_back_ios_rounded, color: Colors.white, size: 15),
+            decoration: BoxDecoration(color: kCardBg, borderRadius: BorderRadius.circular(20), border: Border.all(color: kDividerLine)),
+            child: Icon(appLanguageGlobal == 'English' ? Icons.arrow_back_ios_new_rounded : Icons.arrow_back_ios_rounded, color: kTextPrimary, size: 15),
           ),
         ),
         const SizedBox(width: 12),
-        Expanded(child: Text(widget.analyst.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white))),
+        Expanded(child: Text(widget.analyst.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: kTextPrimary))),
         Container(
           width: 32, height: 32,
-          decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withOpacity(0.05)),
+          decoration: BoxDecoration(shape: BoxShape.circle, color: kCardBg2, border: Border.all(color: kDividerLine)),
           child: ClipOval(child: _buildDynamicAvatar(widget.analyst.imagePath, widget.analyst.emoji, 16)),
         ),
       ]),
@@ -457,21 +463,21 @@ class _AnalystPortalScreenState extends State<AnalystPortalScreen> {
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 6),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF131C2E),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        color: kCardBg,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: kDividerLine),
       ),
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Container(
           width: 52, height: 52,
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(14), border: Border.all(color: Colors.white.withOpacity(0.05))),
-          child: ClipRRect(borderRadius: BorderRadius.circular(12), child: _buildDynamicAvatar(widget.analyst.imagePath, widget.analyst.emoji, 28)),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(26), border: Border.all(color: kDividerLine)),
+          child: ClipOval(child: _buildDynamicAvatar(widget.analyst.imagePath, widget.analyst.emoji, 28)),
         ),
         const SizedBox(width: 12),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(widget.analyst.title, style: const TextStyle(color: Color(0xFFECC880), fontSize: 11.5, fontWeight: FontWeight.w600)),
+          Text(widget.analyst.title, style: const TextStyle(color: kFbBlueLight, fontSize: 11.5, fontWeight: FontWeight.w600)),
           const SizedBox(height: 4),
-          Text(widget.analyst.description, style: TextStyle(color: Colors.white.withOpacity(0.55), fontSize: 12, height: 1.5)),
+          Text(widget.analyst.description, style: TextStyle(color: kTextSecondary, fontSize: 12, height: 1.5)),
         ])),
       ]),
     );
@@ -479,237 +485,196 @@ class _AnalystPortalScreenState extends State<AnalystPortalScreen> {
 }
 
 // ============================================================
-// کارتی ڤیدیۆ - گەورە و جوان
+// هێدەری پۆست - هەمان شێوازی فەیسبووک بۆ هەموو پۆستێک
 // ============================================================
-class _VideoCard extends StatefulWidget {
-  final VideoAnalysis video;
-  final int index;
-  const _VideoCard({required this.video, required this.index});
-  @override
-  State<_VideoCard> createState() => _VideoCardState();
-}
-
-class _VideoCardState extends State<_VideoCard> with SingleTickerProviderStateMixin {
-  late AnimationController _ctrl;
-  late Animation<double> _scale;
-
-  @override
-  void initState() {
-    super.initState();
-    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 100));
-    _scale = Tween<double>(begin: 1.0, end: 0.97).animate(_ctrl);
-  }
-
-  @override
-  void dispose() { _ctrl.dispose(); super.dispose(); }
+class _FbPostHeader extends StatelessWidget {
+  final AnalystModel analyst;
+  final String date;
+  const _FbPostHeader({required this.analyst, required this.date});
 
   @override
   Widget build(BuildContext context) {
-    final videoId = extractYoutubeId(widget.video.youtubeUrl) ?? '';
-    final thumbUrl = 'https://img.youtube.com/vi/$videoId/mqdefault.jpg';
-
-    final List<List<Color>> gradients = [
-      [const Color(0xFF0072FF), const Color(0xFF00C6FF)],
-      [const Color(0xFF8B5CF6), const Color(0xFFEC4899)],
-      [const Color(0xFF059669), const Color(0xFF34D399)],
-    ];
-    final colors = gradients[widget.index % gradients.length];
-
-    return GestureDetector(
-      onTapDown: (_) => _ctrl.forward(),
-      onTapUp: (_) => _ctrl.reverse(),
-      onTapCancel: () => _ctrl.reverse(),
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => _VideoDetailView(video: widget.video, index: widget.index))),
-      child: ScaleTransition(
-        scale: _scale,
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 20),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-
-            // ---- تامبنەیلی گەورە ----
-            Container(
-              height: 210,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(22),
-                boxShadow: [BoxShadow(color: colors[0].withOpacity(0.3), blurRadius: 24, offset: const Offset(0, 8))],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(22),
-                child: Stack(fit: StackFit.expand, children: [
-
-                  Image.network(thumbUrl, fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
-                        decoration: BoxDecoration(gradient: LinearGradient(colors: [colors[0].withOpacity(0.3), colors[1].withOpacity(0.1)])),
-                        child: const Icon(Icons.video_library_rounded, size: 48, color: Colors.white12),
-                      )),
-
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter, end: Alignment.bottomCenter,
-                        colors: [Colors.transparent, Colors.black.withOpacity(0.8)],
-                        stops: const [0.3, 1.0],
-                      ),
-                    ),
-                  ),
-
-                  Center(
-                    child: Container(
-                      width: 62, height: 62,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(colors: colors),
-                        shape: BoxShape.circle,
-                        boxShadow: [BoxShadow(color: colors[0].withOpacity(0.6), blurRadius: 20, spreadRadius: 2)],
-                      ),
-                      child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 34),
-                    ),
-                  ),
-
-                  Positioned(
-                    top: 12,
-                    right: appLanguageGlobal == 'English' ? null : 12,
-                    left: appLanguageGlobal == 'English' ? 12 : null,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                      decoration: BoxDecoration(color: Colors.black.withOpacity(0.6), borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.white.withOpacity(0.1))),
-                      child: Row(mainAxisSize: MainAxisSize.min, children: [
-                        const Icon(Icons.timer_rounded, size: 10, color: Colors.white60),
-                        const SizedBox(width: 4),
-                        Text(formatDisplayNumbers(widget.video.duration), style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                      ]),
-                    ),
-                  ),
-
-                  Positioned(
-                    bottom: 12,
-                    right: appLanguageGlobal == 'English' ? null : 12,
-                    left: appLanguageGlobal == 'English' ? 12 : null,
-                    child: Row(mainAxisSize: MainAxisSize.min, children: [
-                      const Icon(Icons.calendar_today_rounded, size: 10, color: Colors.white54),
-                      const SizedBox(width: 4),
-                      Text(formatDisplayNumbers(widget.video.date), style: const TextStyle(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.w600)),
-                    ]),
-                  ),
-                ]),
-              ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.fromLTRB(4, 10, 4, 0),
-              child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Container(
-                  width: 26, height: 26,
-                  decoration: BoxDecoration(gradient: LinearGradient(colors: colors), borderRadius: BorderRadius.circular(8)),
-                  child: Center(child: Text('${widget.index ~/ 2 + 1}', style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w900))),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(widget.video.title, style: const TextStyle(color: Colors.white, fontSize: 13.5, fontWeight: FontWeight.bold, height: 1.4), maxLines: 2, overflow: TextOverflow.ellipsis),
-                ),
-              ]),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
-              child: Text(
-                widget.video.longDescription.length > 100
-                    ? '${widget.video.longDescription.substring(0, 100)}...'
-                    : widget.video.longDescription,
-                style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11.5, height: 1.55),
-              ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.fromLTRB(4, 10, 4, 0),
-              child: Row(children: [
-                _InteractionBtn(icon: Icons.favorite_border_rounded, label: '٤٢', color: const Color(0xFFFF6B6B)),
-                const SizedBox(width: 10),
-                _InteractionBtn(icon: Icons.chat_bubble_outline_rounded, label: '١٢', color: const Color(0xFF4FC3F7)),
-                const SizedBox(width: 10),
-                _InteractionBtn(icon: Icons.share_rounded, label: appLanguageGlobal == 'English' ? 'Share' : 'هاوبەشکردن', color: const Color(0xFF4ADE80)),
-                const Spacer(),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: colors),
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [BoxShadow(color: colors[0].withOpacity(0.3), blurRadius: 8)],
-                  ),
-                  child: Row(mainAxisSize: MainAxisSize.min, children: [
-                    const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 14),
-                    const SizedBox(width: 4),
-                    Text(appLanguageGlobal == 'English' ? 'Watch' : 'تەماشا', style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
-                  ]),
-                ),
-              ]),
-            ),
-
-            const SizedBox(height: 8),
-            Divider(color: Colors.white.withOpacity(0.06), height: 1),
-
-          ]),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+      child: Row(children: [
+        Container(
+          width: 40, height: 40,
+          decoration: BoxDecoration(shape: BoxShape.circle, color: kCardBg2, border: Border.all(color: kDividerLine)),
+          child: ClipOval(child: _buildDynamicAvatar(analyst.imagePath, analyst.emoji, 20)),
         ),
-      ),
+        const SizedBox(width: 10),
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(analyst.name, style: const TextStyle(color: kTextPrimary, fontSize: 13.5, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 2),
+          Row(children: [
+            Text(formatDisplayNumbers(date), style: TextStyle(color: kTextSecondary, fontSize: 10.5, fontWeight: FontWeight.w500)),
+            const SizedBox(width: 5),
+            Icon(Icons.public_rounded, size: 10, color: kTextSecondary.withOpacity(0.8)),
+          ]),
+        ])),
+        Icon(Icons.more_horiz_rounded, color: kTextSecondary, size: 20),
+      ]),
     );
   }
 }
 
 // ============================================================
-// دەگمەی ئینتەراکتیڤ (لایک، کۆمێنت، هاوبەشکردن)
+// شریتی لایک/کۆمێنت/هاوبەشکردن
 // ============================================================
-class _InteractionBtn extends StatefulWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  // ✅ لادانی وشەی const لە پێش پێناسەی کڵاسەکە بۆ ڕێگری لە ئێرۆری invalid_constant
-  const _InteractionBtn({required this.icon, required this.label, required this.color});
-  @override
-  State<_InteractionBtn> createState() => _InteractionBtnState();
-}
-
-class _InteractionBtnState extends State<_InteractionBtn> with SingleTickerProviderStateMixin {
-  bool _active = false;
-  late AnimationController _ctrl;
-  late Animation<double> _scale;
-
-  @override
-  void initState() {
-    super.initState();
-    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 150));
-    _scale = Tween<double>(begin: 1.0, end: 1.25).animate(CurvedAnimation(parent: _ctrl, curve: Curves.elasticOut));
-  }
-
-  @override
-  void dispose() { _ctrl.dispose(); super.dispose(); }
-
-  void _toggle() {
-    setState(() => _active = !_active);
-    _ctrl.forward(from: 0).then((_) => _ctrl.reverse());
-  }
+class _FbActionsBar extends StatelessWidget {
+  final String likeLabel, commentLabel;
+  const _FbActionsBar({required this.likeLabel, required this.commentLabel});
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _toggle,
-      child: ScaleTransition(
-        scale: _scale,
-        child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Icon(
-            _active ? _filledIcon(widget.icon) : widget.icon,
-            color: _active ? widget.color : Colors.white38,
-            size: 16,
+    return Column(children: [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+        child: Row(children: [
+          Container(
+            padding: const EdgeInsets.all(3),
+            decoration: const BoxDecoration(color: kFbBlue, shape: BoxShape.circle),
+            child: const Icon(Icons.thumb_up_rounded, size: 9, color: Colors.white),
           ),
-          const SizedBox(width: 4),
-          Text(widget.label, style: TextStyle(color: _active ? widget.color : Colors.white38, fontSize: 11, fontWeight: FontWeight.w600)),
+          const SizedBox(width: 6),
+          Text(likeLabel, style: TextStyle(color: kTextSecondary, fontSize: 11.5, fontWeight: FontWeight.w500)),
+          const Spacer(),
+          Text(commentLabel, style: TextStyle(color: kTextSecondary, fontSize: 11.5, fontWeight: FontWeight.w500)),
+        ]),
+      ),
+      Divider(color: kDividerLine, height: 1),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+        child: Row(children: [
+          Expanded(child: _FbActionBtn(icon: Icons.thumb_up_outlined, activeIcon: Icons.thumb_up_rounded, label: appLanguageGlobal == 'English' ? 'Like' : 'لایک', color: kFbBlue)),
+          Expanded(child: _FbActionBtn(icon: Icons.chat_bubble_outline_rounded, activeIcon: Icons.chat_bubble_rounded, label: appLanguageGlobal == 'English' ? 'Comment' : 'کۆمێنت', color: kFbBlue)),
+          Expanded(child: _FbActionBtn(icon: Icons.share_outlined, activeIcon: Icons.share_rounded, label: appLanguageGlobal == 'English' ? 'Share' : 'هاوبەشکردن', color: kFbBlue)),
+        ]),
+      ),
+    ]);
+  }
+}
+
+class _FbActionBtn extends StatefulWidget {
+  final IconData icon, activeIcon;
+  final String label;
+  final Color color;
+  const _FbActionBtn({required this.icon, required this.activeIcon, required this.label, required this.color});
+  @override
+  State<_FbActionBtn> createState() => _FbActionBtnState();
+}
+
+class _FbActionBtnState extends State<_FbActionBtn> {
+  bool _active = false;
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => setState(() => _active = !_active),
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Icon(_active ? widget.activeIcon : widget.icon, size: 16, color: _active ? widget.color : kTextSecondary),
+          const SizedBox(width: 6),
+          Text(widget.label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: _active ? widget.color : kTextSecondary)),
         ]),
       ),
     );
   }
+}
 
-  IconData _filledIcon(IconData icon) {
-    if (icon == Icons.favorite_border_rounded) return Icons.favorite_rounded;
-    if (icon == Icons.chat_bubble_outline_rounded) return Icons.chat_bubble_rounded;
-    return icon;
+// ============================================================
+// کارتی ڤیدیۆ - وەک پۆستی ڤیدیۆیی فەیسبووک
+// ✅ خەتی باریک دەوری هەموو چوارچێوەکە
+// ============================================================
+class _VideoCard extends StatelessWidget {
+  final VideoAnalysis video;
+  final int index;
+  final AnalystModel analyst;
+  const _VideoCard({required this.video, required this.index, required this.analyst});
+
+  @override
+  Widget build(BuildContext context) {
+    final videoId = extractYoutubeId(video.youtubeUrl) ?? '';
+    final thumbUrl = 'https://img.youtube.com/vi/$videoId/mqdefault.jpg';
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: kCardBg,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: kDividerLine, width: 1), // ✅ خەتی باریک
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+
+        _FbPostHeader(analyst: analyst, date: video.date),
+
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+          child: Text(video.title, style: const TextStyle(color: kTextPrimary, fontSize: 14, fontWeight: FontWeight.bold, height: 1.4)),
+        ),
+
+        GestureDetector(
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => _VideoDetailView(video: video, analyst: analyst))),
+          child: Container(
+            height: 200,
+            width: double.infinity,
+            decoration: BoxDecoration(border: Border(top: BorderSide(color: kDividerLine), bottom: BorderSide(color: kDividerLine))), // ✅ خەتی باریک دەوری میدیا
+            child: Stack(fit: StackFit.expand, children: [
+              Image.network(thumbUrl, fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: kCardBg2,
+                    child: const Icon(Icons.video_library_rounded, size: 44, color: Colors.white24),
+                  )),
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter, end: Alignment.bottomCenter,
+                    colors: [Colors.transparent, Colors.black.withOpacity(0.55)],
+                    stops: const [0.5, 1.0],
+                  ),
+                ),
+              ),
+              Center(
+                child: Container(
+                  width: 58, height: 58,
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.45),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white.withOpacity(0.85), width: 2),
+                  ),
+                  child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 32),
+                ),
+              ),
+              Positioned(
+                bottom: 10,
+                right: appLanguageGlobal == 'English' ? null : 10,
+                left: appLanguageGlobal == 'English' ? 10 : null,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(color: Colors.black.withOpacity(0.75), borderRadius: BorderRadius.circular(6)),
+                  child: Text(formatDisplayNumbers(video.duration), style: const TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ]),
+          ),
+        ),
+
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
+          // ✅ گۆڕینی نووسین بۆ سپی درەوشاوە و بۆڵدی قورس
+          child: Text(
+            video.longDescription.length > 110 ? '${video.longDescription.substring(0, 110)}...' : video.longDescription,
+            style: const TextStyle(color: Colors.white, fontSize: 12.5, height: 1.55, fontWeight: FontWeight.bold),
+          ),
+        ),
+
+        const SizedBox(height: 6),
+
+        _FbActionsBar(likeLabel: formatDisplayNumbers('42'), commentLabel: '${formatDisplayNumbers('12')} ${appLanguageGlobal == 'English' ? 'comments' : 'کۆمێنت'}'),
+      ]),
+    );
   }
 }
 
@@ -718,24 +683,18 @@ class _InteractionBtnState extends State<_InteractionBtn> with SingleTickerProvi
 // ============================================================
 class _VideoDetailView extends StatelessWidget {
   final VideoAnalysis video;
-  final int index;
-  const _VideoDetailView({required this.video, required this.index});
+  final AnalystModel analyst;
+  const _VideoDetailView({required this.video, required this.analyst});
 
   @override
   Widget build(BuildContext context) {
     final videoId = extractYoutubeId(video.youtubeUrl) ?? '';
     final thumbUrl = 'https://img.youtube.com/vi/$videoId/0.jpg';
-    final List<List<Color>> gradients = [
-      [const Color(0xFF0072FF), const Color(0xFF00C6FF)],
-      [const Color(0xFF8B5CF6), const Color(0xFFEC4899)],
-      [const Color(0xFF059669), const Color(0xFF34D399)],
-    ];
-    final colors = gradients[index % gradients.length];
 
     return Directionality(
       textDirection: appLanguageGlobal == 'English' ? TextDirection.ltr : TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFF0B121F),
+        backgroundColor: kCardBg, // 🔹 گۆڕینی پاشبنەمای شاشەی خوێندنەوەی ڤیدیۆ بۆ خۆڵەمێشی ماتی فەیسبووکی (kCardBg)
         body: SafeArea(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
           Padding(
@@ -745,92 +704,86 @@ class _VideoDetailView extends StatelessWidget {
                 onTap: () => Navigator.pop(context),
                 child: Container(
                   padding: const EdgeInsets.all(9),
-                  decoration: BoxDecoration(color: const Color(0xFF131C2E), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white.withOpacity(0.08))),
-                  child: Icon(appLanguageGlobal == 'English' ? Icons.arrow_back_ios_new_rounded : Icons.arrow_back_ios_rounded, color: Colors.white, size: 15),
+                  decoration: BoxDecoration(color: kCardBg2, borderRadius: BorderRadius.circular(20), border: Border.all(color: kDividerLine)), // 🔹 گۆڕینی بۆ kCardBg2 بۆ تۆخکردنی زیاتری دوگمەکە
+                  child: Icon(appLanguageGlobal == 'English' ? Icons.arrow_back_ios_new_rounded : Icons.arrow_back_ios_rounded, color: kTextPrimary, size: 15),
                 ),
               ),
               const SizedBox(width: 14),
-              const Text('شرۆڤەی ڤیدیۆیی', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+              const Text('شرۆڤەی ڤیدیۆیی', style: TextStyle(color: kTextPrimary, fontSize: 14, fontWeight: FontWeight.bold)),
             ]),
           ),
 
-          // تامبنەیلی گەورە
+          _FbPostHeader(analyst: analyst, date: video.date),
+
           Container(
-            height: 230,
+            height: 220,
             margin: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [BoxShadow(color: colors[0].withOpacity(0.25), blurRadius: 30)],
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: kDividerLine, width: 1),
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(12),
               child: Stack(fit: StackFit.expand, children: [
                 Image.network(thumbUrl, fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      decoration: BoxDecoration(gradient: LinearGradient(colors: [colors[0].withOpacity(0.3), colors[1].withOpacity(0.1)])),
-                    )),
-                Container(color: Colors.black.withOpacity(0.4)),
+                    errorBuilder: (_, __, ___) => Container(color: kCardBg2)),
+                Container(color: Colors.black.withOpacity(0.3)),
                 Center(
                   child: GestureDetector(
                     onTap: () => ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       content: Text(appLanguageGlobal == 'English' ? 'Live Player Coming Soon.' : 'لێدەری ڕاستەوخۆ بەمزوانە جێگیر دەکرێت.'),
-                      backgroundColor: const Color(0xFF0072FF), behavior: SnackBarBehavior.floating,
+                      backgroundColor: kFbBlue, behavior: SnackBarBehavior.floating,
                     )),
                     child: Container(
-                      width: 70, height: 70,
+                      width: 66, height: 66,
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(colors: colors),
+                        color: Colors.black.withOpacity(0.45),
                         shape: BoxShape.circle,
-                        boxShadow: [BoxShadow(color: colors[0].withOpacity(0.5), blurRadius: 20, spreadRadius: 2)],
+                        border: Border.all(color: Colors.white.withOpacity(0.85), width: 2),
                       ),
-                      child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 38),
+                      child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 36),
                     ),
                   ),
                 ),
                 Positioned(
-                  bottom: 14, left: 14, right: 14,
-                  child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                    Text(formatDisplayNumbers(video.date), style: const TextStyle(color: Colors.white60, fontSize: 11)),
-                    Text(formatDisplayNumbers(video.duration), style: const TextStyle(color: Colors.white60, fontSize: 11, fontWeight: FontWeight.bold)),
+                  bottom: 12, left: 12, right: 12,
+                  child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(color: Colors.black.withOpacity(0.7), borderRadius: BorderRadius.circular(6)),
+                      child: Text(formatDisplayNumbers(video.duration), style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                    ),
                   ]),
                 ),
               ]),
             ),
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
 
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
-                Text(video.title, style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold, height: 1.4)),
-                const SizedBox(height: 14),
-
-                // دەگمەکانی ئینتەراکتیڤ
-                Row(children: [
-                  _InteractionBtn(icon: Icons.favorite_border_rounded, label: '٤٢', color: const Color(0xFFFF6B6B)),
-                  const SizedBox(width: 14),
-                  _InteractionBtn(icon: Icons.chat_bubble_outline_rounded, label: '١٢', color: const Color(0xFF4FC3F7)),
-                  const SizedBox(width: 14),
-                  _InteractionBtn(icon: Icons.share_rounded, label: appLanguageGlobal == 'English' ? 'Share' : 'هاوبەشکردن', color: const Color(0xFF4ADE80)),
-                ]),
-
+                Text(video.title, style: const TextStyle(color: kTextPrimary, fontSize: 17, fontWeight: FontWeight.bold, height: 1.4)),
                 const SizedBox(height: 16),
-                Divider(color: Colors.white.withOpacity(0.08), height: 1),
+                Divider(color: kDividerLine, height: 1),
                 const SizedBox(height: 16),
 
-                // ناونیشانی شرۆڤە
                 Row(children: [
-                  Container(width: 4, height: 16, decoration: BoxDecoration(gradient: LinearGradient(colors: colors), borderRadius: BorderRadius.circular(2))),
+                  Container(width: 4, height: 16, decoration: BoxDecoration(color: kFbBlue, borderRadius: BorderRadius.circular(2))),
                   const SizedBox(width: 8),
-                  const Text('نووسینی ڕوونکەرەوەی شرۆڤەکار', style: TextStyle(color: Color(0xFFECC880), fontSize: 13, fontWeight: FontWeight.bold)),
+                  const Text('نووسینی ڕوونکەرەوەی شرۆڤەکار', style: TextStyle(color: kFbBlueLight, fontSize: 13, fontWeight: FontWeight.bold)),
                 ]),
                 const SizedBox(height: 12),
 
-                Text(video.longDescription, style: TextStyle(color: Colors.white.withOpacity(0.75), fontSize: 14, height: 1.75, fontWeight: FontWeight.w500)),
-                const SizedBox(height: 30),
+                // ✅ نووسینی ڤیدیۆکان لێرەش بە تەواوی سپی درەوشاوە و بۆڵدی تۆخە
+                Text(video.longDescription, style: const TextStyle(color: Colors.white, fontSize: 14.5, height: 1.8, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 20),
+
+                _FbActionsBar(likeLabel: formatDisplayNumbers('42'), commentLabel: '${formatDisplayNumbers('12')} ${appLanguageGlobal == 'English' ? 'comments' : 'کۆمێنت'}'),
+                const SizedBox(height: 24),
               ]),
             ),
           ),
@@ -841,12 +794,14 @@ class _VideoDetailView extends StatelessWidget {
 }
 
 // ============================================================
-// کارتی وتار
+// کارتی وتار - وەک پۆستی تێکستی/وێنەی فەیسبووک
+// ✅ خەتی باریک دەوری چوارچێوە + پشتگیری وێنە
 // ============================================================
 class _ArticleCard extends StatelessWidget {
   final WrittenAnalysis article;
   final int index;
-  const _ArticleCard({required this.article, required this.index});
+  final AnalystModel analyst;
+  const _ArticleCard({required this.article, required this.index, required this.analyst});
 
   String _readTime(String content) {
     final minutes = (content.split(' ').length / 200).ceil();
@@ -855,87 +810,73 @@ class _ArticleCard extends StatelessWidget {
   }
 
   String _preview(String content) {
-    if (content.length <= 100) return content;
-    return '${content.substring(0, 100)}...';
+    if (content.length <= 220) return content;
+    return '${content.substring(0, 220)}...';
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<Color> accents = [const Color(0xFF0072FF), const Color(0xFF8B5CF6), const Color(0xFF059669)];
-    final Color accent = accents[index % accents.length];
-
     return GestureDetector(
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => _ArticleReadView(article: article, accent: accent, readTime: _readTime(article.content)))),
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => _ArticleReadView(article: article, analyst: analyst, readTime: _readTime(article.content)))),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 14),
-        padding: const EdgeInsets.all(14),
+        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: const Color(0xFF131C2E),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.08), width: 1.2),
+          color: kCardBg,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: kDividerLine, width: 1), // ✅ خەتی باریک
         ),
+        clipBehavior: Clip.antiAlias,
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
-          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Container(
-              width: 44, height: 44,
-              decoration: BoxDecoration(color: accent.withOpacity(0.1), borderRadius: BorderRadius.circular(12), border: Border.all(color: accent.withOpacity(0.2))),
-              child: Icon(Icons.article_rounded, color: accent, size: 22),
-            ),
-            const SizedBox(width: 12),
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(article.title, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold, height: 1.35), maxLines: 2, overflow: TextOverflow.ellipsis),
-              const SizedBox(height: 8),
-              Row(children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                  decoration: BoxDecoration(color: Colors.white.withOpacity(0.04), borderRadius: BorderRadius.circular(6)),
-                  child: Row(mainAxisSize: MainAxisSize.min, children: [
-                    Icon(Icons.calendar_today_rounded, size: 9, color: Colors.white.withOpacity(0.35)),
-                    const SizedBox(width: 4),
-                    Text(formatDisplayNumbers(article.date), style: TextStyle(color: Colors.white.withOpacity(0.35), fontSize: 10)),
-                  ]),
-                ),
-                const SizedBox(width: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                  decoration: BoxDecoration(color: accent.withOpacity(0.08), borderRadius: BorderRadius.circular(6)),
-                  child: Row(mainAxisSize: MainAxisSize.min, children: [
-                    Icon(Icons.timer_outlined, size: 9, color: accent.withOpacity(0.7)),
-                    const SizedBox(width: 4),
-                    Text(_readTime(article.content), style: TextStyle(color: accent.withOpacity(0.8), fontSize: 10, fontWeight: FontWeight.bold)),
-                  ]),
-                ),
-              ]),
-            ])),
-          ]),
+          _FbPostHeader(analyst: analyst, date: article.date),
 
-          const SizedBox(height: 10),
-
-          // پوختەی دەق
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: const Color(0xFF0B121F), borderRadius: BorderRadius.circular(10), border: Border.all(color: Colors.white.withOpacity(0.04))),
-            child: Text(_preview(article.content), style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11.5, height: 1.6, fontStyle: FontStyle.italic)),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+            child: Text(article.title, style: const TextStyle(color: kTextPrimary, fontSize: 14, fontWeight: FontWeight.bold, height: 1.4)),
           ),
 
-          const SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+            // ✅ تێکستی وتارەکانی سەر شاشە لێرەش بە تەواوی سپی درەوشاوە و بۆڵدە
+            child: Text(
+              _preview(article.content),
+              style: const TextStyle(color: Colors.white, fontSize: 13, height: 1.7, fontWeight: FontWeight.bold),
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
 
-          // دەگمەکانی ئینتەراکتیڤ
-          Row(children: [
-            _InteractionBtn(icon: Icons.favorite_border_rounded, label: '٢٨', color: const Color(0xFFFF6B6B)),
-            const SizedBox(width: 10),
-            _InteractionBtn(icon: Icons.chat_bubble_outline_rounded, label: '٧', color: const Color(0xFF4FC3F7)),
-            const SizedBox(width: 10),
-            _InteractionBtn(icon: Icons.share_rounded, label: appLanguageGlobal == 'English' ? 'Share' : 'هاوبەشکردن', color: const Color(0xFF4ADE80)),
-            const Spacer(),
-            Row(mainAxisSize: MainAxisSize.min, children: [
-              Text(appLanguageGlobal == 'English' ? 'Read more' : 'زیاتر بخوێنەوە', style: TextStyle(color: accent, fontSize: 11, fontWeight: FontWeight.bold)),
+          // ✅ ئەگەر وێنە هەبوو پیشانی بدە، ئەگینا بۆکسی ئایکۆن
+          Container(
+            height: 150,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: kCardBg2,
+              border: Border(top: BorderSide(color: kDividerLine), bottom: BorderSide(color: kDividerLine)),
+            ),
+            child: (article.imageUrl != null && article.imageUrl!.isNotEmpty)
+                ? Image.network(
+                    article.imageUrl!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Center(child: Icon(Icons.broken_image_rounded, size: 36, color: kTextSecondary.withOpacity(0.5))),
+                  )
+                : Center(child: Icon(Icons.article_rounded, size: 40, color: kTextSecondary.withOpacity(0.5))),
+          ),
+
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
+            child: Row(children: [
+              Icon(Icons.timer_outlined, size: 11, color: kTextSecondary),
               const SizedBox(width: 4),
-              Icon(appLanguageGlobal == 'English' ? Icons.arrow_forward_rounded : Icons.arrow_back_rounded, color: accent, size: 13),
+              Text(_readTime(article.content), style: TextStyle(color: kTextSecondary, fontSize: 11, fontWeight: FontWeight.bold)),
+              const Spacer(),
+              const Text('زیاتر بخوێنەوە', style: TextStyle(color: kFbBlueLight, fontSize: 11.5, fontWeight: FontWeight.bold)),
             ]),
-          ]),
+          ),
+          const SizedBox(height: 8),
 
+          _FbActionsBar(likeLabel: formatDisplayNumbers('28'), commentLabel: '${formatDisplayNumbers('7')} ${appLanguageGlobal == 'English' ? 'comments' : 'کۆمێنت'}'),
         ]),
       ),
     );
@@ -943,23 +884,22 @@ class _ArticleCard extends StatelessWidget {
 }
 
 // ============================================================
-// شاشەی خوێندنەوەی وتار - وەک بۆرسەی عێراق
+// شاشەی خوێندنەوەی وتار
 // ============================================================
 class _ArticleReadView extends StatelessWidget {
   final WrittenAnalysis article;
-  final Color accent;
+  final AnalystModel analyst;
   final String readTime;
-  const _ArticleReadView({required this.article, required this.accent, required this.readTime});
+  const _ArticleReadView({required this.article, required this.analyst, required this.readTime});
 
   @override
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: appLanguageGlobal == 'English' ? TextDirection.ltr : TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFF0B121F),
+        backgroundColor: kCardBg, // 🔹 گۆڕینی پاشبنەمای شاشەی خوێندنەوەی وتار بۆ خۆڵەمێشی ماتی فەیسبووکی (kCardBg)
         body: SafeArea(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
-          // تۆپ بار
           Padding(
             padding: const EdgeInsets.all(16),
             child: Row(children: [
@@ -967,108 +907,85 @@ class _ArticleReadView extends StatelessWidget {
                 onTap: () => Navigator.pop(context),
                 child: Container(
                   padding: const EdgeInsets.all(9),
-                  decoration: BoxDecoration(color: const Color(0xFF131C2E), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white.withOpacity(0.08))),
-                  child: Icon(appLanguageGlobal == 'English' ? Icons.arrow_back_ios_new_rounded : Icons.arrow_back_ios_rounded, color: Colors.white, size: 15),
+                  decoration: BoxDecoration(color: kCardBg2, borderRadius: BorderRadius.circular(20), border: Border.all(color: kDividerLine)), // 🔹 گۆڕینی بۆ kCardBg2 بۆ تۆخکردنی زیاتری دوگمەکە
+                  child: Icon(appLanguageGlobal == 'English' ? Icons.arrow_back_ios_new_rounded : Icons.arrow_back_ios_rounded, color: kTextPrimary, size: 15),
                 ),
               ),
               const SizedBox(width: 12),
-              // لۆگۆی بۆرسەی عێراق وەک تایتڵ
-              Row(children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: [accent, accent.withOpacity(0.7)]),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Row(mainAxisSize: MainAxisSize.min, children: [
-                    Icon(Icons.trending_up_rounded, color: Colors.white, size: 13),
-                    SizedBox(width: 5),
-                    Text('بۆرسەی عێراق', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w900)),
-                  ]),
-                ),
-              ]),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(color: kFbBlue, borderRadius: BorderRadius.circular(8)),
+                child: const Row(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(Icons.trending_up_rounded, color: Colors.white, size: 13),
+                  SizedBox(width: 5),
+                  Text('بۆرسەی عێراق', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w900)),
+                ]),
+              ),
             ]),
           ),
 
-          // هێدەری وتار
+          _FbPostHeader(analyst: analyst, date: article.date),
+
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(article.title, style: const TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.bold, height: 1.4)),
-              const SizedBox(height: 12),
+              Text(article.title, style: const TextStyle(color: kTextPrimary, fontSize: 19, fontWeight: FontWeight.bold, height: 1.4)),
+              const SizedBox(height: 10),
               Row(children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                  decoration: BoxDecoration(color: Colors.white.withOpacity(0.04), borderRadius: BorderRadius.circular(8)),
-                  child: Row(children: [
-                    Icon(Icons.calendar_today_rounded, size: 10, color: Colors.white.withOpacity(0.4)),
-                    const SizedBox(width: 5),
-                    Text(formatDisplayNumbers(article.date), style: const TextStyle(color: Colors.white54, fontSize: 11)),
-                  ]),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                  decoration: BoxDecoration(color: accent.withOpacity(0.08), borderRadius: BorderRadius.circular(8)),
-                  child: Row(children: [
-                    Icon(Icons.timer_outlined, size: 10, color: accent),
-                    const SizedBox(width: 5),
-                    Text(readTime, style: TextStyle(color: accent, fontSize: 11, fontWeight: FontWeight.bold)),
-                  ]),
-                ),
-                const Spacer(),
-                // دەگمەی هاوبەشکردن
-                _InteractionBtn(icon: Icons.share_rounded, label: appLanguageGlobal == 'English' ? 'Share' : 'هاوبەشکردن', color: const Color(0xFF4ADE80)),
+                Icon(Icons.timer_outlined, size: 12, color: kFbBlueLight),
+                const SizedBox(width: 5),
+                Text(readTime, style: const TextStyle(color: kFbBlueLight, fontSize: 11.5, fontWeight: FontWeight.bold)),
               ]),
             ]),
           ),
 
           const SizedBox(height: 14),
-          Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: Divider(color: Colors.white.withOpacity(0.07), height: 1)),
-          const SizedBox(height: 16),
 
-          // ناوەڕۆکی وتار
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(children: [
-                IntrinsicHeight(
-                  child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                    // هێڵی رەنگین لە لای
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+
+                // وێنەی گەورەی وتار (ئەگەر هەبوو)
+                if (article.imageUrl != null && article.imageUrl!.isNotEmpty) ...[
+                  Container(
+                    width: double.infinity,
+                    height: 220,
+                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: kDividerLine, width: 1),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        article.imageUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(color: kCardBg2, child: Center(child: Icon(Icons.broken_image_rounded, color: kTextSecondary.withOpacity(0.5)))),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                ] else
+                  Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: Divider(color: kDividerLine, height: 1)),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    if (article.imageUrl == null || article.imageUrl!.isEmpty) const SizedBox(height: 16),
+                    // ✅ گۆڕینی نووسینی بەینی وتارەکان بۆ سپی تەواو و بۆڵدی زۆر تۆخ بە هاوسەنگی لایڤ
+                    _buildLinkableText(
+                      article.content,
+                      const TextStyle(color: Colors.white, fontSize: 16.5, height: 1.85, fontWeight: FontWeight.bold), // 🔹 گەورەکردنی فۆنت بۆ ١٦.٥ بۆ خوێندنەوەی بەرز و لایڤی سپی تەواو
+                      kFbBlueLight,
+                    ),
+                    const SizedBox(height: 24),
                     Container(
-                      width: 4,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(colors: [accent, accent.withOpacity(0.1)], begin: Alignment.topCenter, end: Alignment.bottomCenter),
-                        borderRadius: BorderRadius.circular(3),
-                      ),
+                      decoration: BoxDecoration(color: kCardBg, borderRadius: BorderRadius.circular(10), border: Border.all(color: kDividerLine, width: 1)),
+                      child: _FbActionsBar(likeLabel: formatDisplayNumbers('28'), commentLabel: '${formatDisplayNumbers('7')} ${appLanguageGlobal == 'English' ? 'comments' : 'کۆمێنت'}'),
                     ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: _buildLinkableText(
-                        article.content,
-                        TextStyle(color: Colors.white.withOpacity(0.85), fontSize: 15.5, height: 1.85, fontWeight: FontWeight.w500),
-                        const Color(0xFF00C6FF),
-                      ),
-                    ),
+                    const SizedBox(height: 30),
                   ]),
                 ),
-
-                const SizedBox(height: 24),
-
-                // دەگمەکانی لایک و کۆمێنت
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(color: const Color(0xFF131C2E), borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white.withOpacity(0.07))),
-                  child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-                    _InteractionBtn(icon: Icons.favorite_border_rounded, label: '٢٨', color: const Color(0xFFFF6B6B)),
-                    Container(width: 1, height: 24, color: Colors.white.withOpacity(0.07)),
-                    _InteractionBtn(icon: Icons.chat_bubble_outline_rounded, label: '٧', color: const Color(0xFF4FC3F7)),
-                    Container(width: 1, height: 24, color: Colors.white.withOpacity(0.07)),
-                    _InteractionBtn(icon: Icons.share_rounded, label: appLanguageGlobal == 'English' ? 'Share' : 'هاوبەشکردن', color: const Color(0xFF4ADE80)),
-                  ]),
-                ),
-
-                const SizedBox(height: 30),
               ]),
             ),
           ),

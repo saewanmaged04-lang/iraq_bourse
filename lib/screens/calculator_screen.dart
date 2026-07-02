@@ -117,7 +117,6 @@ class _CalculatorScreenState extends State<CalculatorScreen>
   @override
   void didUpdateWidget(CalculatorScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // لۆجیکی خۆکارانەی کردنەوەی لێکدراوە لێرەدا بە تەواوی لادراوە تاوەکو ڕێگری لە نووسینی تەواوی نرخەکان نەکات
   }
 
   void _triggerSwap() {
@@ -248,10 +247,9 @@ class _CalculatorScreenState extends State<CalculatorScreen>
             ),
           ),
           const SizedBox(width: 8),
+          // ✅ گۆڕینی لایڤی زمانی دەقەکەی "نرخی ئۆتۆماتیک" یان "دەستی" لێرەدایە
           Text(
-            _isAutomatic
-                ? (appLanguageGlobal == 'English' ? 'Auto Rate' : 'نرخی ئۆتۆماتیک')
-                : (appLanguageGlobal == 'English' ? 'Manual' : 'دەستی'),
+            _isAutomatic ? getTxt('calc_auto_rate') : getTxt('calc_manual_rate'), // 🔹 بەکارهێنانی کلیلی داینامیکی لۆکاڵی و خۆکار
             style: TextStyle(
               color: _isAutomatic ? const Color(0xFF4ADE80) : Colors.orange,
               fontSize: 11,
@@ -295,9 +293,9 @@ class _CalculatorScreenState extends State<CalculatorScreen>
                 icon: const Icon(Icons.expand_more_rounded, color: Colors.orange, size: 16),
                 style: const TextStyle(color: Colors.orange, fontSize: 11, fontWeight: FontWeight.bold),
                 items: [
-                  DropdownMenuItem(value: 'Central Bank', child: Text(appLanguageGlobal == 'English' ? 'Central Bank' : 'بانکی ناوەندی')),
-                  DropdownMenuItem(value: 'Sulaymaniyah Bourse', child: Text(appLanguageGlobal == 'English' ? 'Slemani Bourse' : 'بۆرسەی سلێمانی')),
-                  DropdownMenuItem(value: 'Baghdad Bourse', child: Text(appLanguageGlobal == 'English' ? 'Baghdad Bourse' : 'بۆرسەی بەغداد')),
+                  DropdownMenuItem(value: 'Central Bank', child: Text(getTxt('rate_source_central'))),
+                  DropdownMenuItem(value: 'Sulaymaniyah Bourse', child: Text(getTxt('rate_source_slemani'))),
+                  DropdownMenuItem(value: 'Baghdad Bourse', child: Text(getTxt('rate_source_baghdad'))),
                 ],
                 onChanged: (val) {
                   if (val != null) {
@@ -455,7 +453,7 @@ class _CalculatorScreenState extends State<CalculatorScreen>
               child: Column(children: [
                 _buildProfitCurrencySelector(),
                 const SizedBox(height: 10),
-                _buildInputGrid(), // تۆڕی ٢*٢ی کورتکراوە بۆ قوبڵنەکردنی سکرۆڵ
+                _buildInputGrid(), 
                 const SizedBox(height: 12),
                 _buildCalculateButton(),
               ]),
@@ -463,7 +461,6 @@ class _CalculatorScreenState extends State<CalculatorScreen>
           ),
           _buildKeyboard(onTap: widget.onKeyTap, isConverter: false),
         ]),
-        // کێشانی داینامیکی لەوحەی سەرئاوکەوتووی ئەنجامەکان (Floating Popup) وەک فەرمانت
         if (_showResultPopup && widget.profitResult != null)
           _buildFloatingResultPopup(),
       ],
@@ -488,8 +485,9 @@ class _CalculatorScreenState extends State<CalculatorScreen>
                 child: const Icon(Icons.currency_exchange_rounded, color: Color(0xFF4FC3F7), size: 13),
               ),
               const SizedBox(width: 8),
+              // ✅ گۆڕینی زمانی نووسینی "دراوی بنەڕەت" لێرەدایە کە بەستراوەتەوە بە کلیلی داینامیکی لۆکاڵی
               Text(
-                appLanguageGlobal == 'English' ? 'Base Currency' : 'دراوی بنەڕەت',
+                getTxt('calc_base_currency'), // 🔹 بەکارهێنانی کلیلی داینامیکی لۆکاڵی بۆ دراوی بنەڕەت
                 style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white.withOpacity(0.7)),
               ),
             ]),
@@ -509,13 +507,11 @@ class _CalculatorScreenState extends State<CalculatorScreen>
     );
   }
 
-  // تۆڕی نوێی کلیلەکان بە جێگیرکردنی لۆجیکی داینامیکی کڕین و فرۆشتن بەپێی جۆری دراوەکە
   Widget _buildInputGrid() {
-    final bool isIQD = widget.selectedCurrency == 'دینار IQD'; // دۆخی دینار
+    final bool isIQD = widget.selectedCurrency == 'دینار IQD'; 
 
     return Column(children: [
       Row(children: [
-        // ١. بڕی پارە (Amount)
         Expanded(
             child: _buildModernField(
                 getTxt('amount_label'),
@@ -524,7 +520,6 @@ class _CalculatorScreenState extends State<CalculatorScreen>
                 const Color(0xFF0072FF),
                 Icons.attach_money_rounded)),
         const SizedBox(width: 10),
-        // ٢. نرخی کڕین (بۆ دۆلار لە سەرەوەیە، بۆ دینار لۆجیکی فرۆشتنەکە دەچێتە پێشەوە)
         Expanded(
             child: _buildModernField(
                 isIQD ? getTxt('sell_price_label') : getTxt('buy_price_label'),
@@ -535,7 +530,6 @@ class _CalculatorScreenState extends State<CalculatorScreen>
       ]),
       const SizedBox(height: 10),
       Row(children: [
-        // ٣. نرخی فرۆشتن (بۆ دۆلار لە خوارەوەیە، بۆ دینار لۆجیکی کڕین دێتە دووەم)
         Expanded(
             child: _buildModernField(
                 isIQD ? getTxt('buy_price_label') : getTxt('sell_price_label'),
@@ -544,7 +538,6 @@ class _CalculatorScreenState extends State<CalculatorScreen>
                 isIQD ? const Color(0xFFFF6B6B) : const Color(0xFF4ADE80),
                 isIQD ? Icons.trending_down_rounded : Icons.trending_up_rounded)),
         const SizedBox(width: 10),
-        // ٤. کەمیسیۆن (Commission)
         Expanded(
             child: _buildModernField(
                 getTxt('commission_label'),
@@ -578,25 +571,15 @@ class _CalculatorScreenState extends State<CalculatorScreen>
             Expanded(
               child: Text(
                 label,
-                style: TextStyle(fontSize: 9, color: isActive ? color.withOpacity(0.9) : Colors.white.withOpacity(0.35), fontWeight: FontWeight.w600),
-                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white.withOpacity(0.7)),
               ),
             ),
           ]),
-          const SizedBox(height: 4),
-          Row(children: [
-            Expanded(
-              child: Text(
-                display.isEmpty ? (appLanguageGlobal == 'English' ? 'Tap' : 'بنووسە') : formatDisplayNumbers(display),
-                style: TextStyle(fontSize: display.isEmpty ? 10.5 : 14.5, fontWeight: FontWeight.w900, color: display.isEmpty ? Colors.white.withOpacity(0.15) : (isActive ? color : Colors.white.withOpacity(0.85))),
-              ),
-            ),
-            if (isActive)
-              AnimatedBuilder(
-                animation: _glowAnim,
-                builder: (_, __) => Opacity(opacity: _glowAnim.value, child: Container(width: 2, height: 14, color: color)),
-              ),
-          ]),
+          const SizedBox(height: 6),
+          Text(
+            display.isEmpty ? (appLanguageGlobal == 'English' ? '0' : '٠') : formatDisplayNumbers(display),
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: isActive ? color : Colors.white),
+          ),
         ]),
       ),
     );
@@ -607,7 +590,7 @@ class _CalculatorScreenState extends State<CalculatorScreen>
       onTap: () {
         widget.onCalculateProfit();
         setState(() {
-          _showResultPopup = true; // دڵنیابوون لەوەی تەنیا بە داگرتنی دەستی دوگمەکە لەوحەکە دەکرێتەوە
+          _showResultPopup = true; 
         });
       },
       child: Container(
@@ -627,9 +610,6 @@ class _CalculatorScreenState extends State<CalculatorScreen>
     );
   }
 
-  // ============================================================================
-  // دروستکردنی شاشەی سەرئاوکەوتووی ئەنجامەکان بە دەق و فۆنتی زۆر گەورەتر بە داواکاریت
-  // ============================================================================
   Widget _buildFloatingResultPopup() {
     final bool isProfit = widget.profitResult != null && (widget.profitResult!['isProfit'] as bool? ?? false);
     final Color resultColor = isProfit ? const Color(0xFF4ADE80) : const Color(0xFFFF6B6B);
@@ -638,9 +618,9 @@ class _CalculatorScreenState extends State<CalculatorScreen>
       child: Container(
         color: Colors.black.withOpacity(0.7), 
         alignment: Alignment.center,
-        padding: const EdgeInsets.symmetric(horizontal: 24), // زیادکردنی مەودای چواردەور بۆ ئەوەی جوانتر بێت
+        padding: const EdgeInsets.symmetric(horizontal: 24), 
         child: Container(
-          padding: const EdgeInsets.all(20), // گەورەکردنی پادینگی دەرەوەی لەوحەکە
+          padding: const EdgeInsets.all(20), 
           decoration: BoxDecoration(
             color: const Color(0xFF131C2E), 
             borderRadius: BorderRadius.circular(24),
@@ -650,21 +630,19 @@ class _CalculatorScreenState extends State<CalculatorScreen>
           child: Column(
             mainAxisSize: MainAxisSize.min, 
             children: [
-              // نازناوی سەرەکی: قازانج یان زیان
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10), // گەورەکردن بۆ دیاریبوون
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10), 
                 decoration: BoxDecoration(color: resultColor.withOpacity(0.08), borderRadius: BorderRadius.circular(14)),
                 child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  Icon(isProfit ? Icons.trending_up_rounded : Icons.trending_down_rounded, color: resultColor, size: 24), // گەورەکردنی سایزی ئایکۆن بۆ ٢٤
+                  Icon(isProfit ? Icons.trending_up_rounded : Icons.trending_down_rounded, color: resultColor, size: 24), 
                   const SizedBox(width: 10),
                   Text(
                     isProfit ? getTxt('profit_won') : getTxt('profit_lost'), 
-                    style: TextStyle(fontSize: 16.5, fontWeight: FontWeight.w900, color: resultColor), // ✅ گەورەکردنی فۆنتی سەرەکی بۆ ١٦.٥
+                    style: TextStyle(fontSize: 16.5, fontWeight: FontWeight.w900, color: resultColor), 
                   ),
                 ]),
               ),
               const SizedBox(height: 18),
-              // ڕیزی ئەنجامەکان بە فۆنت و ئایکۆنی گەورەتر بەبێ دروستبوونی سکرۆڵ
               _buildResultRow(getTxt('profit_iqd_label'), '${(widget.profitResult!['profitIQD'] as double) >= 0 ? '+' : ''}${formatDisplayNumbers(_addCommas((widget.profitResult!['profitIQD'] as double).toStringAsFixed(0)))} د.ع', resultColor, Icons.monetization_on_rounded),
               const SizedBox(height: 10),
               _buildResultRow('${getTxt('profit_curr_label')} ${widget.profitResult!['currency']}', '${(widget.profitResult!['profitCurrency'] as double) >= 0 ? '+' : ''}${formatDisplayNumbers(_addCommas((widget.profitResult!['profitCurrency'] as double).toStringAsFixed(2)))}', resultColor, Icons.currency_exchange_rounded),
@@ -675,7 +653,6 @@ class _CalculatorScreenState extends State<CalculatorScreen>
               const SizedBox(height: 10),
               _buildResultRow(getTxt('total_sell'), '${formatDisplayNumbers(_addCommas((widget.profitResult!['totalSell'] as double).toStringAsFixed(0)))} د.ع', Colors.white60, Icons.sell_rounded),
               const SizedBox(height: 22),
-              // دوگمەی سەرەکی داخستنی سەرئاوکەوتووی پۆپئەپ
               GestureDetector(
                 onTap: () => setState(() => _showResultPopup = false),
                 child: Container(
@@ -689,7 +666,7 @@ class _CalculatorScreenState extends State<CalculatorScreen>
                   child: Center(
                     child: Text(
                       appLanguageGlobal == 'English' ? 'Close' : 'داخستن',
-                      style: const TextStyle(color: Colors.white, fontSize: 13.5, fontWeight: FontWeight.bold), // ✅ گەورەکردنی دوگمەی داخستن بۆ ١٣.٥
+                      style: const TextStyle(color: Colors.white, fontSize: 13.5, fontWeight: FontWeight.bold), 
                     ),
                   ),
                 ),
@@ -701,15 +678,14 @@ class _CalculatorScreenState extends State<CalculatorScreen>
     );
   }
 
-  // نوێکردنەوەی پڕفیشناڵی ڕیزی ئەنجامەکان بە فۆنت و قەبارەی ڕێژەیی زۆر گەورەتر
   Widget _buildResultRow(String label, String value, Color valueColor, IconData icon) {
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
       Row(children: [
-        Icon(icon, size: 15, color: valueColor.withOpacity(0.5)), // ✅ گەورەکردنی ئایکۆن لەناو ڕیزەکە بۆ ١٥
+        Icon(icon, size: 15, color: valueColor.withOpacity(0.5)), 
         const SizedBox(width: 8),
-        Text(label, style: const TextStyle(fontSize: 12.5, color: Colors.white54)), // ✅ گەورەکردنی تێکستی ڕیز بۆ ١٢.٥
+        Text(label, style: const TextStyle(fontSize: 12.5, color: Colors.white54)), 
       ]),
-      Text(value, style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w900, color: valueColor)), // ✅ گەورەکردنی بەهای ڕیزەکە بۆ ١٤.٥
+      Text(value, style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w900, color: valueColor)), 
     ]);
   }
 
@@ -732,21 +708,21 @@ class _CalculatorScreenState extends State<CalculatorScreen>
           _buildKey('8', onTap),
           _buildKey('7', onTap),
         ]),
-        const SizedBox(height: 6),
+        const SizedBox(height: 10),
         Row(children: [
           _buildSpecialKey('C', onTap, bgColor: const Color(0xFF0D1117), textColor: Colors.orange),
           _buildKey('6', onTap),
           _buildKey('5', onTap),
           _buildKey('4', onTap),
         ]),
-        const SizedBox(height: 6),
+        const SizedBox(height: 10),
         Row(children: [
           _buildKey('.', onTap),
           _buildKey('3', onTap),
           _buildKey('2', onTap),
           _buildKey('1', onTap),
         ]),
-        const SizedBox(height: 6),
+        const SizedBox(height: 10),
         Row(children: [
           _buildSpecialKey('⇅', onTap, bgColor: const Color(0xFF4ADE80).withOpacity(0.06), iconColor: const Color(0xFF4ADE80)),
           _buildKey('000', onTap),

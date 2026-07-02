@@ -28,6 +28,7 @@ class CitiesScreen extends StatefulWidget {
 class _CitiesScreenState extends State<CitiesScreen> {
   int? _activeDragIndex; 
 
+  // مێتۆدی هۆشمەندی پیشاندانی دیالۆگی پینکردنی سەرەوە
   void _showPinSelectionDialog(String city, String buy, String sell, String status) {
     showModalBottomSheet(
       context: context,
@@ -54,7 +55,7 @@ class _CitiesScreenState extends State<CitiesScreen> {
                       ? 'Cell ${i + 1} (Now: ${getCityName(widget.pinnedRates[i]['city']!)})'
                       : (appLanguageGlobal == 'العربية'
                           ? 'الخانة ${i + 1} (الآن: ${getCityName(widget.pinnedRates[i]['city']!)})'
-                          : 'khaney ${i == 0 ? 'yekam' : i == 1 ? 'dwam' : 'seyam'} (esta: ${getCityName(widget.pinnedRates[i]['city']!)})'),
+                          : 'خانەی ${i == 0 ? 'یەکەم' : i == 1 ? 'دووەم' : 'سێیەم'} (ئێستا: ${getCityName(widget.pinnedRates[i]['city']!)})'), // گۆڕینی لاتینی بۆ کوردی سۆرانی ڕەسەن
                   style: const TextStyle(fontSize: 12)
                 ),
                 leading: Icon(i == 0 ? Icons.looks_one : i == 1 ? Icons.looks_two : i == 2 ? Icons.looks_3 : Icons.looks_one, color: Colors.blueAccent),
@@ -63,57 +64,10 @@ class _CitiesScreenState extends State<CitiesScreen> {
                   Navigator.pop(context); 
                 },
               )),
-              const SizedBox(height: 12),
-              _buildContactCardItemDialog('+964 750 585 6964'), 
-              const SizedBox(height: 10),
-              _buildContactCardItemDialog('+964 772 585 6969'),
+              // لێرەدا لاکێشەکانی ژمارەی تەلەفۆنەکانی پشتگیری بە تەواوی لابراون بۆ خاوێنکردنەوەی شاشەکە
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  // پێکهاتەی سندوقی تەلەفۆنەکانی پشتگیری
-  static Widget _buildContactCardItemDialog(String number) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: const Color(0xFF16181F),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.04)),
-      ),
-      child: Row(
-        textDirection: TextDirection.ltr,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: const Color(0xFF6F3EBF).withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.phone_iphone_rounded, color: Color(0xFF8F5EBF), size: 14),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: const Color(0xFF25D366).withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.chat_bubble_rounded, color: Color(0xFF25D366), size: 14),
-          ),
-          const Spacer(),
-          Text(
-            number,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.8,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -139,14 +93,12 @@ class _CitiesScreenState extends State<CitiesScreen> {
             controller: widget.citiesScrollController,
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-            itemCount: widget.cities.length + 1, // زیادکردنی یەک خانە بۆ هێنانە خوارەوەی پینەکان و تایتڵەکان بێ کێشە
+            itemCount: widget.cities.length + 1, 
             itemBuilder: (context, index) {
-              // هێڵی یەکەم (Index 0): خۆکارانە ٣ کارتەکەی پینکردنی سەرەوە و تایتڵەکان پیشان دەدەین بۆ جووڵانی داینامیکی
               if (index == 0) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // دروستکردنەوەی ٣ سندوقی پینکراوی مۆدێرنی پێشوو بە شینی ڕەسەن و قەبارەی بچووکی زۆر ڕێکخراو
                     Container(
                       margin: const EdgeInsets.fromLTRB(0, 4, 0, 0),
                       padding: const EdgeInsets.all(1.5),
@@ -168,7 +120,7 @@ class _CitiesScreenState extends State<CitiesScreen> {
                             final bool isHovering = candidateData.isNotEmpty;
                             final List<Color> cardGradient = isHovering
                                 ? [const Color(0xFF0072FF), const Color(0xFF00C6FF)]
-                                : [const Color(0xFF0D47A1), const Color(0xFF1565C0)]; // گەڕانەوە بۆ شینی فەرمی هێمن
+                                : [const Color(0xFF0D47A1), const Color(0xFF1565C0)]; 
                             
                             return AnimatedContainer(
                               duration: const Duration(milliseconds: 200),
@@ -210,7 +162,6 @@ class _CitiesScreenState extends State<CitiesScreen> {
                       })),
                     ),
                     
-                    // زیادکردنی ڕیزی ناونیشانەکان لێرەدا تا بەیەکەوە لەگەڵ پینەکان بە جوانی بجووڵێت و زیاتر لە ٢٥٪ مەودا بە شاشەکە ببەخشێت
                     Padding(
                       padding: const EdgeInsets.fromLTRB(4, 8, 4, 4),
                       child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
@@ -226,7 +177,6 @@ class _CitiesScreenState extends State<CitiesScreen> {
                 );
               }
 
-              // ڕێکخستنی سەرجەم کارتەکانی شارەکان بەپێی ئیندێکسە نوێیەکە (Index - 1)
               final itemIndex = index - 1;
               final item = widget.cities[itemIndex];
               final String status = item['status'] ?? 'neutral';
@@ -241,7 +191,7 @@ class _CitiesScreenState extends State<CitiesScreen> {
               return CityDragItem(
                 key: ValueKey('drag_${item['name']}'),
                 item: item, 
-                index: itemIndex, // فۆرماتی دروستی ئیندێکسی لایڤ بۆ بڕینی کێشەی دراگ
+                index: itemIndex, 
                 isActive: _activeDragIndex == itemIndex, 
                 buyColor: trendColor, 
                 sellColor: trendColor, 
@@ -258,31 +208,4 @@ class _CitiesScreenState extends State<CitiesScreen> {
       ]),
     );
   }
-}
-
-// پێکهاتەی هۆشداری لای خوارەوە بە سوودوەرگرتن لە withValues فەرمی بێ کێشە
-Widget _buildDialogContactRow(BuildContext context, String number) {
-  return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-    decoration: BoxDecoration(
-      color: const Color(0xFF0B121F), 
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-    ),
-    child: Row(
-      children: [
-        Text(
-          number,
-          textDirection: TextDirection.ltr,
-          style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 0.8),
-        ),
-        const Spacer(),
-        Icon(Icons.chat_bubble_outline_rounded, color: Colors.white.withValues(alpha: 0.6), size: 16),
-        const SizedBox(width: 10),
-        Icon(Icons.phone_outlined, color: Colors.white.withValues(alpha: 0.6), size: 16),
-        const SizedBox(width: 10),
-        Icon(Icons.chat_outlined, color: Colors.white.withValues(alpha: 0.6), size: 16),
-      ],
-    ),
-  );
 }

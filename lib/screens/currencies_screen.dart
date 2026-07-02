@@ -23,9 +23,7 @@ class CurrenciesScreen extends StatefulWidget {
 class _CurrenciesScreenState extends State<CurrenciesScreen>
     with TickerProviderStateMixin {
   late AnimationController _pulseController;
-  late AnimationController _shimmerController;
   late Animation<double> _pulseAnim;
-  late Animation<double> _shimmerAnim;
 
   // ئایندێکسی دراوی هەڵبژێردراو بۆ تەفسیلات
   int? _expandedIndex;
@@ -48,22 +46,46 @@ class _CurrenciesScreenState extends State<CurrenciesScreen>
   }
 
   String _getLocalName(String code) {
-    if (code == 'IQD') return appLanguageGlobal == 'English' ? 'Iraqi Dinar' : (appLanguageGlobal == 'العربية' ? 'دينار عراقي' : 'دینار عێراقی');
-    if (code == 'IRR') return appLanguageGlobal == 'English' ? 'Iranian Toman' : (appLanguageGlobal == 'العربية' ? 'تومان إيراني' : 'تمەنی ئێرانی');
-    if (code == 'GBP') return appLanguageGlobal == 'English' ? 'British Pound' : (appLanguageGlobal == 'العربية' ? 'جنيه إسترليني' : 'پاوەندی بەریتانی');
-    if (code == 'EUR') return appLanguageGlobal == 'English' ? 'Euro' : (appLanguageGlobal == 'العربية' ? 'يورو أوروبي' : 'یۆرۆی ئەورووپی');
-    if (code == 'TRY') return appLanguageGlobal == 'English' ? 'Turkish Lira' : (appLanguageGlobal == 'العربية' ? 'ليرة تركية' : 'لیرەی تورکی');
-    if (code == 'AED') return appLanguageGlobal == 'English' ? 'UAE Dirham' : (appLanguageGlobal == 'العربية' ? 'درهم إماراتي' : 'درامی ئیماراتی');
+    if (code == 'IQD') {
+      return appLanguageGlobal == 'English' ? 'Iraqi Dinar' : (appLanguageGlobal == 'العربية' ? 'دينار عراقي' : 'دینار عێراقی');
+    }
+    if (code == 'IRR') {
+      return appLanguageGlobal == 'English' ? 'Iranian Toman' : (appLanguageGlobal == 'العربية' ? 'تومان إيراني' : 'تمەنی ئێرانی');
+    }
+    if (code == 'GBP') {
+      return appLanguageGlobal == 'English' ? 'British Pound' : (appLanguageGlobal == 'العربية' ? 'جنيه إسترليني' : 'پاوەندی بەریتانی');
+    }
+    if (code == 'EUR') {
+      return appLanguageGlobal == 'English' ? 'Euro' : (appLanguageGlobal == 'العربية' ? 'يورو أوروبي' : 'یۆرۆی ئەورووپی');
+    }
+    if (code == 'TRY') {
+      return appLanguageGlobal == 'English' ? 'Turkish Lira' : (appLanguageGlobal == 'العربية' ? 'ليرة تركية' : 'لیرەی تورکی');
+    }
+    if (code == 'AED') {
+      return appLanguageGlobal == 'English' ? 'UAE Dirham' : (appLanguageGlobal == 'العربية' ? 'درهم إماراتي' : 'درامی ئیماراتی');
+    }
     return code;
   }
 
   String _getLocalUnit(String code) {
-    if (code == 'IQD') return appLanguageGlobal == 'English' ? 'IQD' : 'د.ع';
-    if (code == 'IRR') return appLanguageGlobal == 'English' ? 'Toman' : (appLanguageGlobal == 'العربية' ? 'تومان' : 'تمەن');
-    if (code == 'GBP') return appLanguageGlobal == 'English' ? 'GBP' : (appLanguageGlobal == 'العربية' ? 'جنيه' : 'پاوەند');
-    if (code == 'EUR') return appLanguageGlobal == 'English' ? 'EUR' : (appLanguageGlobal == 'العربية' ? 'يورو' : 'یۆرۆ');
-    if (code == 'TRY') return appLanguageGlobal == 'English' ? 'TRY' : (appLanguageGlobal == 'العربية' ? 'ليرة' : 'لیرە');
-    if (code == 'AED') return appLanguageGlobal == 'English' ? 'AED' : (appLanguageGlobal == 'العربية' ? 'درهم' : 'درام');
+    if (code == 'IQD') {
+      return appLanguageGlobal == 'English' ? 'IQD' : 'د.ع';
+    }
+    if (code == 'IRR') {
+      return appLanguageGlobal == 'English' ? 'Toman' : (appLanguageGlobal == 'العربية' ? 'تومان' : 'تمەن');
+    }
+    if (code == 'GBP') {
+      return appLanguageGlobal == 'English' ? 'GBP' : (appLanguageGlobal == 'العربية' ? 'جنيه' : 'پاوەند');
+    }
+    if (code == 'EUR') {
+      return appLanguageGlobal == 'English' ? 'EUR' : (appLanguageGlobal == 'العربية' ? 'يورو' : 'یۆرۆ');
+    }
+    if (code == 'TRY') {
+      return appLanguageGlobal == 'English' ? 'TRY' : (appLanguageGlobal == 'العربية' ? 'ليرة' : 'لیرە');
+    }
+    if (code == 'AED') {
+      return appLanguageGlobal == 'English' ? 'AED' : (appLanguageGlobal == 'العربية' ? 'درهم' : 'درام');
+    }
     return code;
   }
 
@@ -86,19 +108,13 @@ class _CurrenciesScreenState extends State<CurrenciesScreen>
     _pulseController = AnimationController(
         vsync: this, duration: const Duration(seconds: 2))
       ..repeat(reverse: true);
-    _shimmerController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1500))
-      ..repeat();
     _pulseAnim =
         Tween<double>(begin: 0.5, end: 1.0).animate(_pulseController);
-    _shimmerAnim =
-        Tween<double>(begin: -1.0, end: 2.0).animate(_shimmerController);
   }
 
   @override
   void dispose() {
     _pulseController.dispose();
-    _shimmerController.dispose();
     super.dispose();
   }
 
@@ -144,7 +160,7 @@ class _CurrenciesScreenState extends State<CurrenciesScreen>
   }
 
   // ============================================================
-  // HEADER (دروستکردنی ڕیزی سەرەوە بە درۆپداونی داینامیکی فەرمی)
+  // HEADER 
   // ============================================================
   Widget _buildHeader() {
     return Container(
@@ -165,13 +181,12 @@ class _CurrenciesScreenState extends State<CurrenciesScreen>
               getTxt('vs_100_dollars'),
               style: TextStyle(
                   fontSize: 10,
-                  color: Colors.white.withValues(alpha: 0.35)),
+                  color: Colors.white.withOpacity(0.35)),
             ),
           ]),
-          // ڕیزکردنی لای چەپ بۆ درۆپ داونی سەرچاوەی دۆلار لەگەڵ لایڤ باجەکەت
           Row(
             children: [
-              _buildBaseUsdSelector(), // درۆپداونی داینامیکی لێرەیە
+              _buildBaseUsdSelector(), 
               const SizedBox(width: 8),
               _buildLiveBadge(),
             ],
@@ -181,14 +196,14 @@ class _CurrenciesScreenState extends State<CurrenciesScreen>
     );
   }
 
-  // دروستکردنی درۆپداونی مۆدێرن و بچووک بۆ گۆڕینی لایڤی سەرچاوەی دۆلار
+  // ✅ لێره‌دا كێشه‌ی درۆپداون بنه‌ڕه‌تییه‌كه‌ به‌ كلیلی وه‌رگێڕانی تۆڕی ناوخۆیی به‌ ته‌واوی چاك كراوه‌
   Widget _buildBaseUsdSelector() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: const Color(0xFF131C2E),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
@@ -198,17 +213,17 @@ class _CurrenciesScreenState extends State<CurrenciesScreen>
           icon: const Icon(Icons.expand_more_rounded, color: Color(0xFFECC880), size: 14),
           style: const TextStyle(color: Color(0xFFECC880), fontSize: 10.5, fontWeight: FontWeight.bold),
           items: [
-            DropdownMenuItem(value: 'Central Bank', child: Text(appLanguageGlobal == 'English' ? 'Central' : 'ناوەندی')),
-            DropdownMenuItem(value: 'Sulaymaniyah Bourse', child: Text(appLanguageGlobal == 'English' ? 'Slemani' : 'سلێمانی')),
-            DropdownMenuItem(value: 'Baghdad Bourse', child: Text(appLanguageGlobal == 'English' ? 'Baghdad' : 'بەغداد')),
-            DropdownMenuItem(value: 'Erbil Bourse', child: Text(appLanguageGlobal == 'English' ? 'Erbil' : 'هەولێر')),
+            DropdownMenuItem(value: 'Central Bank', child: Text(getTxt('rate_source_central'))), // 🔹 بەکارهێنانی كلیلی داینامیكی وه‌رگێڕان
+            DropdownMenuItem(value: 'Sulaymaniyah Bourse', child: Text(getTxt('rate_source_slemani'))), // 🔹 بەکارهێنانی كلیلی داینامیكی وه‌رگێڕان
+            DropdownMenuItem(value: 'Baghdad Bourse', child: Text(getTxt('rate_source_baghdad'))), // 🔹 بەکارهێنانی كلیلی داینامیكی وه‌رگێڕان
+            DropdownMenuItem(value: 'Erbil Bourse', child: Text(getTxt('rate_source_erbil'))), // 🔹 بەکارهێنانی كلیلی داینامیكی وه‌رگێڕان
           ],
           onChanged: (val) {
             if (val != null) {
               setState(() {
                 selectedBaseRateSourceGlobal = val;
               });
-              BoursePremiumApp.rebuild(context); // سەرلەنوێ کێشانەوەی خۆکاری دراوەکان بەگوێرەی نرخەکەت
+              BoursePremiumApp.rebuild(context); 
             }
           },
         ),
@@ -223,16 +238,16 @@ class _CurrenciesScreenState extends State<CurrenciesScreen>
         padding:
             const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: const Color(0xFF4ADE80).withValues(alpha: 0.08),
+          color: const Color(0xFF4ADE80).withOpacity(0.08),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: const Color(0xFF4ADE80)
-                .withValues(alpha: 0.2 + _pulseAnim.value * 0.15),
+                .withOpacity(0.2 + _pulseAnim.value * 0.15),
           ),
           boxShadow: [
             BoxShadow(
               color: const Color(0xFF4ADE80)
-                  .withValues(alpha: _pulseAnim.value * 0.12),
+                  .withOpacity(_pulseAnim.value * 0.12),
               blurRadius: 12,
               spreadRadius: 2,
             )
@@ -245,11 +260,11 @@ class _CurrenciesScreenState extends State<CurrenciesScreen>
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: const Color(0xFF4ADE80)
-                  .withValues(alpha: 0.6 + _pulseAnim.value * 0.4),
+                  .withOpacity(0.6 + _pulseAnim.value * 0.4),
               boxShadow: [
                 BoxShadow(
                   color: const Color(0xFF4ADE80)
-                      .withValues(alpha: _pulseAnim.value * 0.6),
+                      .withOpacity(_pulseAnim.value * 0.6),
                   blurRadius: 6,
                   spreadRadius: 1,
                 )
@@ -271,13 +286,17 @@ class _CurrenciesScreenState extends State<CurrenciesScreen>
   }
 
   // ============================================================
-  // SUMMARY STRIP - ئیستاتیستیکی کورتەیی
+  // SUMMARY STRIP
   // ============================================================
   Widget _buildSummaryStrip() {
     int upCount = 0, downCount = 0;
     for (final item in widget.currencyData) {
       final bool isUp = item['isUp'] as bool? ?? true;
-      if (isUp) upCount++; else downCount++;
+      if (isUp) {
+        upCount++;
+      } else {
+        downCount++;
+      }
     }
 
     return Container(
@@ -286,31 +305,32 @@ class _CurrenciesScreenState extends State<CurrenciesScreen>
       decoration: BoxDecoration(
         color: const Color(0xFF0D1117),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: Colors.white.withOpacity(0.06)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
+          // ✅ لێرەش كێشه‌ی نووسینه‌كان كه‌ ناونیشانی كلیل بوو چاك كراوه‌ به‌ وه‌رگێڕانی داینامیكی
           _buildStripStat(
             icon: Icons.trending_up_rounded,
             color: const Color(0xFF4ADE80),
-            label: appLanguageGlobal == 'English' ? 'Rising' : 'بەرزبووە',
+            label: getTxt('strip_rising'), // 🔹 بەکارهێنانی وه‌رگێڕان بۆ به‌رزبووه‌
             value: '$upCount',
           ),
           Container(
-              width: 1, height: 28, color: Colors.white.withValues(alpha: 0.06)),
+              width: 1, height: 28, color: Colors.white.withOpacity(0.06)),
           _buildStripStat(
             icon: Icons.trending_down_rounded,
             color: const Color(0xFFFF6B6B),
-            label: appLanguageGlobal == 'English' ? 'Falling' : 'کەمبووە',
+            label: getTxt('strip_falling'), // 🔹 بەکارهێنانی وه‌رگێڕان بۆ كه‌مبووه‌
             value: '$downCount',
           ),
           Container(
-              width: 1, height: 28, color: Colors.white.withValues(alpha: 0.06)),
+              width: 1, height: 28, color: Colors.white.withOpacity(0.06)),
           _buildStripStat(
             icon: Icons.access_time_rounded,
             color: const Color(0xFF4FC3F7),
-            label: appLanguageGlobal == 'English' ? 'Updated' : 'نوێکراوە',
+            label: getTxt('strip_updated'), // 🔹 بەکارهێنانی وه‌رگێڕان بۆ نوێكراوه‌
             value: '12:00',
           ),
         ],
@@ -336,7 +356,7 @@ class _CurrenciesScreenState extends State<CurrenciesScreen>
       const SizedBox(height: 2),
       Text(label,
           style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.35),
+              color: Colors.white.withOpacity(0.35),
               fontSize: 9,
               fontWeight: FontWeight.w600)),
     ]);
@@ -372,14 +392,14 @@ class _CurrenciesScreenState extends State<CurrenciesScreen>
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isExpanded
-                ? itemColor.withValues(alpha: 0.3)
-                : Colors.white.withValues(alpha: 0.06),
+                ? itemColor.withOpacity(0.3)
+                : Colors.white.withOpacity(0.06),
             width: isExpanded ? 1.5 : 1,
           ),
           boxShadow: isExpanded
               ? [
                   BoxShadow(
-                    color: itemColor.withValues(alpha: 0.1),
+                    color: itemColor.withOpacity(0.1),
                     blurRadius: 20,
                     spreadRadius: 0,
                   )
@@ -412,8 +432,8 @@ class _CurrenciesScreenState extends State<CurrenciesScreen>
         height: 44,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: color.withValues(alpha: 0.08),
-          border: Border.all(color: color.withValues(alpha: 0.15)),
+          color: color.withOpacity(0.08),
+          border: Border.all(color: color.withOpacity(0.15)),
         ),
         child: Center(
           child:
@@ -434,7 +454,7 @@ class _CurrenciesScreenState extends State<CurrenciesScreen>
           padding:
               const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
+            color: color.withOpacity(0.1),
             borderRadius: BorderRadius.circular(6),
           ),
           child: Text(
@@ -495,14 +515,13 @@ class _CurrenciesScreenState extends State<CurrenciesScreen>
   }
 
   // ============================================================
-  // EXPANDED DETAILS - پیشاندانی گۆڕینەوەی لایڤی ١، ١٠، ١٠٠ دۆلار
+  // EXPANDED DETAILS
   // ============================================================
   Widget _buildExpandedDetails(
       Map<String, dynamic> item, Color color, String displayName) {
     final double price = item['price'] as double;
     final String displayUnit = _getLocalUnit(item['code'] as String);
 
-    // لۆجیکی حیسابکردنی خۆکاری ١, ١٠, ١٠٠ دۆلار بەگوێرەی تێکرای بۆرسەکان
     final double per100 = price;
     final double per10 = price / 10;
     final double per1 = price / 100;
@@ -511,24 +530,20 @@ class _CurrenciesScreenState extends State<CurrenciesScreen>
       margin: const EdgeInsets.fromLTRB(14, 0, 14, 14),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.04),
+        color: color.withOpacity(0.04),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withValues(alpha: 0.12)),
+        border: Border.all(color: color.withOpacity(0.12)),
       ),
       child: Column(children: [
         Row(children: [
           Container(width: 3, height: 12, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2))),
           const SizedBox(width: 8),
           Text(
-            appLanguageGlobal == 'English'
-                ? 'Quick Convert'
-                : (appLanguageGlobal == 'العربية'
-                    ? 'تحويل سريع'
-                    : 'گەڕاندنەوەی خێرا'),
+            getTxt('quick_convert_title'), 
             style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
-                color: color.withValues(alpha: 0.8)),
+                color: color.withOpacity(0.8)),
           ),
         ]),
         const SizedBox(height: 10),
@@ -549,7 +564,7 @@ class _CurrenciesScreenState extends State<CurrenciesScreen>
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.05),
+            color: Colors.white.withOpacity(0.05),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
@@ -561,11 +576,11 @@ class _CurrenciesScreenState extends State<CurrenciesScreen>
           ),
         ),
         Icon(Icons.arrow_forward_rounded,
-            size: 12, color: Colors.white.withValues(alpha: 0.2)),
+            size: 12, color: Colors.white.withOpacity(0.2)),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
+            color: color.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Row(mainAxisSize: MainAxisSize.min, children: [
@@ -581,7 +596,7 @@ class _CurrenciesScreenState extends State<CurrenciesScreen>
               unit,
               style: TextStyle(
                   fontSize: 9,
-                  color: color.withValues(alpha: 0.6),
+                  color: color.withOpacity(0.6),
                   fontWeight: FontWeight.w600),
             ),
           ]),
@@ -640,7 +655,7 @@ class _SparklinePainter extends CustomPainter {
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [color.withValues(alpha: 0.2), color.withValues(alpha: 0.0)],
+        colors: [color.withOpacity(0.2), color.withOpacity(0.0)],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
 
     canvas.drawPath(fillPath, fillPaint);

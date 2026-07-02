@@ -323,6 +323,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildContactRow(String number) {
+    // 🔹 بەکارهێنانی نیشانەی LRM بۆ ناچارکردنی لایڤی ژمارەکان بە شێوازی چەپ بۆ ڕاست بێ گوێدان بە زمانی دەرەکی
+    final String cleanNumber = '\u200E$number'; 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -345,7 +347,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           }),
           const Spacer(),
           Text(
-            formatDisplayNumbers(number),
+            formatDisplayNumbers(cleanNumber),
+            textDirection: TextDirection.ltr, // 🔹 ڕێگریکردنی لایڤ لە تێکچوونی سەرەوژووری ژمارەکان لە ڕێگەی LTR
             style: const TextStyle(
               color: Colors.white,
               fontSize: 13,
@@ -373,7 +376,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // دروستکردنی کارتی نوێ و یەکگرتوو بۆ سەرەوەی لیستەکە بێ جەنجاڵی (iOS Settings Style)
   Widget _buildConsolidatedAccountCard() {
     String displayName = userDisplayNameGlobal;
     if (displayName.isEmpty && userPhoneNumberGlobal.isNotEmpty) {
@@ -388,12 +390,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         iconColor: const Color(0xFF76C917),
         iconBg: const Color(0xFF76C917).withOpacity(0.12),
         onTap: () {
-          // هەناردەکردنی بەکارهێنەر بۆ لاپەڕەی نوێی سەربەخۆ بێ شێواندنی مۆدێلی مێنوی ڕێکخستنەکان
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const AccountDetailsScreen()),
           ).then((_) {
-            // نوێکردنەوەی لۆکاڵی شاشەی ڕێکخستنەکان ئەگەر لەناو ئەپەکە لۆگ دەرچوو بێت
             setState(() {});
           });
         },
@@ -430,7 +430,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           children: [
             const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 12),
             const SizedBox(width: 6),
-            Text(formatDisplayNumbers('وەشانی 1.0.0'), style: const TextStyle(fontSize: 10, color: Colors.white54, fontWeight: FontWeight.w600)),
+            Text(formatDisplayNumbers('${getTxt('app_version_label')} 1.0.0'), style: const TextStyle(fontSize: 10, color: Colors.white54, fontWeight: FontWeight.w600)), 
           ],
         ),
       ),
@@ -468,7 +468,7 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
     return Directionality(
       textDirection: textDirection,
       child: Scaffold(
-        backgroundColor: const Color(0xFF0B121F), // پاشبنەمای فەرمی تاریکی ئەپەکە
+        backgroundColor: const Color(0xFF0B121F), 
         body: SafeArea(
           child: Column(
             children: [
@@ -523,7 +523,6 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                               color: Colors.white30
                             ),
                             onTap: () {
-                              // پیشاندانی دیالۆگی ناوەڕاستی پشتگیری بۆ گۆڕینی پاسۆرد
                               showSupportContactDialog(context);
                             },
                           ),
@@ -534,7 +533,6 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                             iconColor: Colors.redAccent,
                             iconBg: const Color(0xFF2E0F0F),
                             onTap: () {
-                              // پرۆسەی چوونە دەرەوە و گەڕانەوە بۆ لاپەڕەی پێشوو
                               isLoggedInGlobal = false;
                               isPremiumActiveGlobal = false;
                               userPhoneNumberGlobal = '';

@@ -1,39 +1,30 @@
 // lib/global_state.dart
 
-import 'package:flutter/material.dart';
-
 // --- barudoxi cihani taqikrdnawa (Global Mock State) ---
 bool isLoggedInGlobal = false;
 bool isGuestGlobal = false;
 String userPhoneNumberGlobal = '';
-String userDisplayNameGlobal = ''; // گۆڕاوی جیهانی بۆ پاراستنی ناوی بەکارهێنەری لۆگینبوو
-String activationDateGlobal = '١٨ / ٦ / ٢٠٢٦'; // ١٨ی حوزەیرانی ٢٠٢٦
-String expiryDateGlobal = '١٨ / ٨ / ٢٠٢٦';     // ماوەی ٢ مانگی تاقیکردنەوەی بێبەرامبەر
-bool isPremiumActiveGlobal = false; // ئایا بەکارهێنەر بە فەرمی ئەکاونتەکەی چالاک کراوە؟
+String userDisplayNameGlobal = ''; 
+String activationDateGlobal = '١٨ / ٦ / ٢٠٢٦'; 
+String expiryDateGlobal = '١٨ / ٨ / ٢٠٢٦';     
+bool isPremiumActiveGlobal = false; 
 
-// ماوەی تاقیکردنەوەی ٢ مانگی گشتی (لەسەرەتادا هەمیشە چالاکە بە خۆڕایی بۆ ٢ مانگ)
 bool isGlobalFreeTrialActive = true; 
 
-// قەبارەی داینامیکی فۆنتی جیهانی (بچووک = 0.85، مامناوەند = 1.0، گەورە = 1.25)
 double fontScaleMultiplierGlobal = 1.0; 
 
-// زمانی جیهانی ئەپلیکەیشن (کوردی، العربية، English)
 String appLanguageGlobal = 'کوردی';
 
-// شێوازی جیهانی ژمارەکان ('123' یان '١٢٣')
 String appNumeralStyleGlobal = '١٢٣';
 
-// --- لۆجیکی نرخەکانی دۆلار بەرامبەر دینار (بۆ گۆڕینەوەی جیهانی بەپێی بژاردەی بەکارهێنەر) ---
-// بژاردەکان: 'Central Bank'، 'Baghdad Bourse'، 'Sulaymaniyah Bourse'، 'Erbil Bourse'
 String selectedBaseRateSourceGlobal = 'Central Bank'; 
 
-double usdToIqdMarketRate = 1537.0;       // نرخی فەرمی دۆلاری بازاڕ
-double usdToIqdCentralBankRate = 1320.0;  // نرخی بانکی ناوەندی: ١ دۆلار = ١٣٢٠ دینار
-double usdToIqdBaghdadRate = 1539.5;       // بۆرسەی بەغداد: ١ دۆلار = ١٥٣٩.٥ دینار
-double usdToIqdSulaymaniyahRate = 1538.0;   // بۆرسەی سلێمانی: ١ دۆلار = ١٥٣٨ دینار
-double usdToIqdErbilRate = 1537.5;          // بۆرسەی هەولێر: ١ دۆلار = ١٥٣٧.٥ دینار
+double usdToIqdMarketRate = 1537.0;       
+double usdToIqdCentralBankRate = 1320.0;  
+double usdToIqdBaghdadRate = 1539.5;       
+double usdToIqdSulaymaniyahRate = 1538.0;   
+double usdToIqdErbilRate = 1537.5;          
 
-// گێتەری هۆشمەند بۆ بەکارخستنی تێکڕای گشتی گۆڕینی دۆلار بەپێی سەرچاوەی دیاریکراو
 double get activeBaseUsdToIqdRate {
   switch (selectedBaseRateSourceGlobal) {
     case 'Central Bank':
@@ -49,7 +40,6 @@ double get activeBaseUsdToIqdRate {
   }
 }
 
-// فەرمانی داینامیکی بۆ کۆنتڕۆڵکردنی قوفڵی بەشەکان
 bool get isCitiesLockedGlobal {
   if (isGlobalFreeTrialActive) return false;
   if (isLoggedInGlobal && isPremiumActiveGlobal) return false;
@@ -62,24 +52,21 @@ bool get isCurrenciesLockedGlobal {
   return true;
 }
 
-// --- بنکەی دراوەی کاتی بۆ بەکارهێنەرانی تۆمارکراو (ژمارەکان و پاسۆردەکان) ---
 Map<String, String> registeredUsersDb = {
   '+9647701234567': '1234'
 };
 
-// --- داتابەیسی کاتی ناوی بەکارهێنەرە تۆمارکراوەکان ---
 Map<String, String> registeredNamesDb = {
   '+9647701234567': 'سەروان'
 };
 
-// --- فەرهەنگی وەرگێڕانی گشتگیر و فەرمی زمانەکان ---
 final Map<String, Map<String, String>> translations = {
   'کوردی': {
     'cities_tab': 'بۆرسەی شارەکان',
     'currencies_tab': 'دراوەکان',
     'calculator_tab': 'حاسیبە',
     'offices_tab': 'نوسینگەکان',
-    'analysis_tab': 'شیکارییەکان', // ✅ گۆڕدرا بۆ "شیکارییەکان" وەک داواکاری خۆت
+    'analysis_tab': 'شیکارییەکان',
     'analysis_title': 'شیکارییەکان', 
     'videos_tab': 'شیکاریی ڤیدیۆیی',
     'articles_tab': 'شیکاریی نووسراو',
@@ -100,19 +87,21 @@ final Map<String, Map<String, String>> translations = {
     'end_date': 'بەرواری کۆتایی هاتن',
     'logout': 'چوونە دەرەوە',
     'login_btn': 'چوونەژوورەوە یان دروستکردنی ئەژمار',
-    'test_panel': 'کۆنتڕۆڵی تاقیکردنەوە (بۆ گەشەپێدەر)',
+    'test_panel': 'کۆنتڕۆڵی تاقیکردنیەوە (بۆ گەشەپێدەر)',
     'trial_active': 'باری تاقیکاری چالاکە (بەشەکان کراوەن)',
     'trial_inactive': 'باری تاقیکاری ناچالاکە (بۆرسە قوفڵە)',
     'locked_msg': 'قفڵ کراوە',
-    'locked_title': 'هەژمارت بەسەرچوو',
-    'locked_desc': 'ماوەی بەکارهێنانی ئەژمارەکەت بەسەرچوو، بۆ نوێکردنەوە تەنیا دەست بنێ بە ئایکۆنی وەتساپی خوارەوە بۆ ئەوەی نامەی تۆماتیکی نوێنکردنەوەی ئەژمارەکەتمان پێ بگات ...',
-    'locked_note': 'تێبینی: ئەگەر ئەژمارت نییە با لە خوارەوە ئەژمارەکەت دروست بکەو دواتر پەیوەندیمان پێوە بکە.',
+    'locked_title': 'هەژمارەکەت بەسەرچوو',
+    // ✅ دەقە نوێی و فەرمییە داواکراوەکەت لێرەدا بە تەواوی گۆڕدراوە
+    'locked_desc': 'ماوەی بەکارهێنانی ئەژمارەکەت بەسەرچوو. بۆ نوێکردنەوە دەست بنێ بە ئایکۆنی ناردنی نامەدا لەخوارەوە یان لەڕێگای ئەو ژمارە مۆبایلەوە پەیوەندیمان پێوە بکە.',
+    // ✅ دەقە نوێی و فەرمییە داواکراوەکەت لێرەدا بە تەواوی گۆڕدراوە
+    'locked_note': 'تێبینی: گەر ئەژمارت دروست نەکردووە ئەوە لەخوارەوە ئەژمارێک دروست بکە و دواتر پەیوەندیمان پێوە بکە.',
     'refresh_btn': 'هەڵسەنگاندنەوە',
     'lock_create_account_btn': 'دروستکردنی ئەژمار',
     'unlock_btn': 'چوونە دەرەوە و چالاککردنی ئەکاونت',
     'buy': 'کڕین',
     'sell': 'فرۆشتن',
-    'app_subtitle': 'بۆرسەی عێراق',
+    'app_subtitle': 'بۆرسەی عێراق - کوردستان',
     'currencies_title': 'نرخی دراوەکان',
     'vs_100_dollars': 'بەرامبەر ١٠٠ دۆلار',
     'live': 'زیندوو',
@@ -183,13 +172,39 @@ final Map<String, Map<String, String>> translations = {
     'password_length_hint': 'لانی کەم ٤ پیت',
     'submit_btn': 'پاشکۆ',
     'forgot_pass_phone_desc': 'تکایە ژمارەی مۆبایلەکەت بنووسە بۆ ناردنی کۆدی دڵنیاکەرەوە',
+    'news_ticker': 'هەواڵ: نرخەکان نوێکرانەوە.',
+    'header_time': 'شەممە • ١٢:٠٠ پ.ن',
+    'rate_source_central': 'ناوەندی', 
+    'rate_source_slemani': 'سلێمانی', 
+    'rate_source_baghdad': 'بەغداد', 
+    'rate_source_erbil': 'هەولێر', 
+    'strip_rising': 'بەرزبووە', 
+    'strip_falling': 'کەمبووە', 
+    'strip_updated': 'نوێکراوە', 
+    'quick_convert_title': 'گۆڕینەوەی خێرا',
+    'calc_auto_rate': 'نرخی ئۆتۆماتیک', 
+    'calc_manual_rate': 'دەستی', 
+    'calc_base_currency': 'دراوی بنەڕەت', 
+    'office_working_hours_header': 'کاتی کارکردنی نووسینگە', 
+    'office_live_status': 'باری ئێستا:',
+    'office_address_services_header': 'ناونیشان و خزمەتگوزارییەکان',
+    'office_staff_header': 'ناو و ژمارەی کارمەندانی نووسینگە',
+    'office_staff_prefix': 'کارمەند: ',
+    'حەواڵ': 'حەواڵ', 
+    'کڕین و فرۆشتن': 'کڕین و فرۆشتن',
+    'گۆڕینەوەی خێرا': 'گۆڕینەوەی خێرا',
+    'reg_success_title': 'پیرۆزە کارەکە سەرکەوتووبوو.', 
+    'reg_success_subtitle': 'بۆ تەواوکردنی کارەکەت ئێستا پەیوەندیمان پێوەبکە:', 
+    'app_version_label': 'وەشانی',
+    'office_1': 'نووسینگەی ڕاستگۆ', 
+    'office_2': 'کۆمپانیای بازاڕی ناوەندی', 
   },
   'العربية': {
     'cities_tab': 'بورصة المدن',
     'currencies_tab': 'العملات',
     'calculator_tab': 'الحاسبة',
     'offices_tab': 'المكاتب',
-    'analysis_tab': 'التحليلات', // ✅ گۆڕدرا بۆ "التحليلات"
+    'analysis_tab': 'التحليلات',
     'analysis_title': 'التحليلات', 
     'videos_tab': 'التحليل المرئي',
     'articles_tab': 'التحليل المكتوب',
@@ -215,14 +230,14 @@ final Map<String, Map<String, String>> translations = {
     'trial_inactive': 'الفترة التجريبية منتهية (البورصة مغلقة)',
     'locked_msg': 'مغلق حالياً',
     'locked_title': 'انتهت صلاحية الحساب',
-    'locked_desc': 'لقد انتهت فترة استخدام حسابك. يرجى التواصل معنا للتجديد إذا كان لديك حساب بالفعل. اضغط على أيقونة الواتساب لإرسال طلب تجديد تلقائي.',
+    'locked_desc': 'لقد انتهت فترة استخدام حسابك. للتجديد, فقط اضغط على أيقونة الواتساب أدناه لإرسال رسالة تجديد تلقائية إلينا.',
     'locked_note': 'ملاحظة: إذا لم يكن لديك حساب، قم بإنشاء حساب أدناه ثم تواصل معنا.',
     'refresh_btn': 'إعادة المحاولة',
     'lock_create_account_btn': 'إنشاء حساب',
     'unlock_btn': 'تسجيل الدخول وتفعيل الحساب',
     'buy': 'طلب',
     'sell': 'عرض',
-    'app_subtitle': 'بورصة العراق',
+    'app_subtitle': 'البورصة العراقية - كوردستان', 
     'currencies_title': 'أسعار العملات',
     'live': 'مباشر',
     'vs_100_dollars': 'مقابل ١٠٠ دولار',
@@ -293,13 +308,39 @@ final Map<String, Map<String, String>> translations = {
     'password_length_hint': 'على الأقل ٤ رموز',
     'submit_btn': 'تأكيد',
     'forgot_pass_phone_desc': 'يرجى إدخال رقم هاتفك لإرسال رمز التأكيد',
+    'news_ticker': 'الأخبار: تم تحديث الأسعار.',
+    'header_time': 'السبت • ١٢:٠٠ ص',
+    'rate_source_central': 'المركزي', 
+    'rate_source_slemani': 'السليمانية', 
+    'rate_source_baghdad': 'بغداد', 
+    'rate_source_erbil': 'أربيل', 
+    'strip_rising': 'ارتفع', 
+    'strip_falling': 'انخفض', 
+    'strip_updated': 'محدث', 
+    'quick_convert_title': 'تحويل سريع', 
+    'calc_auto_rate': 'سعر تلقائي', 
+    'calc_manual_rate': 'يدوي', 
+    'calc_base_currency': 'العملة الأساسية', 
+    'office_working_hours_header': 'أوقات عمل المكتب', 
+    'office_live_status': 'الحالة المباشرة:',
+    'office_address_services_header': 'العنوان والخدمات',
+    'office_staff_header': 'أسماء وأرقام هواتف موظفي المكتب',
+    'office_staff_prefix': 'الموظف: ',
+    'حەواڵ': 'حوالات', 
+    'کڕین و فرۆشتن': 'بيع وشراء',
+    'گۆڕینەوەی خێرا': 'تبديل سريع',
+    'reg_success_title': 'تمت العملية بنجاح! مبروك.', 
+    'reg_success_subtitle': 'لإكمال عمليتك اتصل بنا الآن:', 
+    'app_version_label': 'الإصدار',
+    'نوسینگەی ڕاستگۆ': 'مكتب راستكو للصيرفة', 
+    'کۆمپانیای بازاڕی ناوەندی': 'مكتب السوق المركزي', 
   },
   'English': {
     'cities_tab': 'Cities Bourse',
     'currencies_tab': 'Currencies',
     'calculator_tab': 'Calculator',
     'offices_tab': 'Offices',
-    'analysis_tab': 'Analyses', // ✅ گۆڕدرا بۆ "Analyses"
+    'analysis_tab': 'Analyses', 
     'analysis_title': 'Analyses', 
     'videos_tab': 'Video Analysis',
     'articles_tab': 'Written Analysis',
@@ -332,7 +373,7 @@ final Map<String, Map<String, String>> translations = {
     'unlock_btn': 'Login & Activate Account',
     'buy': 'Buy',
     'sell': 'Sell',
-    'app_subtitle': 'Iraq Bourse',
+    'app_subtitle': 'Iraq - Kurdistan Bourse', 
     'currencies_title': 'Currency Rates',
     'live': 'Live',
     'vs_100_dollars': 'vs 100 Dollars',
@@ -403,12 +444,36 @@ final Map<String, Map<String, String>> translations = {
     'password_length_hint': 'At least 4 characters',
     'submit_btn': 'Submit',
     'forgot_pass_phone_desc': 'Please enter your phone number to receive a verification code',
+    'news_ticker': 'News: Rates updated.', 
+    'header_time': 'Saturday • 12:00 AM', 
+    'rate_source_central': 'Central', 
+    'rate_source_slemani': 'Slemani', 
+    'rate_source_baghdad': 'Baghdad', 
+    'rate_source_erbil': 'Erbil', 
+    'strip_rising': 'Rising', 
+    'strip_falling': 'Falling', 
+    'strip_updated': 'Updated', 
+    'quick_convert_title': 'Quick Convert',
+    'calc_auto_rate': 'Auto Rate', 
+    'calc_manual_rate': 'Manual', 
+    'calc_base_currency': 'Base Currency', 
+    'office_working_hours_header': 'Office Working Hours', 
+    'office_live_status': 'Live Status:',
+    'office_address_services_header': 'Address & Services',
+    'office_staff_header': 'Office Staff Contacts',
+    'office_staff_prefix': 'Staff: ',
+    'حەواڵ': 'Money Transfer', 
+    'کڕین و فرۆشتن': 'Buy & Sell',
+    'گۆڕینەوەی خێرا': 'Quick Exchange',
+    'reg_success_title': 'Registration Successful! Congratulations.', 
+    'reg_success_subtitle': 'To complete your process, contact us now:', 
+    'app_version_label': 'Version',
+    'office_1': 'Rastgo Exchange Office', 
+    'office_2': 'Central Market Company', 
   }
 };
 
-String getTxt(String key) {
-  return translations[appLanguageGlobal]?[key] ?? key;
-}
+String getTxt(String key) => translations[appLanguageGlobal]?[key] ?? key;
 
 String getCityName(String input) {
   if (input.contains('هەمووی')) return getTxt('all_cities');
