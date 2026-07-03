@@ -25,6 +25,10 @@ double usdToIqdBaghdadRate = 1539.5;
 double usdToIqdSulaymaniyahRate = 1538.0;   
 double usdToIqdErbilRate = 1537.5;          
 
+// لۆجیکی گۆڕاوی نوێی جیهانی بۆ جیاکردنەوەی داینامیکی ئاگادارکردنەوەکان لێرەدایە
+bool isRateNotifEnabledGlobal = true; // ئاگادارکردنەوەی بۆرسەی شارەکان
+bool isAnalysisNotifEnabledGlobal = true; // ئاگادارکردنەوەی شیکاری ڤیدیۆ و وتارەکان
+
 double get activeBaseUsdToIqdRate {
   switch (selectedBaseRateSourceGlobal) {
     case 'Central Bank':
@@ -92,9 +96,7 @@ final Map<String, Map<String, String>> translations = {
     'trial_inactive': 'باری تاقیکاری ناچالاکە (بۆرسە قوفڵە)',
     'locked_msg': 'قفڵ کراوە',
     'locked_title': 'هەژمارەکەت بەسەرچوو',
-    // ✅ دەقە نوێی و فەرمییە داواکراوەکەت لێرەدا بە تەواوی گۆڕدراوە
     'locked_desc': 'ماوەی بەکارهێنانی ئەژمارەکەت بەسەرچوو. بۆ نوێکردنەوە دەست بنێ بە ئایکۆنی ناردنی نامەدا لەخوارەوە یان لەڕێگای ئەو ژمارە مۆبایلەوە پەیوەندیمان پێوە بکە.',
-    // ✅ دەقە نوێی و فەرمییە داواکراوەکەت لێرەدا بە تەواوی گۆڕدراوە
     'locked_note': 'تێبینی: گەر ئەژمارت دروست نەکردووە ئەوە لەخوارەوە ئەژمارێک دروست بکە و دواتر پەیوەندیمان پێوە بکە.',
     'refresh_btn': 'هەڵسەنگاندنەوە',
     'lock_create_account_btn': 'دروستکردنی ئەژمار',
@@ -161,7 +163,7 @@ final Map<String, Map<String, String>> translations = {
     'login_title': 'چوونەژوورەوە بۆ هەژمار 🔑',
     'phone_hint': 'ژمارەی مۆبایل (نموونە: 07701234567)',
     'password_hint': 'پاسۆرد',
-    'forgot_password': 'پاسۆردت بیرچووە؟',
+    'forgot_password': 'پاسۆردt بیرچووە؟',
     'login_action': 'چوونەژوورەوە',
     'register_action': 'تۆمارکۆدنی هەژماری نوێ',
     'register_title': 'دروستکردنی ئەژمار نوێ 👤',
@@ -198,6 +200,10 @@ final Map<String, Map<String, String>> translations = {
     'app_version_label': 'وەشانی',
     'office_1': 'نووسینگەی ڕاستگۆ', 
     'office_2': 'کۆمپانیای بازاڕی ناوەندی', 
+    'notif_rate_changes': 'ئاگادارکردنەوە لە گۆڕانی نرخەکان (بۆرسە)', 
+    'notif_new_analysis': 'ئاگادارکردنەوە لە شیکارییە نوێیەکان (ڤیدیۆ و وتار)', 
+    'analyst_tab_kurdish': 'شرۆڤەکارانی کورد', // 🔹 پاراستنی تەواوی ناونیشانی فەرمی کوردی
+    'analyst_tab_arabic': 'شرۆڤە بە زمانی عەرەبی', // 🔹 گۆڕینی نووسینی بەشی عەرەبی بەپێی ویستت
   },
   'العربية': {
     'cities_tab': 'بورصة المدن',
@@ -332,8 +338,12 @@ final Map<String, Map<String, String>> translations = {
     'reg_success_title': 'تمت العملية بنجاح! مبروك.', 
     'reg_success_subtitle': 'لإكمال عمليتك اتصل بنا الآن:', 
     'app_version_label': 'الإصدار',
-    'نوسینگەی ڕاستگۆ': 'مكتب راستكو للصيرفة', 
-    'کۆمپانیای بازاڕی ناوەندی': 'مكتب السوق المركزي', 
+    'office_1': 'مكتب راستكو للصيرفة', 
+    'office_2': 'مكتب السوق المركزي', 
+    'notif_rate_changes': 'إشعارات تغير الأسعار (البورصة)', 
+    'notif_new_analysis': 'إشعارات التحليلات الجديدة (فيديو ومقالات)', 
+    'analyst_tab_kurdish': 'المحللون الأكراد', 
+    'analyst_tab_arabic': 'التحليلات باللغة العربية', // 🔹 نوێکاری عەرەبی لێرەیە بۆ گونجاندنی لەگەڵ دەقە نوێیەکەت
   },
   'English': {
     'cities_tab': 'Cities Bourse',
@@ -383,12 +393,6 @@ final Map<String, Map<String, String>> translations = {
     'EUR_name': 'Euro',
     'TRY_name': 'Turkish Lira',
     'AED_name': 'UAE Dirham',
-    'IQD_unit': 'IQD',
-    'IRR_unit': 'Toman',
-    'GBP_unit': 'Pound',
-    'EUR_unit': 'Euro',
-    'TRY_unit': 'Lira',
-    'AED_unit': 'Dirham',
     'heuler': 'Erbil',
     'slemani': 'Sulaymaniyah',
     'baghdad_kifah': 'Baghdad (Kifah)',
@@ -470,6 +474,10 @@ final Map<String, Map<String, String>> translations = {
     'app_version_label': 'Version',
     'office_1': 'Rastgo Exchange Office', 
     'office_2': 'Central Market Company', 
+    'notif_rate_changes': 'Rate Change Notifications (Bourse)', 
+    'notif_new_analysis': 'New Analysis Notifications (Videos & Articles)', 
+    'analyst_tab_kurdish': 'Kurdish Analysts', // 🔹 کلیلە لۆکاڵییە مۆدێرنە نوێیەکان بۆ فلتەری شیکارکاران
+    'analyst_tab_arabic': 'Arabic Analysts', // 🔹 کلیلە لۆکاڵی مۆدێرنە نوێیەکان بۆ فلتەری شیکارکاران
   }
 };
 

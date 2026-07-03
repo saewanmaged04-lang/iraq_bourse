@@ -2,6 +2,7 @@
 // lib/screens/settings_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart'; // 🔹 هاوردەکردنی وێستی کتێبخانەی url_launcher بۆ لایڤکردنی دوگمەکان
 import '../global_state.dart';
 import '../widgets/auth_sheets.dart';
 import '../main.dart'; // بۆ بانگکردنی BoursePremiumApp.rebuild
@@ -137,14 +138,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                         ),
                       ),
+                      
                       const Divider(color: Color(0xFF1E293B), height: 1),
+                      
                       _buildSettingsTile(
-                        icon: Icons.notifications_active_rounded,
-                        title: getTxt('notifications'),
+                        icon: Icons.trending_up_rounded,
+                        title: getTxt('notif_rate_changes'), 
+                        iconColor: Colors.orangeAccent,
+                        iconBg: Colors.orangeAccent.withOpacity(0.12),
                         trailing: Switch(
-                          value: _notificationsEnabled,
+                          value: isRateNotifEnabledGlobal,
                           activeColor: const Color(0xFF22C55E),
-                          onChanged: (val) => setState(() => _notificationsEnabled = val),
+                          onChanged: (val) {
+                            setState(() {
+                              isRateNotifEnabledGlobal = val;
+                            });
+                          },
+                        ),
+                      ),
+                      
+                      const Divider(color: Color(0xFF1E293B), height: 1),
+                      
+                      _buildSettingsTile(
+                        icon: Icons.analytics_rounded,
+                        title: getTxt('notif_new_analysis'), 
+                        iconColor: const Color(0xFF00C6FF),
+                        iconBg: const Color(0xFF00C6FF).withOpacity(0.12),
+                        trailing: Switch(
+                          value: isAnalysisNotifEnabledGlobal,
+                          activeColor: const Color(0xFF22C55E),
+                          onChanged: (val) {
+                            setState(() {
+                              isAnalysisNotifEnabledGlobal = val;
+                            });
+                          },
                         ),
                       ),
                     ]),
@@ -322,8 +349,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  // ✅ لێره‌دا فەنکشنی لایڤکردنی تەواوی پڕکردنەوەی دوگمەکان نووسراوەتەوە تا بە تەواوی ڕاستەوخۆ بن
   Widget _buildContactRow(String number) {
-    // 🔹 بەکارهێنانی نیشانەی LRM بۆ ناچارکردنی لایڤی ژمارەکان بە شێوازی چەپ بۆ ڕاست بێ گوێدان بە زمانی دەرەکی
     final String cleanNumber = '\u200E$number'; 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
@@ -334,21 +361,49 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       child: Row(
         children: [
-          _buildCircleActionButton(Icons.phone_rounded, const Color(0xFF0072FF), () {
-            _simulateAction('پەیوەندی دەکات بە $number...');
+          // 🔹 دوگمەی پەیوەندی لایڤی فەرمی
+          _buildCircleActionButton(Icons.phone_rounded, const Color(0xFF0072FF), () async {
+            final cleanNumberForTel = number.replaceAll(' ', '');
+            final Uri url = Uri.parse('tel:$cleanNumberForTel');
+            if (await canLaunchUrl(url)) {
+              await launchUrl(url);
+            } else {
+              _simulateAction('پەیوەندی دەکات بە $number...');
+            }
           }),
           const SizedBox(width: 8),
-          _buildCircleActionButton(Icons.phone_iphone_rounded, Colors.purpleAccent, () {
-            _simulateAction('ڤایبەری $number دەکاتەوە...');
+          // 🔹 دوگمەی ڤایبەری لایڤی فەرمی
+          _buildCircleActionButton(Icons.phone_iphone_rounded, Colors.purpleAccent, () async {
+            final cleanNumberForViber = number.replaceAll(' ', '').replaceAll('+', '');
+            final Uri url = Uri.parse('viber://chat?number=$cleanNumberForViber');
+            if (await canLaunchUrl(url)) {
+              await launchUrl(url);
+            } else {
+              _simulateAction('ڤایبەری $number دەکاتەوە...');
+            }
           }),
           const SizedBox(width: 8),
-          _buildCircleActionButton(Icons.chat_bubble_rounded, const Color(0xFF22C55E), () {
-            _simulateAction('واتسئەپی $number دەکاتەوە...');
+          // 🔹 دوگمەی وەتساپی لایڤی فەرمی بە نامەی داینامیکی لۆکاڵی
+          _buildCircleActionButton(Icons.chat_bubble_rounded, const Color(0xFF22C55E), () async {
+            final cleanNumberForWa = number.replaceAll(' ', '').replaceAll('+', '');
+            final message = Uri.encodeComponent(
+              appLanguageGlobal == 'English'
+                  ? "Hello, I have a question regarding your app..."
+                  : (appLanguageGlobal == 'العربية'
+                      ? "مرحباً، لدي استفسار بخصوص تطبيقكم..."
+                      : "سڵاو، پرسیارم هەیە سەبارەت بە ئەپەکەتان..."),
+            );
+            final Uri url = Uri.parse('https://wa.me/$cleanNumberForWa?text=$message');
+            if (await canLaunchUrl(url)) {
+              await launchUrl(url, mode: LaunchMode.externalApplication);
+            } else {
+              _simulateAction('واتسئەپی $number دەکاتەوە...');
+            }
           }),
           const Spacer(),
           Text(
-            formatDisplayNumbers(cleanNumber),
-            textDirection: TextDirection.ltr, // 🔹 ڕێگریکردنی لایڤ لە تێکچوونی سەرەوژووری ژمارەکان لە ڕێگەی LTR
+            cleanNumber, 
+            textDirection: TextDirection.ltr, 
             style: const TextStyle(
               color: Colors.white,
               fontSize: 13,
@@ -602,7 +657,7 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
           Container(
             width: 36, height: 36, 
             decoration: BoxDecoration(
-              color: iconBg ?? const Color(0xFF1E293B), 
+              color: iconBg ?? const Color(0xFF22C55E).withOpacity(0.15), 
               borderRadius: BorderRadius.circular(10)
             ), 
             child: Icon(icon, size: 18, color: iconColor)

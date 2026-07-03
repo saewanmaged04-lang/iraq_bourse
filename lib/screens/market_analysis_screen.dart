@@ -27,12 +27,14 @@ class AnalystModel {
   final String? imagePath;
   final List<VideoAnalysis> videos;
   final List<WrittenAnalysis> articles;
+  final String language; // 🔹 گۆڕاوی زمان: 'Kurdish' یان 'Arabic'
 
   const AnalystModel({
     required this.id, required this.name, required this.title,
     required this.emoji, required this.description,
     this.imagePath,
     required this.videos, required this.articles,
+    required this.language, // 🔹 جێگیرکردنی زمان
   });
 }
 
@@ -68,7 +70,6 @@ String? extractYoutubeId(String url) {
   return regExp.firstMatch(url)?.group(1);
 }
 
-// ✅ لێرەدا فەنکشنەکە گۆڕدراوە تا ڕاستەوخۆ ستایلی ڕیشەیی سپی بە دەقەکە ببەخشێت
 Widget _buildLinkableText(String text, TextStyle baseStyle, Color linkColor) {
   final RegExp linkRegExp = RegExp(r'(https?:\/\/[^\s]+)', caseSensitive: false);
   final List<TextSpan> spans = [];
@@ -102,18 +103,20 @@ final List<SystemNotification> _globalNotifications = [
   SystemNotification(id: 'n2', title: 'نوێکردنەوەی نرخەکانی بۆرسە 📊', body: 'سەرجەم نرخەکانی بۆرسەی شارەکان و دراوە جیهانییەکان لە بازاردا بە لایڤی نوێکرانەوە.', date: '٢٨/٦/٢٠٢٦'),
 ];
 
+// ✅ لێرەدا لیستی شیکارکارەکان نوێکراوەتەوە بۆ هەم کورد و هەم عەرەبە لۆکاڵییە بەڕێزەکان
 final List<AnalystModel> _mockAnalysts = [
   const AnalystModel(
     id: 'a1', name: 'د. ڕێبین جەمال',
     title: 'پڕۆفیسۆری سیاسەتی دارایی عێراق',
     emoji: '👨‍🏫', imagePath: null,
     description: 'پسپۆڕی سەرەکی سیاسەتی دراو و چاودێری جووڵەی بازارەکانی عێراق.',
+    language: 'Kurdish', // 🔹 کوری
     videos: [
       VideoAnalysis(id: 'v1', title: 'شیکاریی نوێ: بەهای دۆلار بەرامبەر دینار بۆ کۆتایی ساڵی ٢٠٢٦', youtubeUrl: 'https://www.youtube.com/watch?v=BBAyRBTfsOU', duration: '12:45', date: '٢٧/٦/٢٠٢٦', longDescription: 'لەم ڤیدیۆیەدا، دکتۆر ڕێبین شیکارییەکی زۆر ورد پێشکەش دەکات سەبارەت بە هەڵئاوسانی نێوخۆیی و بڕیارە درەنگوەختەکانی بانکی ناوەندی عێراق کە ڕاستەوخۆ کاریگەری لەسەر بەهای بازاڕی هاوتەریبی دۆلار دادەنێت لە بازارەکانی سلێمانی و بەغداد. زۆر گرنگی بۆ ئەوانەی کە سەرمایەیان هەیە.'),
-      VideoAnalysis(id: 'v2', title: 'کاریگەری بڕیارەکانی بانکی ناوەندی لەسەر بەهای بازاڕ', youtubeUrl: 'https://www.youtube.com/watch?v=y6Sxv-sUYtM', duration: '09:15', date: '٢٠/٦/٢٠٢٦', longDescription: 'لەم بابەتەدا, بە قووڵی باس لە ستراتیژی تەمویلکردنی نوێ دەکرێت کە چۆن گۆڕانکاری بەسەر جوڵەی بازرگانی گشتی دەهێنێت و چۆن کار دەکاتە سەر کەمکردنەوەی جیاوازی نێوان نرخی فەرمی و نافەرمی دۆلار.'),
+      VideoAnalysis(id: 'v2', title: 'کاریگەری بڕیارەکانی بانکی ناوەندی لەسەر بەهای بازاڕ', youtubeUrl: 'https://www.youtube.com/watch?v=y6Sxv-sUYtM', duration: '09:15', date: '٢٠/٦/٢٠٢٦', longDescription: 'لەم بابەتەدا، بە قووڵی باس لە ستراتیژی تەمویلکردنی نوێ دەکرێت کە چۆن گۆڕانکاری بەسەر جوڵەی بازرگانی گشتی دەهێنێت و چۆن کار دەکاتە سەر کەمکردنەوەی جیاوازی نێوان نرخی فەرمی و نافەرمی دۆلار.'),
     ],
     articles: [
-      WrittenAnalysis(id: 'art1', title: 'سیستمی تەمویلکردنی بازرگانی گشتی و کێشەی بازارە هاوتەریبەکان', content: 'لەم شرۆڤە فەرمییەدا, بە تەواوی ئاماژە بە هۆکارەکانی بەرزبوونەوەی کاتیی بەهای فرۆشتنی دۆلار لە بازارەکانی سلێمانی و بەغداد دەکەین. بۆ خوێندنەوەی ڕاپۆرتی فەرمی بانکی ناوەندی عێراق سەردانی ئەم بەستەرە بکە: https://cbi.iq هۆکاری سەرەکی گرفتەکە بریتییە لە نەبوونی متمانەی تەواوی نووسینگە بازرگانییە کاتییەکان بە مێتۆدە ئەلەکترۆنییەکان.', date: '٢٧/٦/٢٠٢٦'),
+      WrittenAnalysis(id: 'art1', title: 'سیستمی تەمویلکردنی بازرگانی گشتی و کێشەی بازارە هاوتەریبەکان', content: 'لەم شڕۆڤە فەرمییەدا, بە تەواوی ئاماژە بە هۆکارەکانی بەرزبوونەوەی کاتیی بەهای فرۆشتنی دۆلار لە بازارەکانی سلێمانی و بەغداد دەکەین. بۆ خوێندنەوەی ڕاپۆتی فەرمی بانکی ناوەندی عێراق سەردانی ئەم بەستەرە بکە: https://cbi.iq هۆکاری سەرەکی گرفتەکە بریتییە لە نەبوونی متمانەی تەواوی نووسینگە بازرگانییە کاتییەکان بە مێتۆدە ئەلەکترۆنییەکان.', date: '٢٧/٦/٢٠٢٦'),
       WrittenAnalysis(id: 'art2', title: 'پێشبینییەکانی تمەن بەرامبەر دۆلار بەپێی جووڵە نێودەوڵەتییەکان', content: 'جووڵەی دراوی تمەنی ئێرانی بە تەواوی بەستراوەتەوە بە سیاسەتە نێودەوڵەتییە گشتییەکان. هۆکاری جێگیربوونی نرخەکە لە کاتی نوێدا بۆ پەیوەندییە هاوبەشە بازرگانییەکان دەگەڕێتەوە، بەڵام پێشبینی دەکرێت لە مانگەکانی داهاتوودا سەرلەنوێ کێشە لە توانای دارایی بازارە کاتییەکانی تمەندا دروست ببێتەوە.', date: '٢٥/٦/٢٠٢٦'),
     ],
   ),
@@ -122,6 +125,7 @@ final List<AnalystModel> _mockAnalysts = [
     title: 'شرۆڤەکاری دارایی و ڕاوێژکاری بۆرسەی سلێمانی',
     emoji: '📊', imagePath: null,
     description: 'شرۆڤەکاری لایڤی جووڵەی بازار و بۆرسەی بەغداد و سلێمانی.',
+    language: 'Kurdish', // 🔹 کوری
     videos: [
       VideoAnalysis(id: 'v3', title: 'کلیلەکانی سەرکەوتن لە کڕین و فرۆشتنی بازاڕی بۆرسەدا', youtubeUrl: 'https://www.youtube.com/watch?v=BBAyRBTfsOU', duration: '15:20', date: '٢٥/٦/٢٠٢٦', longDescription: 'تەواوی مەرج و یاساکانی سەرکەوتن لە کڕین و فرۆشتنی سەرەکی لەم کورتە شرۆڤەیەدا کۆکراوەتەوە، کە یارمەتیدەرێکی بەهێزی بازرگانانی سەرەکی دراو دەبێت.'),
     ],
@@ -129,9 +133,36 @@ final List<AnalystModel> _mockAnalysts = [
       WrittenAnalysis(id: 'art3', title: 'گرنگی حاسیبە و نرخە لایڤەکان بۆ کۆنتڕۆڵکردنی سەرمایەکان', content: 'هەموو بازرگانێکی دراو پێویستی بە مێکانیزمی خێرا هەیە بۆ کۆنتڕۆڵکردنی قازانج و زیان. بەکارهێنانی نرخەکانی لایڤی بازار لەبری نرخە کۆنەکان هێزی دڵنیایی دەبەخشێت بە بازرگانان تا بتوانن لە خێراترین کاتدا بڕیاردان لەسەر سەفقە گەورەکان دەدەن.', date: '٢٠/٦/٢٠٢٦'),
     ],
   ),
+  // 🔹 زیادکردنی شرۆڤەکارە عەرەبییەکان بە وەرگێڕانی تۆخی فەرمی عەرەبی
+  const AnalystModel(
+    id: 'a3', name: 'أ. أحمد الجبوري',
+    title: 'خبير السياسات النقدية ومحلل أسواق الصرف',
+    emoji: '👨‍💼', imagePath: null,
+    description: 'مستشار مالي عراقي ومتابع لحركة البورصات العراقية والعالمية اليومية لأسعار الدولار.',
+    language: 'Arabic', // 🔹 عەرەبی
+    videos: [
+      VideoAnalysis(id: 'v4', title: 'التحليل الأسبوعي: اتجاهات سعر صرف الدولار مقابل الدينار العراقي لعام ٢٠٢٦', youtubeUrl: 'https://www.youtube.com/watch?v=BBAyRBTfsOU', duration: '10:15', date: '٢٩/٦/٢٠٢٦', longDescription: 'يقدم الأستاذ أحمد الجبوري تحليلاً دقيقاً لسيولة الدينار العراقي والتحويلات المالية عبر المنصة الإلكترونية وأثرها المباشر على أسعار الصرف في الأسواق المحلية.'),
+    ],
+    articles: [
+      WrittenAnalysis(id: 'art4', title: 'تأثير السيولة النقدية للبنك المركزي على حركة مكاتب الصيرفة في بغداد', content: 'نناقش في هذا المقال آليات البنك المركزي الجديدة لتمويل التجارة الخارجية وسد حاجة السوق المحلي للدولار والخطوات المتبعة لاستقرار سعر الصرف في البورصات العراقية. لمزيد من المعلومات، يرجى زيارة الموقع الرسمي للبنك المركزي العراقي: https://cbi.iq', date: '٢٩/٦/٢٠٢٦'),
+    ],
+  ),
+  const AnalystModel(
+    id: 'a4', name: 'المستشار عمر الحديثي',
+    title: 'مستشار أسواق الأسهم والعملات النقدية والبورصات المحلية',
+    emoji: '📈', imagePath: null,
+    description: 'محلل مالي يومي ومتابع لحركات البيع والشراء الفوري في بورصتي الكفاح والحارثية.',
+    language: 'Arabic', // 🔹 عەرەبی
+    videos: [
+      VideoAnalysis(id: 'v5', title: 'أسرار التداول والاستثمار المالي الناجح في أسواق الصرف العراقية', youtubeUrl: 'https://www.youtube.com/watch?v=BBAyRBTfsOU', duration: '14:30', date: '٢٨/٦/٢٠٢٦', longDescription: 'شرح كامل حول آليات حماية رأس المال والتحليلات الأساسية الواجب اتباعها من قبل التجار والمكاتب المالية لتجنب تذبذبات الصرف الفورية.'),
+    ],
+    articles: [
+      WrittenAnalysis(id: 'art5', title: 'أهمية الاعتماد على المنصات الرقمية المعتمدة للتحويلات الفورية', content: 'إن التحول المالي الرقمي هو الحل الأمثل لضمان وصول التمويل للتجار بأسعار مناسبة وضمان خفض الفجوة بين السعر الرسمي والوازي للدولار مقابل الدينار العراقي.', date: '٢٨/٦/٢٠٢٦'),
+    ],
+  ),
 ];
 
-// فەنکشنە گرنگەکان بە سەرکەوتوویی گەڕێنراونەتەوە شوێنی خۆیان بۆ نەهێشتنی تەواوی ئیرۆڕەکان
+// فەنکشنە گرنگەکان بە سەرکەوتوویی گەڕێنراونەتەوە شوێنی خۆیان بۆ نەهێشتنی تەواوی ئیرۆڕەکان [2]
 Widget _buildDynamicAvatar(String? imagePath, String emoji, double size) {
   if (imagePath != null && imagePath.isNotEmpty) {
     if (imagePath.startsWith('http')) {
@@ -154,6 +185,8 @@ class MarketAnalysisScreen extends StatefulWidget {
 }
 
 class _MarketAnalysisScreenState extends State<MarketAnalysisScreen> {
+  // 🔹 فلتەری سەرەکی دەسپێک لەسەر کورد دابینکراوە
+  String _selectedLanguageFilter = 'Kurdish'; 
 
   void _showNotificationCenter(BuildContext context) {
     showModalBottomSheet(
@@ -170,22 +203,9 @@ class _MarketAnalysisScreenState extends State<MarketAnalysisScreen> {
               padding: const EdgeInsets.all(16),
               child: Column(children: [
                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                  Text('ئاگادارکردنەوە فەرمییەکان', style: TextStyle(color: kTextPrimary, fontSize: 14, fontWeight: FontWeight.bold)),
-                  GestureDetector(
-                    onTap: () => _simulatePublishDialog(context, setSheetState),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: kFbBlue.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: kFbBlue.withOpacity(0.4)),
-                      ),
-                      child: const Row(children: [
-                        Icon(Icons.campaign_rounded, color: kFbBlueLight, size: 12),
-                        SizedBox(width: 4),
-                        Text('ناردنی نوێ', style: TextStyle(color: kFbBlueLight, fontSize: 10, fontWeight: FontWeight.bold)),
-                      ]),
-                    ),
+                  Text(
+                    appLanguageGlobal == 'English' ? 'Official Notifications' : (appLanguageGlobal == 'العربية' ? 'الإشعارات الرسمية' : 'ئاگادارکردنەوە فەرمییەکان'),
+                    style: TextStyle(color: kTextPrimary, fontSize: 14, fontWeight: FontWeight.bold)
                   ),
                 ]),
                 const SizedBox(height: 14),
@@ -224,6 +244,7 @@ class _MarketAnalysisScreenState extends State<MarketAnalysisScreen> {
     ).then((_) => setState(() {}));
   }
 
+  // ignore: unused_element
   void _simulatePublishDialog(BuildContext context, StateSetter setSheetState) {
     final titleCtrl = TextEditingController();
     final bodyCtrl = TextEditingController();
@@ -259,6 +280,7 @@ class _MarketAnalysisScreenState extends State<MarketAnalysisScreen> {
     );
   }
 
+  // ignore: unused_element
   void _showPushBanner(String title, String body) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Row(children: [
@@ -277,20 +299,83 @@ class _MarketAnalysisScreenState extends State<MarketAnalysisScreen> {
     setState(() {});
   }
 
+  // ✅ دروستکردنی کارتی فلتەری لایڤی سەرەوە بۆ جیاکردنەوەی شیکارکاران بە دیزاینێکی زۆر ناوازە
+  Widget _buildCategorySelector() {
+    final bool isKurdishActive = _selectedLanguageFilter == 'Kurdish';
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: kCardBg,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: kDividerLine),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedLanguageFilter = 'Kurdish'),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  gradient: isKurdishActive ? const LinearGradient(colors: [Color(0xFF0072FF), Color(0xFF00C6FF)]) : null,
+                  color: isKurdishActive ? null : Colors.transparent,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Center(
+                  child: Text(
+                    getTxt('analyst_tab_kurdish'),
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: isKurdishActive ? Colors.white : kTextSecondary),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 4),
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedLanguageFilter = 'Arabic'),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  gradient: !isKurdishActive ? const LinearGradient(colors: [Color(0xFF0072FF), Color(0xFF00C6FF)]) : null,
+                  color: !isKurdishActive ? null : Colors.transparent,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Center(
+                  child: Text(
+                    getTxt('analyst_tab_arabic'),
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: !isKurdishActive ? Colors.white : kTextSecondary),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    // 🔹 فلتەرکردنی لایڤی شیکارکارەکان لێرەدایە بۆ پیشاندان لەسەر شاشەی فەرمی
+    final filteredAnalysts = _mockAnalysts.where((a) => a.language == _selectedLanguageFilter).toList();
+
     return Directionality(
       textDirection: appLanguageGlobal == 'English' ? TextDirection.ltr : TextDirection.rtl,
       child: Container(
         color: kPageBg,
         child: Column(children: [
           _buildHeader(),
+          _buildCategorySelector(), // 🔹 ڕاکێشانی دروستی فلتەری نوێ
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 30),
-              itemCount: _mockAnalysts.length,
-              itemBuilder: (context, i) => _AnalystCard(analyst: _mockAnalysts[i], index: i),
-            ),
+            child: filteredAnalysts.isEmpty
+                ? Center(child: Text(getTxt('no_content'), style: TextStyle(color: kTextSecondary.withOpacity(0.6))))
+                : ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(16, 6, 16, 30),
+                    itemCount: filteredAnalysts.length,
+                    itemBuilder: (context, i) => _AnalystCard(analyst: filteredAnalysts[i], index: i),
+                  ),
           ),
         ]),
       ),
