@@ -28,6 +28,9 @@ class _CurrenciesScreenState extends State<CurrenciesScreen>
   // ئایندێکسی دراوی هەڵبژێردراو بۆ تەفسیلات
   int? _expandedIndex;
 
+  // دۆخی بەشە چالاکەکە (0: دراوەکان، 1: زێڕ و زیو)
+  int _activeSubTab = 0;
+
   String _formatWithCommas(double price) {
     if (price >= 1000000) {
       return '${(price / 1000000).toStringAsFixed(2)}M';
@@ -140,18 +143,25 @@ class _CurrenciesScreenState extends State<CurrenciesScreen>
           child: ListView.builder(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-            itemCount: widget.currencyData.length + 1, 
+            itemCount: _activeSubTab == 0 
+                ? widget.currencyData.length + 1 
+                : 2, 
             itemBuilder: (context, index) {
               if (index == 0) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildHeader(),
-                    _buildSummaryStrip(),
+                    _buildSubTabSwitcher(), // 🔹 دوگمە هاوتەریبەکان لێرەیە
                   ],
                 );
               }
-              return _buildCurrencyCard(index - 1); 
+              
+              if (_activeSubTab == 0) {
+                return _buildCurrencyCard(index - 1); 
+              } else {
+                return _buildGoldAndSilverSection(); 
+              }
             },
           ),
         ),
@@ -196,7 +206,6 @@ class _CurrenciesScreenState extends State<CurrenciesScreen>
     );
   }
 
-  // ✅ لێره‌دا كێشه‌ی درۆپداون بنه‌ڕه‌تییه‌كه‌ به‌ كلیلی وه‌رگێڕانی تۆڕی ناوخۆیی به‌ ته‌واوی چاك كراوه‌
   Widget _buildBaseUsdSelector() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -213,10 +222,10 @@ class _CurrenciesScreenState extends State<CurrenciesScreen>
           icon: const Icon(Icons.expand_more_rounded, color: Color(0xFFECC880), size: 14),
           style: const TextStyle(color: Color(0xFFECC880), fontSize: 10.5, fontWeight: FontWeight.bold),
           items: [
-            DropdownMenuItem(value: 'Central Bank', child: Text(getTxt('rate_source_central'))), // 🔹 بەکارهێنانی كلیلی داینامیكی وه‌رگێڕان
-            DropdownMenuItem(value: 'Sulaymaniyah Bourse', child: Text(getTxt('rate_source_slemani'))), // 🔹 بەکارهێنانی كلیلی داینامیكی وه‌رگێڕان
-            DropdownMenuItem(value: 'Baghdad Bourse', child: Text(getTxt('rate_source_baghdad'))), // 🔹 بەکارهێنانی كلیلی داینامیكی وه‌رگێڕان
-            DropdownMenuItem(value: 'Erbil Bourse', child: Text(getTxt('rate_source_erbil'))), // 🔹 بەکارهێنانی كلیلی داینامیكی وه‌رگێڕان
+            DropdownMenuItem(value: 'Central Bank', child: Text(getTxt('rate_source_central'))), 
+            DropdownMenuItem(value: 'Sulaymaniyah Bourse', child: Text(getTxt('rate_source_slemani'))), 
+            DropdownMenuItem(value: 'Baghdad Bourse', child: Text(getTxt('rate_source_baghdad'))), 
+            DropdownMenuItem(value: 'Erbil Bourse', child: Text(getTxt('rate_source_erbil'))), 
           ],
           onChanged: (val) {
             if (val != null) {
@@ -286,80 +295,101 @@ class _CurrenciesScreenState extends State<CurrenciesScreen>
   }
 
   // ============================================================
-  // SUMMARY STRIP
+  // 🔹 ویجێتی گۆڕینی بەشەکان بە دوو ڕەنگی جیاواز و دەقی زەق
   // ============================================================
-  Widget _buildSummaryStrip() {
-    int upCount = 0, downCount = 0;
-    for (final item in widget.currencyData) {
-      final bool isUp = item['isUp'] as bool? ?? true;
-      if (isUp) {
-        upCount++;
-      } else {
-        downCount++;
-      }
-    }
+  Widget _buildSubTabSwitcher() {
+    final bool isEn = appLanguageGlobal == 'English';
+    final bool isAr = appLanguageGlobal == 'العربية';
+    
+    final String currenciesLabel = isEn ? 'Currencies' : (isAr ? 'العملات' : 'دراوەکان');
+    final String goldSilverLabel = isEn ? 'Gold & Silver' : (isAr ? 'الذهب والفضة' : 'زێڕ و زیو');
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(0, 0, 0, 10), 
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      margin: const EdgeInsets.only(bottom: 16, top: 4),
+      padding: const EdgeInsets.all(5),
       decoration: BoxDecoration(
-        color: const Color(0xFF0D1117),
+        color: const Color(0xFF0D1117), 
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          // ✅ لێرەش كێشه‌ی نووسینه‌كان كه‌ ناونیشانی كلیل بوو چاك كراوه‌ به‌ وه‌رگێڕانی داینامیكی
-          _buildStripStat(
-            icon: Icons.trending_up_rounded,
-            color: const Color(0xFF4ADE80),
-            label: getTxt('strip_rising'), // 🔹 بەکارهێنانی وه‌رگێڕان بۆ به‌رزبووه‌
-            value: '$upCount',
+          Expanded(
+            child: _buildSubTabButton(
+              index: 0,
+              icon: Icons.monetization_on_rounded,
+              label: currenciesLabel,
+              activeColor: const Color(0xFF22C55E), // 🔹 ڕەنگی سەوز بۆ بەشی دراوەکان [1]
+            ),
           ),
-          Container(
-              width: 1, height: 28, color: Colors.white.withOpacity(0.06)),
-          _buildStripStat(
-            icon: Icons.trending_down_rounded,
-            color: const Color(0xFFFF6B6B),
-            label: getTxt('strip_falling'), // 🔹 بەکارهێنانی وه‌رگێڕان بۆ كه‌مبووه‌
-            value: '$downCount',
-          ),
-          Container(
-              width: 1, height: 28, color: Colors.white.withOpacity(0.06)),
-          _buildStripStat(
-            icon: Icons.access_time_rounded,
-            color: const Color(0xFF4FC3F7),
-            label: getTxt('strip_updated'), // 🔹 بەکارهێنانی وه‌رگێڕان بۆ نوێكراوه‌
-            value: '12:00',
+          const SizedBox(width: 6),
+          Expanded(
+            child: _buildSubTabButton(
+              index: 1,
+              icon: Icons.stars_rounded, 
+              label: goldSilverLabel,
+              activeColor: const Color(0xFFECC880), // 🔹 ڕەنگی زێڕینی شاهانە بۆ زێڕ و زیو [1]
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStripStat(
-      {required IconData icon,
-      required Color color,
-      required String label,
-      required String value}) {
-    return Column(children: [
-      Row(mainAxisSize: MainAxisSize.min, children: [
-        Icon(icon, color: color, size: 14),
-        const SizedBox(width: 4),
-        Text(value,
-            style: TextStyle(
-                color: color,
-                fontSize: 14,
-                fontWeight: FontWeight.w900)),
-      ]),
-      const SizedBox(height: 2),
-      Text(label,
-          style: TextStyle(
-              color: Colors.white.withOpacity(0.35),
-              fontSize: 9,
-              fontWeight: FontWeight.w600)),
-    ]);
+  Widget _buildSubTabButton({
+    required int index, 
+    required IconData icon, 
+    required String label,
+    required Color activeColor, // وەرگرتنی ڕەنگی تایبەت بۆ چالاکبوون
+  }) {
+    final bool isActive = _activeSubTab == index;
+    
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _activeSubTab = index;
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: isActive ? activeColor.withOpacity(0.18) : const Color(0xFF1E293B).withOpacity(0.4),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isActive ? activeColor : Colors.white.withOpacity(0.15), // هێڵی دەوری ناچالاک بۆ پڕکردنەوەی جیاوازییەکە [1]
+            width: isActive ? 1.8 : 1.0,
+          ),
+          boxShadow: isActive ? [
+            BoxShadow(
+              color: activeColor.withOpacity(0.12),
+              blurRadius: 10,
+              spreadRadius: 0,
+            )
+          ] : [],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon, 
+              color: isActive ? activeColor : Colors.white.withOpacity(0.7), // ئایکۆنی بەشی ناچالاک تۆختر کرا بۆ ئەوەی ون نەبێت [1]
+              size: 16,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                color: isActive ? Colors.white : Colors.white.withOpacity(0.75), // زیادکردنی ئۆپاسیتی بەشی ناچالاک بۆ تۆخبوونەوەی دەقەکە [1]
+                fontSize: 12.5,
+                fontWeight: FontWeight.w900, // فۆنتی زۆر ئەستوور بۆ دیاربوون بە ڕوونی [1]
+                letterSpacing: 0.2,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   // ============================================================
@@ -514,9 +544,6 @@ class _CurrenciesScreenState extends State<CurrenciesScreen>
     ]);
   }
 
-  // ============================================================
-  // EXPANDED DETAILS
-  // ============================================================
   Widget _buildExpandedDetails(
       Map<String, dynamic> item, Color color, String displayName) {
     final double price = item['price'] as double;
@@ -602,6 +629,234 @@ class _CurrenciesScreenState extends State<CurrenciesScreen>
           ]),
         ),
       ],
+    );
+  }
+
+  // ============================================================
+  // ✨ بەشی نوێ و ڕێکخراوی زێڕ و زیو (GOLD & SILVER SECTION)
+  // ============================================================
+  Widget _buildGoldAndSilverSection() {
+    final bool isEn = appLanguageGlobal == 'English';
+    final bool isAr = appLanguageGlobal == 'العربية';
+
+    // وەرگێڕانی داینامیکی سەردێڕەکان بە زمانی ئەپەکە
+    final String sectionTitle = isEn 
+        ? 'Gold & Silver Rates' 
+        : (isAr ? 'أسعار الذهب والفضة' : 'نرخەکانی زێڕ و زیو'); 
+        
+    final String subtitle = isEn 
+        ? 'Live gold rates per Mithqal (~5g) & silver per gram' 
+        : (isAr ? 'أسعار الذهب للمثقال والفضة للغرام الواحد' : 'نرخەکانی زێڕ بۆ مسقاڵ و زیو بۆ هەر غرامێک بە زیندوویی');
+
+    final String headerName = isEn ? 'Type' : (isAr ? 'النوع' : 'جۆر');
+    final String headerUnit = isEn ? 'Unit' : (isAr ? 'الوحدة' : 'یەکە');
+    final String headerPrice = isEn ? 'Price (IQD)' : (isAr ? 'السعر (د.ع)' : 'نرخ (دینار)');
+
+    final String mithqalUnit = isEn ? 'Mithqal' : (isAr ? 'مثقال' : 'مسقاڵ');
+    final String pieceUnit = isEn ? 'Piece' : (isAr ? 'قطعة' : 'دانە');
+    final String gramUnit = isEn ? 'Gram' : (isAr ? 'غرام' : 'غرام');
+
+    // نرخە ڕاستەقینەکانی ساڵی ٢٠٢٦ بەپێی بۆرسەی فەرمی عێراق و کوردستان [1.2.3, 1.2.9]
+    final List<Map<String, String>> goldRates = [
+      {
+        'name': isEn ? 'Gold 24 Carat' : (isAr ? 'ذهب عيار ٢٤' : 'زێڕی عەیار ٢٤'),
+        'unit': mithqalUnit,
+        'price': '١,١٤٣,٠٠٠',
+        'icon': '🏆',
+        'color': '0xFFFFD700',
+      },
+      {
+        'name': isEn ? 'Gold 21 Carat' : (isAr ? 'ذهب عيار ٢١' : 'زێڕی عەیار ٢١'),
+        'unit': mithqalUnit,
+        'price': '١,٠٤٥,٠٠٠',
+        'icon': '✨',
+        'color': '0xFFECC880',
+      },
+      {
+        'name': isEn ? 'Gold 18 Carat' : (isAr ? 'ذهب عيار ١٨' : 'زێڕی عەیار ١٨'),
+        'unit': mithqalUnit,
+        'price': '٨٥٥,٠٠٠',
+        'icon': '🎗️',
+        'color': '0xFFCD7F32',
+      },
+      {
+        'name': isEn ? 'Royal Gold Lira (21k)' : (isAr ? 'الليرة الملكية (٢١ك)' : 'لیرەی مەلەکی (عەیار ٢١)'),
+        'unit': pieceUnit,
+        'price': '١,٧٢٠,٠٠٠',
+        'icon': '🪙',
+        'color': '0xFFFFD700',
+      },
+      {
+        'name': isEn ? 'Turkish Gold Lira (22k)' : (isAr ? 'الليرة التركية (٢٢ك)' : 'لیرەی تورکی (عەیار ٢٢)'),
+        'unit': pieceUnit,
+        'price': '١,٦٨٠,٠٠٠',
+        'icon': '👑',
+        'color': '0xFFECC880',
+      },
+      {
+        'name': isEn ? 'Pure Silver (999)' : (isAr ? 'فضة نقية (٩٩٩)' : 'زیوی عەیار ٩٩٩ (پوخت)'),
+        'unit': gramUnit,
+        'price': '٤,٢٥٠',
+        'icon': '💿',
+        'color': '0xFFB0C4DE',
+      },
+      {
+        'name': isEn ? 'Sterling Silver (925)' : (isAr ? 'فضة استرليني (٩٢٥)' : 'زیوی عەیار ٩٢٥ (ئیسترلینی)'),
+        'unit': gramUnit,
+        'price': '٣,٨٥٠',
+        'icon': '💍',
+        'color': '0xFFE6E6FA',
+      },
+    ];
+
+    return Container(
+      margin: const EdgeInsets.only(top: 8, bottom: 20),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF131C2E),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFECC880).withOpacity(0.25), width: 1.2), 
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFECC880).withOpacity(0.03),
+            blurRadius: 20,
+            spreadRadius: 1,
+          )
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFECC880).withOpacity(0.08),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: const Color(0xFFECC880).withOpacity(0.25)),
+                ),
+                child: const Icon(Icons.workspace_premium_rounded, color: Color(0xFFECC880), size: 18),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      sectionTitle,
+                      style: const TextStyle(color: Colors.white, fontSize: 13.5, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      subtitle,
+                      style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 9.5, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // سەردێڕی خشتەی نرخەکان
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.02),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Text(
+                    headerName,
+                    style: TextStyle(color: Colors.white.withOpacity(0.35), fontSize: 10, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Center(
+                    child: Text(
+                      headerUnit,
+                      style: TextStyle(color: Colors.white.withOpacity(0.35), fontSize: 10, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 3,
+                  child: Align(
+                    alignment: isEn ? Alignment.centerRight : Alignment.centerLeft,
+                    child: Text(
+                      headerPrice,
+                      style: TextStyle(color: Colors.white.withOpacity(0.35), fontSize: 10, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 6),
+
+          // لیستی سەرجەم نرخەکانی زێڕ و زیو بە جوانی
+          ...goldRates.map((rate) {
+            final Color rateColor = Color(int.parse(rate['color']!));
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+              decoration: const BoxDecoration(
+                border: Border(bottom: BorderSide(color: Colors.white10, width: 0.5)),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: Row(
+                      children: [
+                        Text(rate['icon']!, style: const TextStyle(fontSize: 16)),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            rate['name']!,
+                            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: rateColor.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: rateColor.withOpacity(0.2)),
+                        ),
+                        child: Text(
+                          rate['unit']!,
+                          style: TextStyle(color: rateColor, fontSize: 9.5, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: Align(
+                      alignment: isEn ? Alignment.centerRight : Alignment.centerLeft,
+                      child: Text(
+                        formatDisplayNumbers(rate['price']!),
+                        style: const TextStyle(color: Color(0xFFECC880), fontSize: 13, fontWeight: FontWeight.w900),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
     );
   }
 }

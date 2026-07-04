@@ -1,3 +1,4 @@
+// ignore_for_file: deprecated_member_use
 // lib/screens/_city_drag_item.dart
 
 import 'dart:async';
@@ -167,19 +168,18 @@ class _CityDragItemState extends State<CityDragItem> with SingleTickerProviderSt
     );
   }
 
-  // ڕێکخستنی ڕەنگی ڕاستەقینە و هێمن بە دیزاینی پڕ و دەقی سپی گەشاوە وەک وێنەکە
   Widget _priceBox(String price, Color color, IconData icon) => Container(
     width: 76, padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
     decoration: BoxDecoration(
-      color: color, // بەکارهێنانی ڕەنگی سەرەکی فەرمی بە ڕەقی وەک داواکارییەکەت
-      borderRadius: BorderRadius.circular(12), // زیاتر خڕکردنی لێوارەکان وەک وێنەکە
+      color: color, 
+      borderRadius: BorderRadius.circular(12), 
     ),
     child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-      Icon(icon, size: 11, color: Colors.white.withValues(alpha: 0.9)), // نیشانەی سپی درەوشاوە
+      Icon(icon, size: 11, color: Colors.white.withValues(alpha: 0.9)), 
       const SizedBox(width: 3),
       Text(
         formatDisplayNumbers(price), 
-        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white), // ژمارەی سپی بە تەواوی ئۆتۆماتیکی
+        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white), 
       ),
     ]),
   );

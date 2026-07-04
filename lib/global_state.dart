@@ -25,9 +25,46 @@ double usdToIqdBaghdadRate = 1539.5;
 double usdToIqdSulaymaniyahRate = 1538.0;   
 double usdToIqdErbilRate = 1537.5;          
 
-// لۆجیکی گۆڕاوی نوێی جیهانی بۆ جیاکردنەوەی داینامیکی ئاگادارکردنەوەکان لێرەدایە
-bool isRateNotifEnabledGlobal = true; // ئاگادارکردنەوەی بۆرسەی شارەکان
-bool isAnalysisNotifEnabledGlobal = true; // ئاگادارکردنەوەی شیکاری ڤیدیۆ و وتارەکان
+bool isRateNotifEnabledGlobal = true; 
+bool isAnalysisNotifEnabledGlobal = true; 
+
+// 🔹 گواستنەوەی هەرسێ خانە جێگیرکراوەکە بۆ ئێرە بۆ ئەوەی لە ڕێکخستنەکانەوە دەستمان پێیان بگات
+List<Map<String, String>> pinnedRatesGlobal = [
+  {'city': 'بەغداد', 'buy': '١٥٣,٨٥٠', 'sell': '١٥٤,٢٥٠', 'status': 'up'},
+  {'city': 'سلێمانی', 'buy': '١٥٣,٦٥٠', 'sell': '١٥٤,٠٠٠', 'status': 'neutral'},
+  {'city': 'هەولێر', 'buy': '١٥٣,٦٦٠', 'sell': '١٥٣,٩٥٠', 'status': 'up'},
+];
+
+// 🔹 لۆجیکی جێگیرکردنی نۆتیفیکەشنەکان بۆ لایڤکردنی لەسەر مۆبایلی بەکارهێنەران
+void updateFcmTopicSubscription(String rawCityName, bool subscribe) {
+  // پاککردنەوەی ناوی شارە کوردییەکان و گۆڕینی بۆ ناونیشانی سادەی فەرمی فایەربەیس
+  String safeCity = rawCityName
+      .replaceAll(' ', '_')
+      .replaceAll('(', '')
+      .replaceAll(')', '')
+      .replaceAll('ِ', '') 
+      .toLowerCase();
+      
+  String topic = 'rate_$safeCity';
+  
+  // تێبینی: کاتێک کتێبخانەی 'firebase_messaging'ت زیاد کرد بۆ پڕۆژەکەت، تەنیا ئەم هێڵانەی خوارەوە چالاک بکە:
+  // if (subscribe) {
+  //   FirebaseMessaging.instance.subscribeToTopic(topic);
+  // } else {
+  //   FirebaseMessaging.instance.unsubscribeFromTopic(topic);
+  // }
+  
+  // پیشاندانی لۆگ و جێبەجێبوونی پرۆسەکە لە کۆنسڵ بۆ تاقیکردنەوەی سەرکەوتووانە
+  print('FCM Topic Subscription: $topic -> ${subscribe ? "SUBSCRIBED" : "UNSUBSCRIBED"}');
+}
+
+// 🔹 چالاککردن یان ناچالاککردنی نۆتیفیکەشنی هەرسێ شارە جێگیرکراوەکە بەیەکەوە
+void toggleAllPinnedNotifications(bool enable) {
+  for (var rate in pinnedRatesGlobal) {
+    String city = rate['city']!;
+    updateFcmTopicSubscription(city, enable);
+  }
+}
 
 double get activeBaseUsdToIqdRate {
   switch (selectedBaseRateSourceGlobal) {
@@ -101,8 +138,10 @@ final Map<String, Map<String, String>> translations = {
     'refresh_btn': 'هەڵسەنگاندنەوە',
     'lock_create_account_btn': 'دروستکردنی ئەژمار',
     'unlock_btn': 'چوونە دەرەوە و چالاککردنی ئەکاونت',
-    'buy': 'کڕین',
-    'sell': 'فرۆشتن',
+    'buy': 'کڕین', 
+    'sell': 'فرۆشتن', 
+    'bourse_buy': 'طلب', 
+    'bourse_sell': 'عەرض', 
     'app_subtitle': 'بۆرسەی عێراق - کوردستان',
     'currencies_title': 'نرخی دراوەکان',
     'vs_100_dollars': 'بەرامبەر ١٠٠ دۆلار',
@@ -134,7 +173,7 @@ final Map<String, Map<String, String>> translations = {
     'sell_price_label': 'نرخی فرۆشتن',
     'commission_label': 'کەمیسیۆن ٪',
     'calculate_btn': 'حیساب بکە',
-    'exchange_tab': 'ئاڵوگۆڕ',
+    'exchange_tab': 'ئلوگۆڕ',
     'profit_tab': 'قازانج / زیان',
     'profit_won': 'قازانج کردووە! 🎉',
     'profit_lost': 'زیان کردووە 📉',
@@ -163,7 +202,7 @@ final Map<String, Map<String, String>> translations = {
     'login_title': 'چوونەژوورەوە بۆ هەژمار 🔑',
     'phone_hint': 'ژمارەی مۆبایل (نموونە: 07701234567)',
     'password_hint': 'پاسۆرد',
-    'forgot_password': 'پاسۆردt بیرچووە؟',
+    'forgot_password': 'پاسۆردت بیرچووە؟',
     'login_action': 'چوونەژوورەوە',
     'register_action': 'تۆمارکۆدنی هەژماری نوێ',
     'register_title': 'دروستکردنی ئەژمار نوێ 👤',
@@ -202,8 +241,8 @@ final Map<String, Map<String, String>> translations = {
     'office_2': 'کۆمپانیای بازاڕی ناوەندی', 
     'notif_rate_changes': 'ئاگادارکردنەوە لە گۆڕانی نرخەکان (بۆرسە)', 
     'notif_new_analysis': 'ئاگادارکردنەوە لە شیکارییە نوێیەکان (ڤیدیۆ و وتار)', 
-    'analyst_tab_kurdish': 'شرۆڤەکارانی کورد', // 🔹 پاراستنی تەواوی ناونیشانی فەرمی کوردی
-    'analyst_tab_arabic': 'شرۆڤە بە زمانی عەرەبی', // 🔹 گۆڕینی نووسینی بەشی عەرەبی بەپێی ویستت
+    'analyst_tab_kurdish': 'شرۆڤەکارانی کورد', 
+    'analyst_tab_arabic': 'شرۆڤە بە زمانی عەرەبی', 
   },
   'العربية': {
     'cities_tab': 'بورصة المدن',
@@ -243,6 +282,8 @@ final Map<String, Map<String, String>> translations = {
     'unlock_btn': 'تسجيل الدخول وتفعيل الحساب',
     'buy': 'طلب',
     'sell': 'عرض',
+    'bourse_buy': 'طلب', 
+    'bourse_sell': 'عرض', 
     'app_subtitle': 'البورصة العراقية - كوردستان', 
     'currencies_title': 'أسعار العملات',
     'live': 'مباشر',
@@ -343,7 +384,7 @@ final Map<String, Map<String, String>> translations = {
     'notif_rate_changes': 'إشعارات تغير الأسعار (البورصة)', 
     'notif_new_analysis': 'إشعارات التحليلات الجديدة (فيديو ومقالات)', 
     'analyst_tab_kurdish': 'المحللون الأكراد', 
-    'analyst_tab_arabic': 'التحليلات باللغة العربية', // 🔹 نوێکاری عەرەبی لێرەیە بۆ گونجاندنی لەگەڵ دەقە نوێیەکەت
+    'analyst_tab_arabic': 'التحليلات باللغة العربية', 
   },
   'English': {
     'cities_tab': 'Cities Bourse',
@@ -365,8 +406,8 @@ final Map<String, Map<String, String>> translations = {
     'share_section': 'Share Application',
     'contact_section': 'Contact & Support',
     'account_section': 'Account Settings',
-    'expired_status': 'Expired',
-    'active_status': 'Active',
+    'expired_status': 'Unsubscribed',
+    'active_status': 'Subscribed',
     'start_date': 'Start Date',
     'end_date': 'End Date',
     'logout': 'Logout',
@@ -383,6 +424,8 @@ final Map<String, Map<String, String>> translations = {
     'unlock_btn': 'Login & Activate Account',
     'buy': 'Buy',
     'sell': 'Sell',
+    'bourse_buy': 'Buy', 
+    'bourse_sell': 'Sell', 
     'app_subtitle': 'Iraq - Kurdistan Bourse', 
     'currencies_title': 'Currency Rates',
     'live': 'Live',
@@ -393,6 +436,12 @@ final Map<String, Map<String, String>> translations = {
     'EUR_name': 'Euro',
     'TRY_name': 'Turkish Lira',
     'AED_name': 'UAE Dirham',
+    'IQD_unit': 'IQD',
+    'IRR_unit': 'Toman',
+    'GBP_unit': 'Pound',
+    'EUR_unit': 'Euro',
+    'TRY_unit': 'Lira',
+    'AED_unit': 'Dirham',
     'heuler': 'Erbil',
     'slemani': 'Sulaymaniyah',
     'baghdad_kifah': 'Baghdad (Kifah)',
@@ -476,8 +525,8 @@ final Map<String, Map<String, String>> translations = {
     'office_2': 'Central Market Company', 
     'notif_rate_changes': 'Rate Change Notifications (Bourse)', 
     'notif_new_analysis': 'New Analysis Notifications (Videos & Articles)', 
-    'analyst_tab_kurdish': 'Kurdish Analysts', // 🔹 کلیلە لۆکاڵییە مۆدێرنە نوێیەکان بۆ فلتەری شیکارکاران
-    'analyst_tab_arabic': 'Arabic Analysts', // 🔹 کلیلە لۆکاڵی مۆدێرنە نوێیەکان بۆ فلتەری شیکارکاران
+    'analyst_tab_kurdish': 'Kurdish Analysts', 
+    'analyst_tab_arabic': 'Arabic Analysts', 
   }
 };
 

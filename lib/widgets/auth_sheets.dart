@@ -447,7 +447,10 @@ void showLoginBottomSheet(BuildContext context, {required VoidCallback onStateCh
                       String pass = passwordController.text.trim();
                       if (phone.isEmpty || pass.isEmpty) {
                         setModalState(() {
-                          localError = appLanguageGlobal == 'English' ? 'Please fill in all fields!' : 'تکایە سەرجەم خانەکان پڕبکەوە!';
+                          // 🔹 لۆجیکی نوێ بە پەیڕەوکردنی زمانی عەرەبی
+                          localError = appLanguageGlobal == 'English' 
+                              ? 'Please fill in all fields!' 
+                              : (appLanguageGlobal == 'العربية' ? 'يرجى ملء جميع الحقول!' : 'تکایە سەرجەم خانەکان پڕبکەوە!');
                         });
                         return;
                       }
@@ -465,9 +468,12 @@ void showLoginBottomSheet(BuildContext context, {required VoidCallback onStateCh
                         onStateChanged();
                       } else {
                         setModalState(() {
+                          // 🔹 لۆجیکی نوێ بە پەیڕەوکردنی زمانی عەرەبی
                           localError = appLanguageGlobal == 'English' 
                               ? 'Incorrect phone number or password! Please try again.' 
-                              : 'ژمارەی مۆبایل یان پاسۆردەکە هەڵەیە! تکایە دووبارە تاقیبکەرەوە.';
+                              : (appLanguageGlobal == 'العربية' 
+                                  ? 'رقم الهاتف أو كلمة المرور غير صحيحة! يرجى المحاولة مرة أخرى.' 
+                                  : 'ژمارەی مۆبایل یان پاسۆردەکە هەڵەیە! تکایە دووبارە تاقیبکەرەوە.');
                         });
                       }
                     }),
@@ -570,13 +576,13 @@ void showRegisterPhoneBottomSheet(BuildContext context, {required VoidCallback o
                       ),
                       const SizedBox(height: 24),
                       Text(
-                        getTxt('reg_success_title'), // 🔹 وەرگێڕانی داینامیکی لۆکاڵی جۆری زمانەکە
+                        getTxt('reg_success_title'), // وەرگێڕانی داینامیکی لۆکاڵی جۆری زمانەکە
                         style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        getTxt('reg_success_subtitle'), // 🔹 وەرگێڕانی داینامیکی لۆکاڵی جۆری زمانەکە
+                        getTxt('reg_success_subtitle'), // وەرگێڕانی داینامیکی لۆکاڵی جۆری زمانەکە
                         style: const TextStyle(
                           color: Color(0xFFECC880), 
                           fontSize: 14.5,
@@ -759,7 +765,12 @@ void showRegisterPhoneBottomSheet(BuildContext context, {required VoidCallback o
                         
                         if (name.isEmpty || phone.isEmpty || pass.isEmpty) {
                           setModalState(() {
-                            localError = appLanguageGlobal == 'English' ? 'Please fill in all fields correctly.' : 'تکایە سەرجەم خانەکان بە دروستی پڕبکەوە.';
+                            // 🔹 لۆجیکی نوێ بە زمانی عەرەبی بۆ تۆمارکردن
+                            localError = appLanguageGlobal == 'English' 
+                                ? 'Please fill in all fields correctly.' 
+                                : (appLanguageGlobal == 'العربية' 
+                                    ? 'يرجى ملء جميع الحقول بشكل صحيح.' 
+                                    : 'تکایە سەرجەم خانەکان بە دروستی پڕبکەوە.');
                           });
                           return;
                         }
@@ -768,25 +779,36 @@ void showRegisterPhoneBottomSheet(BuildContext context, {required VoidCallback o
 
                         if (formattedPhone.length != 14) {
                           setModalState(() {
+                            // 🔹 لۆجیکی نوێ بە زمانی عەرەبی بۆ هەڵەی درێژی ژمارە
                             localError = appLanguageGlobal == 'English' 
                                 ? 'Phone number must be 11 digits (e.g. 0750xxxxxxx)' 
-                                : 'ژمارەی مۆبایلەکە ناتەواوە (دەبێت ١١ ژمارە بێت وەک ٠٧٥٠).';
+                                : (appLanguageGlobal == 'العربية' 
+                                    ? 'يجب أن يتكون رقم الهاتف من 11 رقماً (مثال: 0750xxxxxxx).' 
+                                    : 'ژمارەی مۆبایلەکە ناتەواوە (دەبێت ١١ ژمارە بێت وەک ٠٧٥٠).');
                           });
                           return;
                         }
 
                         if (pass.length < 4) {
                           setModalState(() {
-                            localError = appLanguageGlobal == 'English' ? 'Password at least 4 characters' : 'پاسۆردەکە کورتە (دەبێت لانی کەم ٤ پیت بێت).';
+                            // 🔹 لۆجیکی نوێ بە زمانی عەرەبی بۆ درێژی پاسۆرد
+                            localError = appLanguageGlobal == 'English' 
+                                ? 'Password must be at least 4 characters.' 
+                                : (appLanguageGlobal == 'العربية' 
+                                    ? 'يجب أن تكون كلمة المرور 4 أحرف على الأقل.' 
+                                    : 'پاسۆردەکە کورتە (دەبێت لانی کەم ٤ پیت بێت).');
                           });
                           return;
                         }
 
                         if (registeredUsersDb.containsKey(formattedPhone)) {
                           setModalState(() {
+                            // 🔹 لۆجیکی نوێ بە زمانی عەرەبی بۆ بوونی هەمان ژمارە لە پێشتردا
                             localError = appLanguageGlobal == 'English' 
                               ? 'This number is already registered! Please log in.' 
-                              : 'ئەم ژمارەیە پێشتر تۆمارکراوە! تکایە بچۆ ژوورەوە.';
+                              : (appLanguageGlobal == 'العربية' 
+                                  ? 'هذا الرقم مسجل بالفعل! يرجى تسجيل الدخول.' 
+                                  : 'ئەم ژمارەیە پێشتر تۆمارکراوە! تکایە بچۆ ژوورەوە.');
                           });
                           return;
                         }
@@ -863,7 +885,6 @@ void showRegisterPhoneBottomSheet(BuildContext context, {required VoidCallback o
 }
 
 Widget _buildContactCardItem(String number) {
-  // ✅ هێزدارکردنی تەواوی ڕێڕەوی LTR بۆ نیشاندانی دروستی ژمارەی مۆبایلەکان لێرەش بە نیشانەی شاراوەی \u200E
   final String cleanNumber = '\u200E$number'; 
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8), 
@@ -921,8 +942,8 @@ Widget _buildContactCardItem(String number) {
         ),
         const Spacer(),
         Text(
-          cleanNumber, // 🔹 بەکارهێنانی مۆبایلی جێگیری وەرگرتوو بە LTR
-          textDirection: TextDirection.ltr, // 🔹 پاراستنی هەمیشەیی ڕێکی ڕیزبەندی چەپ بۆ ڕاست لێرەش
+          cleanNumber, 
+          textDirection: TextDirection.ltr, 
           style: const TextStyle(
             color: Colors.white,
             fontSize: 13, 

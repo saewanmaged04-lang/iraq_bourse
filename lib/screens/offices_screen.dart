@@ -28,7 +28,7 @@ class _OfficesScreenState extends State<OfficesScreen> {
   
   List<OfficeModel> get filtered => widget.offices.where((o) {
     final matchCity = _selectedCity == 'هەمووی' || o.city == _selectedCity;
-    // لێرەدا فلتەرکردنی گەڕانەکەشمان بەستەوە بە ناوی داینامیکی وەرگێڕدراوی نووسینگەکان
+    // فلتەرکردنی گەڕانەکە لەگەڵ ناوی داینامیکی وەرگێڕدراوی نووسینگەکان
     final matchSearch = _searchText.isEmpty || getTxt('office_${o.id}').contains(_searchText) || o.name.contains(_searchText) || o.city.contains(_searchText);
     return matchCity && matchSearch;
   }).toList()..sort((a, b) => b.rating.compareTo(a.rating));
@@ -139,8 +139,7 @@ class _OfficesScreenState extends State<OfficesScreen> {
                             ),
                             const SizedBox(width: 12),
                             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                              // گۆڕینی ناوی نووسینگە لێرەش بۆ دەقی داینامیکی وەرگێڕدراوی سەر شاشە
-                              Text(getTxt('office_${office.id}'), style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.bold, color: Colors.white), maxLines: 1, overflow: TextOverflow.ellipsis), // 🔹 وەرگێڕانی ناوی سەرەکی نووسینگە
+                              Text(getTxt('office_${office.id}'), style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.bold, color: Colors.white), maxLines: 1, overflow: TextOverflow.ellipsis), 
                               const SizedBox(height: 5),
                               Row(children: [
                                 Container(width: 8, height: 8, decoration: BoxDecoration(color: office.isOpen ? const Color(0xFF4ADE80) : Colors.grey, shape: BoxShape.circle)),
@@ -166,14 +165,13 @@ class _OfficesScreenState extends State<OfficesScreen> {
   }
 }
 
-// ============================================================================
-// تەواوی پێکهاتەی نوێی مۆدێرنی پیشاندانی نوسینگەکان (Pixel Perfect UI)
-// ============================================================================
+// ============================================================
+// تەواوی پێکهاتەی نوێی پیشاندانی وردەکاری نووسینگەکان
+// ============================================================
 class OfficeDashboard extends StatelessWidget {
   final OfficeModel office;
   const OfficeDashboard({super.key, required this.office});
 
-  // مێتۆدی هۆشمەندی پیشاندانی داتای کارمەندان بە وەرگێڕانی داینامیکی ناوەکان بەپێی زمانی ئەپەکە
   List<Map<String, String>> _getOfficeStaff() {
     final bool isEnglish = appLanguageGlobal == 'English';
     final bool isArabic = appLanguageGlobal == 'العربية';
@@ -181,23 +179,23 @@ class OfficeDashboard extends StatelessWidget {
     if (office.id == '1') {
       return [
         {
-          'name': isEnglish ? 'Peshewa Omer' : (isArabic ? 'بيشوا عمر' : 'پێشەوا عومەر'), 
+          'name': isEnglish ? 'Awât Sadiq' : (isArabic ? 'آوات صديق' : 'ئاوات سدیق'), 
           'phone': '+964 770 123 4567'
         },
         {
-          'name': isEnglish ? 'Aras Jamal' : (isArabic ? 'آراس جمال' : 'ئاراس جەمال'), 
-          'phone': '+964 750 987 6543'
+          'name': isEnglish ? 'Hiwa Karim' : (isArabic ? 'هيوا كريم' : 'هیوا کەریم'), 
+          'phone': '+964 770 987 6543'
         },
       ];
     } else {
       return [
         {
-          'name': isEnglish ? 'Rebin Sabir' : (isArabic ? 'ريبين صابر' : 'ڕێبین سابیر'), 
+          'name': isEnglish ? 'Soran Rashid' : (isArabic ? 'سوران رشيد' : 'سۆران ڕەشید'), 
           'phone': '+964 750 123 4567'
         },
         {
-          'name': isEnglish ? 'Sazan Karwan' : (isArabic ? 'سازان كروان' : 'سازان کاروان'), 
-          'phone': '+964 770 111 2223'
+          'name': isEnglish ? 'Dilan Aziz' : (isArabic ? 'ديلان عزيز' : 'دیلان عەزیز'), 
+          'phone': '+964 750 765 4321'
         },
       ];
     }
@@ -219,7 +217,7 @@ class OfficeDashboard extends StatelessWidget {
         body: SafeArea(
           child: Column(
             children: [
-              // ١. هێدەر و دوگمەی گەڕانەوەی سەرەوە
+              // ١. هێدەر و دوگمەی گەڕانەوە
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 decoration: const BoxDecoration(color: Color(0xFF0F172A), border: Border(bottom: BorderSide(color: Color(0xFF1E293B), width: 1))),
@@ -240,21 +238,18 @@ class OfficeDashboard extends StatelessWidget {
                   Text(office.emoji, style: const TextStyle(fontSize: 22)),
                   const SizedBox(width: 8),
                   Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    // گۆڕینی ناوی نووسینگە لێرەش بۆ داینامیکی لۆکاڵی تا بێ کەموکوڕی بێت
-                    Text(getTxt('office_${office.id}'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white), maxLines: 1, overflow: TextOverflow.ellipsis), // 🔹 وەرگێڕانی ناوی نووسینگە لێرەدا
+                    Text(getTxt('office_${office.id}'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white), maxLines: 1, overflow: TextOverflow.ellipsis), 
                     Text(getCityName(office.city), style: TextStyle(fontSize: 10, color: Colors.white.withOpacity(0.5))),
                   ])),
                 ]),
               ),
               
-              // ٢. بەشی سێ لاکێشە ڕێکخراوەکە بەبێ جەنجاڵی ڕەخنە و سەبسکرایب
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     children: [
-                      
-                      // 🔴 لاکێشەی یەکەم: کاتی کارکردن، کردنەوە و داخستن
+                      // 🔴 لاکێشەی یەکەم: کاتی کارکردن
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(16),
@@ -338,7 +333,7 @@ class OfficeDashboard extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
 
-                      // 🔴 لاکێشەی سێیەم: ناو و ژمارەی کارمەندان (مۆزەفەکان) بە شێوازی ئاسۆیی نوێ و بێ هاوتا
+                      // 🔴 لاکێشەی سێیەم: ناوی کارمەندان بە ڕیزبەندی جێگیری چەپ بۆ ڕاست
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(16),
@@ -380,10 +375,11 @@ class OfficeDashboard extends StatelessWidget {
                                       style: TextStyle(color: Colors.white.withOpacity(0.25), fontSize: 12)
                                     ),
                                     const SizedBox(width: 6),
+                                    // 🔹 ڕاستکردنەوەی بنەڕەتی ژمارەی مۆبایلەکان بە بەکارهێنانی کۆدی یونیکۆدی LTR ی فەرمی (\u200E) بەبێ formatDisplayNumbers
                                     Text(
-                                      formatDisplayNumbers(staff['phone']!), 
-                                      textDirection: TextDirection.ltr, // 🔹 ڕێگریکردنی لایڤ لە تێکچوونی سەرەوژووری ژمارەی مۆبایلی کارمەندان بەپێی وێنەکە
-                                      style: TextStyle(color: Colors.white.withOpacity(0.45), fontSize: 11.5, fontWeight: FontWeight.bold),
+                                      '\u200E${staff['phone']!}', 
+                                      textDirection: TextDirection.ltr, 
+                                      style: TextStyle(color: Colors.white.withOpacity(0.45), fontSize: 11.5, fontWeight: FontWeight.bold, letterSpacing: 0.5),
                                     ),
                                   ],
                                 ),

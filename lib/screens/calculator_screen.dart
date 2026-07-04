@@ -247,9 +247,8 @@ class _CalculatorScreenState extends State<CalculatorScreen>
             ),
           ),
           const SizedBox(width: 8),
-          // ✅ گۆڕینی لایڤی زمانی دەقەکەی "نرخی ئۆتۆماتیک" یان "دەستی" لێرەدایە
           Text(
-            _isAutomatic ? getTxt('calc_auto_rate') : getTxt('calc_manual_rate'), // 🔹 بەکارهێنانی کلیلی داینامیکی لۆکاڵی و خۆکار
+            _isAutomatic ? getTxt('calc_auto_rate') : getTxt('calc_manual_rate'), 
             style: TextStyle(
               color: _isAutomatic ? const Color(0xFF4ADE80) : Colors.orange,
               fontSize: 11,
@@ -410,7 +409,7 @@ class _CalculatorScreenState extends State<CalculatorScreen>
         Container(height: 18, padding: const EdgeInsets.symmetric(horizontal: 8), child: VerticalDivider(color: Colors.white.withOpacity(0.1), thickness: 1)),
         Expanded(
           child: Text(
-            isEmpty ? (appLanguageGlobal == 'English' ? 'Enter amount' : 'بڕێک بنووسە') : formatDisplayNumbers(amount),
+            isEmpty ? (appLanguageGlobal == 'English' ? 'Enter amount' : 'بڕێک بنووسە') : formatDisplayNumbers(_addCommas(amount)), // 🔹 فۆرماتکردنی لایڤی فاریزە بۆ بەشی سەرەوەی حاسیبە
             style: TextStyle(color: isEmpty ? Colors.white.withOpacity(0.2) : amountColor, fontSize: isEmpty ? 11 : 15, fontWeight: FontWeight.w900, letterSpacing: -0.5),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -485,9 +484,8 @@ class _CalculatorScreenState extends State<CalculatorScreen>
                 child: const Icon(Icons.currency_exchange_rounded, color: Color(0xFF4FC3F7), size: 13),
               ),
               const SizedBox(width: 8),
-              // ✅ گۆڕینی زمانی نووسینی "دراوی بنەڕەت" لێرەدایە کە بەستراوەتەوە بە کلیلی داینامیکی لۆکاڵی
               Text(
-                getTxt('calc_base_currency'), // 🔹 بەکارهێنانی کلیلی داینامیکی لۆکاڵی بۆ دراوی بنەڕەت
+                getTxt('calc_base_currency'), 
                 style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white.withOpacity(0.7)),
               ),
             ]),

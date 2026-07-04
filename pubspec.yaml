@@ -15,6 +15,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   url_launcher: ^6.2.5
   shared_preferences: ^2.2.3
+  youtube_player_flutter: ^8.1.2 # 🔹 زیادکردنی لێدەری فەرمی و جێگیری یوتیوب لێرەدا
 
 dev_dependencies:
   flutter_test:

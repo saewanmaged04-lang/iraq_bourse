@@ -1,3 +1,4 @@
+// ignore_for_file: deprecated_member_use
 // lib/screens/cities_screen.dart
 
 import 'package:flutter/material.dart';
@@ -28,7 +29,6 @@ class CitiesScreen extends StatefulWidget {
 class _CitiesScreenState extends State<CitiesScreen> {
   int? _activeDragIndex; 
 
-  // مێتۆدی هۆشمەندی پیشاندانی دیالۆگی پینکردنی سەرەوە
   void _showPinSelectionDialog(String city, String buy, String sell, String status) {
     showModalBottomSheet(
       context: context,
@@ -55,7 +55,7 @@ class _CitiesScreenState extends State<CitiesScreen> {
                       ? 'Cell ${i + 1} (Now: ${getCityName(widget.pinnedRates[i]['city']!)})'
                       : (appLanguageGlobal == 'العربية'
                           ? 'الخانة ${i + 1} (الآن: ${getCityName(widget.pinnedRates[i]['city']!)})'
-                          : 'خانەی ${i == 0 ? 'یەکەم' : i == 1 ? 'دووەم' : 'سێیەم'} (ئێستا: ${getCityName(widget.pinnedRates[i]['city']!)})'), // گۆڕینی لاتینی بۆ کوردی سۆرانی ڕەسەن
+                          : 'خانەی ${i == 0 ? 'یەکەم' : i == 1 ? 'دووەم' : 'سێیەم'} (ئێستا: ${getCityName(widget.pinnedRates[i]['city']!)})'), 
                   style: const TextStyle(fontSize: 12)
                 ),
                 leading: Icon(i == 0 ? Icons.looks_one : i == 1 ? Icons.looks_two : i == 2 ? Icons.looks_3 : Icons.looks_one, color: Colors.blueAccent),
@@ -64,7 +64,6 @@ class _CitiesScreenState extends State<CitiesScreen> {
                   Navigator.pop(context); 
                 },
               )),
-              // لێرەدا لاکێشەکانی ژمارەی تەلەفۆنەکانی پشتگیری بە تەواوی لابراون بۆ خاوێنکردنەوەی شاشەکە
             ],
           ),
         ),
@@ -104,8 +103,8 @@ class _CitiesScreenState extends State<CitiesScreen> {
                       padding: const EdgeInsets.all(1.5),
                       decoration: BoxDecoration(
                         color: const Color(0xFF131C2E), borderRadius: BorderRadius.circular(11),
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 6, offset: const Offset(0, 2))],
+                        border: Border.all(color: Colors.white.withOpacity(0.08)),
+                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 6, offset: const Offset(0, 2))],
                       ),
                       child: Row(children: List.generate(widget.pinnedRates.length, (pIndex) {
                         final rate = widget.pinnedRates[pIndex];
@@ -137,24 +136,24 @@ class _CitiesScreenState extends State<CitiesScreen> {
                                   bottomRight: Radius.circular(3),
                                   bottomLeft: Radius.circular(10),
                                 ),
-                                border: Border.all(color: isHovering ? Colors.white : Colors.blueAccent.withValues(alpha: 0.4)),
+                                border: Border.all(color: isHovering ? Colors.white : Colors.blueAccent.withOpacity(0.4)),
                               ),
                               child: Column(crossAxisAlignment: CrossAxisAlignment.center, mainAxisSize: MainAxisSize.min, children: [
                                 Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                                  Icon(Icons.push_pin, size: 7, color: Colors.white.withValues(alpha: 0.7)), const SizedBox(width: 2),
+                                  Icon(Icons.push_pin, size: 7, color: Colors.white.withOpacity(0.7)), const SizedBox(width: 2),
                                   Flexible(child: Text(getCityName(rate['city']!), style: const TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.w900), overflow: TextOverflow.ellipsis)),
                                 ]),
                                 Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                                   Icon(trendIcon, size: 9, color: trendColor), const SizedBox(width: 1),
                                   Flexible(child: Text(formatDisplayNumbers(rate['sell']!), style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w900), overflow: TextOverflow.ellipsis)),
                                 ]),
-                                Text(getTxt('sell'), style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 7.5, fontWeight: FontWeight.bold)),
-                                Container(height: 0.5, color: Colors.white.withValues(alpha: 0.15)),
+                                Text(getTxt('bourse_sell'), style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 7.5, fontWeight: FontWeight.bold)),
+                                Container(height: 0.5, color: Colors.white.withOpacity(0.15)),
                                 Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                                   Icon(trendIcon, size: 9, color: trendColor), const SizedBox(width: 1),
                                   Flexible(child: Text(formatDisplayNumbers(rate['buy']!), style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w900), overflow: TextOverflow.ellipsis)),
                                 ]),
-                                Text(getTxt('buy'), style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 7.5, fontWeight: FontWeight.bold)),
+                                Text(getTxt('bourse_buy'), style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 7.5, fontWeight: FontWeight.bold)),
                               ]),
                             );
                           },
@@ -165,11 +164,12 @@ class _CitiesScreenState extends State<CitiesScreen> {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(4, 8, 4, 4),
                       child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                        Text(appLanguageGlobal == 'English' ? 'Bourse' : (appLanguageGlobal == 'العربية' ? 'البورصة' : 'بۆرسە'), style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white.withValues(alpha: 0.45))),
+                        Text(appLanguageGlobal == 'English' ? 'Bourse' : (appLanguageGlobal == 'العربية' ? 'البورصة' : 'بۆرسە'), style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white.withOpacity(0.45))),
                         Row(children: [
-                          SizedBox(width: 76, child: Center(child: Text(getTxt('buy'), style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: const Color(0xFF4ADE80).withValues(alpha: 0.9))))),
+                          // ✅ گۆڕینی هەردوو وشەکە بۆ سپی تەواو و بۆڵدی قورس بەپێی داواکاریت
+                          SizedBox(width: 76, child: Center(child: Text(getTxt('bourse_buy'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w900, color: Colors.white)))),
                           const SizedBox(width: 6),
-                          SizedBox(width: 76, child: Center(child: Text(getTxt('sell'), style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: const Color(0xFFFF6B6B).withValues(alpha: 0.9))))),
+                          SizedBox(width: 76, child: Center(child: Text(getTxt('bourse_sell'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w900, color: Colors.white)))),
                         ]),
                       ]),
                     ),

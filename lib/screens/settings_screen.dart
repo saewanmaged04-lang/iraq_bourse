@@ -2,10 +2,10 @@
 // lib/screens/settings_screen.dart
 
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart'; // 🔹 هاوردەکردنی وێستی کتێبخانەی url_launcher بۆ لایڤکردنی دوگمەکان
+import 'package:url_launcher/url_launcher.dart'; 
 import '../global_state.dart';
 import '../widgets/auth_sheets.dart';
-import '../main.dart'; // بۆ بانگکردنی BoursePremiumApp.rebuild
+import '../main.dart'; 
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -14,8 +14,6 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool _notificationsEnabled = true;
-
   void _simulateAction(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(msg), backgroundColor: Colors.blueAccent),
@@ -40,7 +38,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   children: [
                     _sectionLabel(getTxt('account_section')),
                     isLoggedInGlobal 
-                        ? _buildConsolidatedAccountCard() // تەنها یەک ئایکۆنی ڕێکخراو لە جیاتی جەنجاڵی پێشوو
+                        ? _buildConsolidatedAccountCard() 
                         : _buildNotLoggedInCard(),
                     
                     const SizedBox(height: 16),
@@ -62,7 +60,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               if (val != null) {
                                 setState(() {
                                   appLanguageGlobal = val;
-                                  // ئەگەر زمانەکە بوو بە ئینگلیزی، خۆکارانە شێوازی ژمارەکانیش دەکەین بە ئینگلیزی فەرمی (123)
                                   if (val == 'English') {
                                     appNumeralStyleGlobal = '123';
                                   }
@@ -74,7 +71,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                       
-                      // --- هەڵبژاردنی شێوازی ژمارەکان (تەنها نیشان دەدرێت ئەگەر زمانەکە ئینگلیزی نەبێت) ---
+                      // --- هەڵبژاردنی شێوازی ژمارەکان ---
                       if (appLanguageGlobal != 'English') ...[
                         const Divider(color: Color(0xFF1E293B), height: 1),
                         _buildSettingsTile(
@@ -140,7 +137,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       
                       const Divider(color: Color(0xFF1E293B), height: 1),
-                      
+                      // --- نۆتیفیکەشنی نرخەکان ---
                       _buildSettingsTile(
                         icon: Icons.trending_up_rounded,
                         title: getTxt('notif_rate_changes'), 
@@ -152,13 +149,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           onChanged: (val) {
                             setState(() {
                               isRateNotifEnabledGlobal = val;
+                              // 🔹 لۆجیکی جۆری بەستنەوەی نۆتیفیکەشن بە سێ شارە جێگیرکراوەکە بە تەواوی
+                              toggleAllPinnedNotifications(val);
                             });
                           },
                         ),
                       ),
                       
                       const Divider(color: Color(0xFF1E293B), height: 1),
-                      
+                      // --- نۆتیفیکەشنی شیکارییەکان ---
                       _buildSettingsTile(
                         icon: Icons.analytics_rounded,
                         title: getTxt('notif_new_analysis'), 
@@ -349,7 +348,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // ✅ لێره‌دا فەنکشنی لایڤکردنی تەواوی پڕکردنەوەی دوگمەکان نووسراوەتەوە تا بە تەواوی ڕاستەوخۆ بن
   Widget _buildContactRow(String number) {
     final String cleanNumber = '\u200E$number'; 
     return Container(
@@ -361,7 +359,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       child: Row(
         children: [
-          // 🔹 دوگمەی پەیوەندی لایڤی فەرمی
           _buildCircleActionButton(Icons.phone_rounded, const Color(0xFF0072FF), () async {
             final cleanNumberForTel = number.replaceAll(' ', '');
             final Uri url = Uri.parse('tel:$cleanNumberForTel');
@@ -372,7 +369,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             }
           }),
           const SizedBox(width: 8),
-          // 🔹 دوگمەی ڤایبەری لایڤی فەرمی
           _buildCircleActionButton(Icons.phone_iphone_rounded, Colors.purpleAccent, () async {
             final cleanNumberForViber = number.replaceAll(' ', '').replaceAll('+', '');
             final Uri url = Uri.parse('viber://chat?number=$cleanNumberForViber');
@@ -383,12 +379,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             }
           }),
           const SizedBox(width: 8),
-          // 🔹 دوگمەی وەتساپی لایڤی فەرمی بە نامەی داینامیکی لۆکاڵی
           _buildCircleActionButton(Icons.chat_bubble_rounded, const Color(0xFF22C55E), () async {
             final cleanNumberForWa = number.replaceAll(' ', '').replaceAll('+', '');
             final message = Uri.encodeComponent(
               appLanguageGlobal == 'English'
-                  ? "Hello, I have a question regarding your app..."
+                  ? "Hello, I am using the app and have a question..."
                   : (appLanguageGlobal == 'العربية'
                       ? "مرحباً، لدي استفسار بخصوص تطبيقكم..."
                       : "سڵاو، پرسیارم هەیە سەبارەت بە ئەپەکەتان..."),
@@ -500,9 +495,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 }
 
-// ============================================================================
-// شاشەی تایبەت و سەربەخۆ بۆ نیشاندانی وردەکاری ئەکاونت (Account Details Screen)
-// ============================================================================
+// ============================================================
+// شاشەی وردەکاری ئەکاونت (Account Details Screen)
+// ============================================================
 class AccountDetailsScreen extends StatefulWidget {
   const AccountDetailsScreen({super.key});
 
